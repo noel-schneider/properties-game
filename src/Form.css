@@ -1,15 +1,19 @@
 /* Input.css */
 .input-container {
-  position: relative;
+  position: absolute;
   width: 15%;
-  display: flex; /* Align input and button horizontally */
+  top: 90%;
+  right: 50%;
+  transform: translate(50%,-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 9999;/* Align input and button horizontally */
 }
 
 .input {
-  flex: 1; /* Take remaining space in the container */
   background-color: #333;
   color: #fff;
-  padding: 20px 05px 05px 10px;
+  padding: 10px 10px 10px 10px;
   outline: 0;
   border: 1px solid rgba(105, 105, 105, 0.397);
   border-radius: 10px;
@@ -25,7 +29,7 @@
 }
 
 .submit {
-  background-color: #00bfff;
+  background-color: #ff841f;
   color: #fff;
   border: none;
   outline: none;
@@ -33,6 +37,18 @@
   border-radius: 10px;
   font-size: medium;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit:disabled {
+  background-color: #cdcdcd;
+  color: #fff;
+  border: none;
+  outline: none;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: medium;
+  cursor: not-allowed;
   transition: background-color 0.3s ease;
 }
 
