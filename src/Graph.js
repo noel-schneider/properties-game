@@ -33,11 +33,14 @@ class ConceptGraph {
 function Graph({updateSelectedNodes}) {
 
 
+  useEffect(() => {
+
+    let graphData = new ConceptGraph(15);
     let selectedNodes = new Set();
 
     const Graph = ForceGraph()
       (document.getElementById('graph'))
-        .graphData(gData)
+        .graphData(graphData)
         .nodeCanvasObjectMode(() => "after") // Add text in front of the node
         .nodeCanvasObject((node, ctx, globalScale) => {
           const label = node.name;
@@ -51,7 +54,7 @@ function Graph({updateSelectedNodes}) {
         .linkColor(() => 'rgba(100, 100, 100, 0.2)') // Set link color (rgba format for transparency)
         .linkWidth(0) // Set link width
         .nodeLabel('title')
-        .nodeColor(node => selectedNodes.has(node) ? 'yellow' : 'grey')
+        .nodeColor(node => selectedNodes.has(node) ? '#ffad69' : '#e2dcde')
         .onNodeClick((node, event) => {
           if (event.ctrlKey || event.shiftKey || event.altKey) { // multi-selection
             selectedNodes.has(node) ? selectedNodes.delete(node) : selectedNodes.add(node);
@@ -62,6 +65,7 @@ function Graph({updateSelectedNodes}) {
           }
 
           Graph.nodeColor(Graph.nodeColor()); // update color of selected nodes
+          updateSelectedNodes([...selectedNodes]);
         })
         .onNodeDrag((node, translate) => {
           if (selectedNodes.has(node)) { // moving a selected node
