@@ -1,21 +1,28 @@
 import React, { useEffect } from 'react';
 import ForceGraph from 'force-graph';
 
-function Graph() {
-  useEffect(() => {
-    // Random tree
-    const N = 30;
-    const gData = {
-      nodes: [...Array(N).keys()].map(i => ({ id: i, name: `node ${i}`})),
-      links: [],
-      // links: [...Array(N).keys()]
-      //   .filter(id => id)
-      //   .map(id => ({
-      //     source: id,
-      //     target: Math.round(Math.random() * (id - 1)),
-      //   })),
-      titles: [...Array(N).keys()].map(i => Math.round(Math.random() * (i - 1))),
-    };
+class ConceptGraph {
+
+  constructor(initial_nb_nodes) {
+    this.allConcepts = this.readAllConcepts();
+    const nRandomConcepts = getRandomElements(this.allConcepts, initial_nb_nodes);
+    this.nodes = [...Array(initial_nb_nodes).keys()].map(i => ({ id: i, name: nRandomConcepts[i]}));
+    this.links = [];
+    // links: [...Array(N).keys()]
+    //   .filter(id => id)
+    //   .map(id => ({
+    //     source: id,
+    //     target: Math.round(Math.random() * (id - 1)),
+    //   })),
+  }
+
+  readAllConcepts() {
+      return Object.keys(data);
+  }
+}
+
+function Graph({updateSelectedNodes}) {
+
 
     let selectedNodes = new Set();
 
