@@ -1,5 +1,14 @@
 import React, { useEffect } from 'react';
 import ForceGraph from 'force-graph';
+import data from "./concepts.json";
+
+
+//utils
+function getRandomElements(array, n) {
+  const shuffled = array.slice().sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
 
 class ConceptGraph {
 

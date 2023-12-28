@@ -1,0 +1,137 @@
+{
+    "computer": [
+        "electronic device",
+        "technology"
+    ],
+    "pizza": [
+        "food",
+        "dish"
+    ],
+    "airplane": [
+        "vehicle",
+        "transport",
+        "airborne"
+    ],
+    "jungle": [
+        "environment",
+        "vegetation"
+    ],
+    "book": [
+        "object",
+        "reading"
+    ],
+    "ladybug": [
+        "insect",
+        "animal"
+    ],
+    "piano": [
+        "musical instrument",
+        "music"
+    ],
+    "beach": [
+        "location",
+        "sand",
+        "ocean"
+    ],
+    "star": [
+        "celestial object",
+        "astronomy"
+    ],
+    "basketball": [
+        "sport",
+        "ball",
+        "game"
+    ],
+    "camera": [
+        "electronic device",
+        "photography"
+    ],
+    "forest": [
+        "environment",
+        "trees"
+    ],
+    "mountain": [
+        "geography",
+        "nature"
+    ],
+    "bike": [
+        "vehicle",
+        "transport",
+        "two wheels"
+    ],
+    "moon": [
+        "astronomy",
+        "white"
+    ],
+    "watch": [
+        "accessory",
+        "time"
+    ],
+    "dance": [
+        "physical activity",
+        "artistic expression"
+    ],
+    "phone": [
+        "device",
+        "communication"
+    ],
+    "campfire": [
+        "outdoor activity",
+        "heat"
+    ],
+    "rainbow": [
+        "natural phenomenon",
+        "colors"
+    ],
+    "robot": [
+        "machine",
+        "artificial intelligence"
+    ],
+    "waterfall": [
+        "natural phenomenon",
+        "water"
+    ],
+    "igloo": [
+        "house",
+        "cold"
+    ],
+    "apartment": [
+        "house"
+    ],
+    "snake": [
+        "animal",
+        "reptile"
+    ],
+    "bow": [
+        "hunting tool",
+        "sport"
+    ],
+    "guitar": [
+        "musical instrument",
+        "music"
+    ],
+    "rocket": [
+        "spacecraft",
+        "exploration"
+    ],
+    "theater": [
+        "location",
+        "show"
+    ],
+    "ice cream": [
+        "food",
+        "cold"
+    ],
+    "snow": [
+        "cold",
+        "weather"
+    ],
+    "arcade": [
+        "entertainment venue",
+        "video game"
+    ],
+    "tornado": [
+        "weather phenomenon",
+        "wind"
+    ]
+}
