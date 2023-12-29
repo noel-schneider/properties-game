@@ -1,5 +1,15 @@
 import data from './concepts.json'
 
+
+class Concept {
+    constructor(name, properties) {
+        this.name = name;
+        this.allProperties = properties;
+        this.foundProperties = [];
+    }
+
+}
+
 export function getAllData() {
     return data;
 }

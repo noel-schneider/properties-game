@@ -10,9 +10,23 @@ function Form({selectedNodes}) {
         setIsSubmitEnabled(selectedNodes.length >= 3 && inputValue.length > 0);
     }, [inputValue, selectedNodes]);
 
+    const checkIfCorrect = () => {
+        const selectedNodesHaveTheSameCategory = selectedNodes.every(node => node.name === selectedNodes[0].name);
+    }
+
+    // TODO: Move the handleSubmit function to App.js or Graph.js
   const handleSubmit = () => {
     if (isSubmitEnabled) {
       console.log("Submit button clicked!");
+      // const isCorrect = checkIfCorrect();
+      // if (isCorrect) {
+      //   console.log("Correct!");
+      //   changeBackgroundForFewSeconds("green");
+      //   addNewNodes();
+      // } else {
+      //   console.log("Incorrect!");
+      //   changeBackgroundForFewSeconds("red")
+      // }
     }
   };
 
