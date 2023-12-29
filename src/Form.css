@@ -1,4 +1,5 @@
 /* Input.css */
+
 .input-container {
   position: absolute;
   width: 15%;
@@ -6,8 +7,41 @@
   right: 50%;
   transform: translate(50%,-50%);
   display: flex;
+  flex-direction: column;
   gap: 10px;
   z-index: 9999;/* Align input and button horizontally */
+}
+
+.enter-key-image {
+  height: 2rem;
+  width: 2rem;
+}
+
+.input-and-submit-container {
+  display: flex;
+  gap: 10px;
+}
+
+.press-enter-wrapper {
+  opacity: 0.4;
+  position: relative;
+  align-items: center;
+  height: 2rem;
+  gap: 10px;
+  left: 50px;
+  display: flex;
+}
+
+.press-enter-wrapper:hover {
+  opacity: 0.9;
+  transition-duration: 0.2s;
+  /*bezier */
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  cursor: default;
+}
+
+.small-text {
+  color: white;
 }
 
 .input {
