@@ -4,6 +4,11 @@ export function getAllData() {
     return data;
 }
 
-export function readAllConcepts() {
-    return Object.keys(data);
+export function getAllConcepts() {
+    return Object.fromEntries(
+        Object.entries(data).map(([name, properties]) => [
+            name,
+            new Concept(name, properties),
+        ])
+    );
 }

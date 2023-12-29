@@ -1,20 +1,14 @@
 import React, { useEffect } from 'react';
 import ForceGraph from 'force-graph';
-import data from "./concepts.json";
-
-
-//utils
-function getRandomElements(array, n) {
-  const shuffled = array.slice().sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, n);
-}
+import {getNRandomElements} from "./utils";
+import {getAllConcepts} from "./concepts-interface";
 
 
 class ConceptGraph {
 
   constructor(initial_nb_nodes) {
-    this.allConcepts = this.readAllConcepts();
-    const nRandomConcepts = getRandomElements(this.allConcepts, initial_nb_nodes);
+    this.allConcepts = Object.keys((getAllConcepts()));
+    const nRandomConcepts = getNRandomElements(this.allConcepts, initial_nb_nodes);
     this.nodes = [...Array(initial_nb_nodes).keys()].map(i => ({ id: i, name: nRandomConcepts[i]}));
     this.links = [];
     // links: [...Array(N).keys()]
