@@ -11,16 +11,13 @@ class ConceptGraph {
     const nRandomConcepts = getNRandomElements(this.allConcepts, initial_nb_nodes);
     this.nodes = [...Array(initial_nb_nodes).keys()].map(i => ({ id: i, name: nRandomConcepts[i]}));
     this.links = [];
+    console.log(this.nodes);
     // links: [...Array(N).keys()]
     //   .filter(id => id)
     //   .map(id => ({
     //     source: id,
     //     target: Math.round(Math.random() * (id - 1)),
     //   })),
-  }
-
-  readAllConcepts() {
-      return Object.keys(data);
   }
 }
 
@@ -33,6 +30,7 @@ function Graph({updateSelectedNodes}) {
     let selectedNodes = new Set();
 
     const Graph = ForceGraph()
+        // TODO: replace the document.getElementById('graph') with a ref
       (document.getElementById('graph'))
         .graphData(graphData)
         .nodeCanvasObjectMode(() => "after") // Add text in front of the node

@@ -13,7 +13,7 @@
         "airborne"
     ],
     "jungle": [
-        "environment",
+        "biome",
         "vegetation"
     ],
     "book": [
@@ -33,6 +33,10 @@
         "sand",
         "ocean"
     ],
+    "desert": [
+        "biome",
+        "sand"
+    ],
     "star": [
         "celestial object",
         "astronomy"
@@ -47,7 +51,7 @@
         "photography"
     ],
     "forest": [
-        "environment",
+        "biome",
         "trees"
     ],
     "mountain": [
