@@ -38,10 +38,13 @@ function Graph({updateSelectedNodes}) {
         .nodeCanvasObjectMode(() => "after") // Add text in front of the node
         .nodeCanvasObject((node, ctx, globalScale) => {
           const label = node.name;
-          ctx.font = "12px Sans-Serif";
+          ctx.font = "12px Poppins";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillStyle = "black"; //node.color;
+          ctx.lineWidth = 1; // Adjust the border width as needed
+          ctx.strokeStyle = '#black';
+          ctx.stroke();
           ctx.fillText(label, node.x, node.y);
         })
         .nodeRelSize(40)
