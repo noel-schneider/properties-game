@@ -1,5 +1,6 @@
 import React, {useEffect} from "react";
 import "./Form.css"
+import {Node} from "./Graph";
 
 function Form({selectedNodes}) {
 
@@ -11,10 +12,10 @@ function Form({selectedNodes}) {
     }, [inputValue, selectedNodes]);
 
     const checkIfCorrect = () => {
-        const selectedNodesHaveTheSameCategory = selectedNodes.every(node => node.name === selectedNodes[0].name);
+        const selectedNodesHaveTheSameCategory = selectedNodes.every((node: Node) => node.name === selectedNodes[0].name);
     }
 
-    // TODO: Move the handleSubmit function to App.js or Graph.js
+    // TODO: Move the handleSubmit function to App.tsx or Graph.tsx
   const handleSubmit = () => {
     if (isSubmitEnabled) {
       console.log("Submit button clicked!");
@@ -30,7 +31,7 @@ function Form({selectedNodes}) {
     }
   };
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
         setInputValue(e.target.value);
     }
@@ -46,7 +47,7 @@ function Form({selectedNodes}) {
             </div>
             <div className="press-enter-wrapper">
                 <img className={"enter-key-image"} src={process.env.PUBLIC_URL + "/enter-key.png"} alt={'Press enter'}/>
-                <p className={'small-text'}>Press 'Enter' to select!</p>
+                <p className={'small-text'}>Press 'Enter' to start tyîng!</p>
             </div>
         </div>
     );

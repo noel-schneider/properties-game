@@ -1,8 +1,12 @@
 import data from './concepts.json'
 
 
-class Concept {
-    constructor(name, properties) {
+export class Concept {
+    private name: string;
+    private allProperties: string[];
+    private foundProperties: string[];
+
+    constructor(name: string, properties: string[]) {
         this.name = name;
         this.allProperties = properties;
         this.foundProperties = [];

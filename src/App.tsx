@@ -6,7 +6,7 @@ function App() {
 
     const [selectedNodes, setSelectedNodes] = useState([]);
 
-    const updateSelectedNodes = (nodes) => {
+    const updateSelectedNodes = (nodes): void => {
         setSelectedNodes(nodes);
     };
 

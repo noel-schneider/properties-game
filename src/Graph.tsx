@@ -1,17 +1,19 @@
 import React, { useEffect } from 'react';
-import ForceGraph from 'force-graph';
+import ForceGraph, {GraphData, NodeObject} from 'force-graph';
 import {getNRandomElements} from "./utils";
-import {getAllConcepts} from "./concepts-interface";
+import {getAllConcepts, Concept} from "./concepts-interface";
 
 
 class ConceptGraph {
+    allConcepts: string[];
+    nodes: { name: string; id: number }[];
+    links: { source: number; target: number }[]; // Replace 'any' with the actual type
 
-  constructor(initial_nb_nodes) {
+  constructor(initial_nb_nodes: number) {
     this.allConcepts = Object.keys((getAllConcepts()));
     const nRandomConcepts = getNRandomElements(this.allConcepts, initial_nb_nodes);
-    this.nodes = [...Array(initial_nb_nodes).keys()].map(i => ({ id: i, name: nRandomConcepts[i]}));
+    this.nodes = Array(initial_nb_nodes).fill(0).map((_, index) => index).map((i) => ({ id: i, name: nRandomConcepts[i]}));
     this.links = [];
-    console.log(this.nodes);
     // links: [...Array(N).keys()]
     //   .filter(id => id)
     //   .map(id => ({
@@ -21,8 +23,13 @@ class ConceptGraph {
   }
 }
 
-function Graph({updateSelectedNodes}) {
+export interface Node {
+    name: any;
+    x: any;
+    y: any;
+}
 
+function Graph({updateSelectedNodes}) {
 
   useEffect(() => {
 
@@ -34,7 +41,7 @@ function Graph({updateSelectedNodes}) {
       (document.getElementById('graph'))
         .graphData(graphData)
         .nodeCanvasObjectMode(() => "after") // Add text in front of the node
-        .nodeCanvasObject((node, ctx, globalScale) => {
+        .nodeCanvasObject((node: Node, ctx) => {
           const label = node.name;
           ctx.font = "12px Poppins";
           ctx.textAlign = "center";
@@ -45,12 +52,12 @@ function Graph({updateSelectedNodes}) {
           ctx.stroke();
           ctx.fillText(label, node.x, node.y);
         })
-        .nodeRelSize(40)
+        .nodeRelSize(40) // Diameter of the node
         .linkColor(() => 'rgba(100, 100, 100, 0.2)') // Set link color (rgba format for transparency)
         .linkWidth(0) // Set link width
         .nodeLabel('title')
-        .nodeColor(node => selectedNodes.has(node) ? '#ffad69' : '#e2dcde')
-        .onNodeClick((node, event) => {
+        .nodeColor((node: NodeObject) => selectedNodes.has(node) ? '#ffad69' : '#e2dcde')
+        .onNodeClick((node: NodeObject, event: { ctrlKey: any; shiftKey: any; altKey: any; }) => {
           if (event.ctrlKey || event.shiftKey || event.altKey) { // multi-selection
             selectedNodes.has(node) ? selectedNodes.delete(node) : selectedNodes.add(node);
           } else { // single-selection
@@ -60,18 +67,18 @@ function Graph({updateSelectedNodes}) {
           }
 
           Graph.nodeColor(Graph.nodeColor()); // update color of selected nodes
-          updateSelectedNodes([...selectedNodes]);
+          updateSelectedNodes(selectedNodes);
         })
         .onNodeDrag((node, translate) => {
           if (selectedNodes.has(node)) { // moving a selected node
-            [...selectedNodes]
+            Array(selectedNodes)
               .filter(selNode => selNode !== node) // don't touch node being dragged
               .forEach(node => ['x', 'y'].forEach(coord => node[`f${coord}`] = node[coord] + translate[coord])); // translate other nodes by the same amount
           }
         })
         .onNodeDragEnd(node => {
           if (selectedNodes.has(node)) { // finished moving a selected node
-            [...selectedNodes]
+            Array(selectedNodes)
               .filter(selNode => selNode !== node) // don't touch node being dragged
               .forEach(node => ['x', 'y'].forEach(coord => node[`f${coord}`] = undefined)); // unfix controlled nodes
           }
