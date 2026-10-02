@@ -187,6 +187,23 @@ test('a concept can be dropped onto a category already found', async ({ page }) 
   }
   expect(aimed, 'never managed to aim at the wanted group').toBe(true)
 
+  // The group being offered to is lit, so the offer and the thing it is
+  // offering are read in one glance.
+  for (const name of host) {
+    await expect(page.locator(`.bubble[aria-label="${label(name)}"]`)).toHaveClass(/bubble--target/)
+  }
+  await expect(page.locator(`.bubble[aria-label="${label(joiner)}"]`)).not.toHaveClass(/bubble--target/)
+
+  // And the offer is in front of everything: it is what the player reads
+  // while deciding whether to let go, so no bubble may cover it.
+  const inFront = await page.locator('.graph').evaluate((graph) => {
+    const drawn = [...graph.querySelectorAll('.bubble, .drop-hint')]
+    const hint = drawn.findIndex((el) => el.classList.contains('drop-hint'))
+    const lastBubble = drawn.map((el) => el.classList.contains('bubble')).lastIndexOf(true)
+    return hint > lastBubble
+  })
+  expect(inFront).toBe(true)
+
   await page.mouse.up()
 
   await expect(page.getByRole('status')).toHaveText(/correct/i)

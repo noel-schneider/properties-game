@@ -127,6 +127,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
 
     // Which found group the dragged bubble is currently over, if any.
     const [over, setOver] = useState<number | null>(null);
+    const aimedAt = over === null ? null : found[over] ?? null;
 
     /**
      * What a concept has been used for. Only found categories: a concept's
@@ -261,7 +262,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                     <stop offset="100%" stopColor="#e46a92" />
                 </linearGradient>
             </defs>
-            {live.map(({ group, where }, groupIndex) => {
+            {live.map(({ group }, groupIndex) => {
                 // Ties stay for every group. Names do not: at twenty groups the
                 // labels pile into an unreadable heap, so only the group just
                 // found says what it was.
@@ -278,11 +279,6 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                             className={named ? 'found__loop found__loop--latest' : 'found__loop'}
                             d={groupOutline(places, centre)}
                         />
-                        {over === where && (
-                            <text className="drop-hint" x={centre.x} y={centre.y - 8} textAnchor="middle">
-                                {`${t('drop.add')} « ${propertyName(group.property)} »`}
-                            </text>
-                        )}
                     </g>
                 );
             })}
@@ -299,6 +295,9 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                 else if (isSelected) classes.push('bubble--selected');
                 if (kin.has(concept.name)) classes.push('bubble--kin');
                 else if (kin.size > 0) classes.push('bubble--aside');
+                // Lit while a concept is held over their group, so the offer
+                // and the thing it is offering are read in one glance.
+                if (aimedAt?.concepts.includes(concept.name)) classes.push('bubble--target');
 
                 return (
                     <g
@@ -356,6 +355,25 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                     </g>
                 );
             })}
+
+            {/*
+              * The offer, drawn after everything: it is the one thing on the
+              * board that must never be behind a bubble, since it is what the
+              * player is reading while deciding whether to let go.
+              */}
+            {aimedAt && (() => {
+                const places = aimedAt.concepts.map(at);
+                const middle = {
+                    x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
+                    y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
+                };
+
+                return (
+                    <text className="drop-hint" x={middle.x} y={middle.y - 8} textAnchor="middle">
+                        {`${t('drop.add')} « ${propertyName(aimedAt.property)} »`}
+                    </text>
+                );
+            })()}
 
             {/*
               * The name of the group just found, in its middle and over the

@@ -217,3 +217,9 @@
     pointer-events: none;
     user-select: none;
 }
+
+/* The members of the group a held concept is being offered to. */
+.bubble--target circle {
+    stroke: #ffd9b0;
+    stroke-width: 6;
+}
