@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './Panel.css'
 import { CATALOGUE } from './catalogue'
+import { useTranslator } from '../i18n'
 import type { Achievement } from './types'
 
 interface PanelProps {
@@ -10,6 +11,9 @@ interface PanelProps {
 }
 
 function Entry({ achievement, earned }: { achievement: Achievement; earned: boolean }) {
+    const { t, achievement: wording } = useTranslator();
+    const { name, description } = wording(achievement.id);
+
     // A secret still to be found gives nothing away: no name, no description,
     // no icon. Only that there is something there.
     const concealed = achievement.secret && !earned;
@@ -19,13 +23,13 @@ function Entry({ achievement, earned }: { achievement: Achievement; earned: bool
             <span className="panel__icon" aria-hidden="true">{concealed ? '🔒' : achievement.icon}</span>
             {concealed ? (
                 <span className="panel__text">
-                    <span className="panel__name panel__name--secret">???</span>
-                    <span className="panel__description">A secret achievement.</span>
+                    <span className="panel__name panel__name--secret">{t('panel.secretName')}</span>
+                    <span className="panel__description">{t('panel.secretDescription')}</span>
                 </span>
             ) : (
                 <span className="panel__text">
-                    <span className="panel__name">{achievement.name}</span>
-                    <span className="panel__description">{achievement.description}</span>
+                    <span className="panel__name">{name}</span>
+                    <span className="panel__description">{description}</span>
                 </span>
             )}
         </li>
@@ -33,6 +37,7 @@ function Entry({ achievement, earned }: { achievement: Achievement; earned: bool
 }
 
 function Panel({ unlocked, muted, onToggleMute }: PanelProps) {
+    const { t } = useTranslator();
     const [open, setOpen] = useState(false);
     const earned = new Set(unlocked);
 
@@ -53,27 +58,27 @@ function Panel({ unlocked, muted, onToggleMute }: PanelProps) {
                     className="panel__button"
                     onClick={() => setOpen((current) => !current)}
                 >
-                    🏆 Achievements <span className="panel__count">{earned.size} / {CATALOGUE.length}</span>
+                    🏆 {t('panel.open')} <span className="panel__count">{earned.size} / {CATALOGUE.length}</span>
                 </button>
                 <button
                     type="button"
                     className="panel__button panel__button--icon"
                     onClick={onToggleMute}
-                    aria-label={muted ? 'Unmute achievement sound' : 'Mute achievement sound'}
+                    aria-label={muted ? t('panel.unmute') : t('panel.mute')}
                 >
                     {muted ? '🔇' : '🔊'}
                 </button>
             </div>
 
             {open && (
-                <div className="panel__sheet" role="dialog" aria-modal="true" aria-label="Achievements">
+                <div className="panel__sheet" role="dialog" aria-modal="true" aria-label={t('panel.title')}>
                     <div className="panel__header">
-                        <h2 className="panel__title">Achievements</h2>
+                        <h2 className="panel__title">{t('panel.title')}</h2>
                         <button
                             type="button"
                             className="panel__button panel__button--icon"
                             onClick={() => setOpen(false)}
-                            aria-label="Close achievements"
+                            aria-label={t('panel.close')}
                         >
                             ✕
                         </button>

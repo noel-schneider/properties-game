@@ -1,4 +1,5 @@
 import './Scoreboard.css'
+import { useTranslator } from './i18n'
 
 interface ScoreboardProps {
     found: number;
@@ -7,14 +8,16 @@ interface ScoreboardProps {
 }
 
 function Scoreboard({ found, total, remaining }: ScoreboardProps) {
+    const { t } = useTranslator();
+
     return (
         <div className="scoreboard">
             <p className="scoreboard__item">
-                Categories{' '}
+                {t('score.categories')}{' '}
                 <span data-testid="categories" className="scoreboard__value">{found} / {total}</span>
             </p>
             <p className="scoreboard__item">
-                Left in this board <span className="scoreboard__value">{remaining}</span>
+                {t('score.remaining')} <span className="scoreboard__value">{remaining}</span>
             </p>
         </div>
     );

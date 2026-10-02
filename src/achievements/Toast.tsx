@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import './Toast.css'
+import { useTranslator } from '../i18n'
 import type { Achievement } from './types'
 
 export const TOAST_MS = 4000;
@@ -10,6 +11,9 @@ interface ToastProps {
 }
 
 function Announcement({ achievement, onDismiss }: { achievement: Achievement; onDismiss: (id: string) => void }) {
+    const { t, achievement: wording } = useTranslator();
+    const { name, description } = wording(achievement.id);
+
     useEffect(() => {
         const timer = setTimeout(() => onDismiss(achievement.id), TOAST_MS);
         return () => clearTimeout(timer);
@@ -19,9 +23,9 @@ function Announcement({ achievement, onDismiss }: { achievement: Achievement; on
         <div className="toast" role="alert">
             <span className="toast__icon" aria-hidden="true">{achievement.icon}</span>
             <span className="toast__text">
-                <span className="toast__label">Achievement unlocked</span>
-                <span className="toast__name">{achievement.name}</span>
-                <span className="toast__description">{achievement.description}</span>
+                <span className="toast__label">{t('toast.unlocked')}</span>
+                <span className="toast__name">{name}</span>
+                <span className="toast__description">{description}</span>
             </span>
         </div>
     );

@@ -1,14 +1,9 @@
 import React from "react";
 import "./Form.css"
+import { useTranslator } from "./i18n";
 import type { Feedback } from "./App";
 
 export const MIN_SELECTED_CONCEPTS = 3;
-
-const FEEDBACK_MESSAGE: Record<Feedback, string> = {
-    none: '',
-    correct: 'Correct!',
-    wrong: 'Not quite — try another category.',
-};
 
 interface FormProps {
     selected: string[];
@@ -19,7 +14,14 @@ interface FormProps {
 
 function Form({ selected, feedback, onSubmit }: FormProps) {
 
+    const { t } = useTranslator();
     const [inputValue, setInputValue] = React.useState("");
+
+    const message: Record<Feedback, string> = {
+        none: '',
+        correct: t('form.correct'),
+        wrong: t('form.wrong'),
+    };
 
     const isSubmitEnabled = selected.length >= MIN_SELECTED_CONCEPTS && inputValue.trim().length > 0;
 
@@ -38,17 +40,17 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
             <div className="input-and-submit-container">
                 <input id="category-input" className="input" type="text" value={inputValue}
                        onChange={handleChange}
-                       placeholder='Type a category here!'/>
+                       placeholder={t('form.placeholder')}/>
                 <button className="submit" type="submit" disabled={!isSubmitEnabled}>
-                    Submit
+                    {t('form.submit')}
                 </button>
             </div>
             <p className={`feedback feedback--${feedback}`} role="status">
-                {FEEDBACK_MESSAGE[feedback]}
+                {message[feedback]}
             </p>
             <div className="press-enter-wrapper">
-                <img className={"enter-key-image"} src={"/enter-key.png"} alt={'Press enter'}/>
-                <p className={'small-text'}>Press 'Enter' to submit!</p>
+                <img className={"enter-key-image"} src={"/enter-key.png"} alt={t('form.enterAlt')}/>
+                <p className={'small-text'}>{t('form.enterHint')}</p>
             </div>
         </form>
     );

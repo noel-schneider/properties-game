@@ -1,4 +1,4 @@
-import { CONCEPTS_PER_GROUP, dealRound, getAllConcepts, propertyAliases } from './concepts'
+import { CONCEPTS_PER_GROUP, dealRound, getAllConcepts } from './concepts'
 
 const concepts = getAllConcepts();
 
@@ -28,14 +28,6 @@ test('every concept belongs to at least two categories', () => {
   const tooThin = concepts.filter((c) => c.properties.length < 2).map((c) => c.name);
 
   expect(tooThin).toEqual([]);
-});
-
-test('every property declares the other wordings a player might use', () => {
-  const missing = [...conceptsByProperty().keys()].filter(
-    (property) => (propertyAliases[property] ?? []).length === 0,
-  );
-
-  expect(missing).toEqual([]);
 });
 
 test('every deal offers three separate groups to find', () => {

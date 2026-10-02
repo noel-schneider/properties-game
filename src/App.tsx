@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
+import "./App.css";
 import Form from "./Form";
 import Graph from "./Graph";
 import Scoreboard from "./Scoreboard";
 import Summary from "./Summary";
+import LanguageToggle from "./LanguageToggle";
 import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
@@ -10,9 +12,10 @@ import { playUnlockChime } from "./achievements/chime";
 import { emptyRunStats, loadLifetime, loadMuted, loadRunStats, saveLifetime, saveMuted, saveRunStats } from "./achievements/storage";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
-import { allProperties, dealRound, getAllConcepts, propertyAliases } from "./concepts";
-import { normalizeAnswer } from "./guess";
+import { allProperties, dealRound, getAllConcepts } from "./concepts";
+import { isExactLabel } from "./guess";
 import { resolveGuess } from "./round";
+import { useTranslator } from "./i18n";
 import type { Achievement, GameEvent, Progress } from "./achievements";
 
 export type Feedback = 'none' | 'correct' | 'wrong';
@@ -27,6 +30,7 @@ interface AppProps {
 
 function App({ playChime = playUnlockChime }: AppProps) {
 
+    const { wordings } = useTranslator();
     const [lifetimeAtStart] = useState(loadLifetime);
     const [hand, setHand] = useState(() => dealRound(lifetimeAtStart.propertiesFound));
     const [selected, setSelected] = useState<string[]>([]);
@@ -103,7 +107,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
     };
 
     const submitGuess = (guess: string): boolean => {
-        const outcome = resolveGuess(hand, selected, guess, { aliases: propertyAliases, pool });
+        const outcome = resolveGuess(hand, selected, guess, { wordings, pool });
 
         record({
             type: 'guess',
@@ -111,8 +115,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
             correct: outcome.correct,
             property: outcome.property,
             exactName:
-                outcome.property !== undefined &&
-                normalizeAnswer(guess) === normalizeAnswer(outcome.property),
+                outcome.property !== undefined && isExactLabel(outcome.property, guess, wordings),
             selection: selected,
         });
 
@@ -166,7 +169,10 @@ function App({ playChime = playUnlockChime }: AppProps) {
   return (
       <>
           <Scoreboard found={found.length} total={TOTAL_CATEGORIES} remaining={hand.solutions.length} />
-          <Panel unlocked={unlocked} muted={muted} onToggleMute={toggleMute} />
+          <div className="top-right">
+              <LanguageToggle />
+              <Panel unlocked={unlocked} muted={muted} onToggleMute={toggleMute} />
+          </div>
           <Graph concepts={hand.concepts} selected={selected} onToggle={toggleConcept} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <Toast unlocked={announcing} onDismiss={dismissAnnouncement} />

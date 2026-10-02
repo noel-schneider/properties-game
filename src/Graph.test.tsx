@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
+import { renderApp } from './test-utils'
 import { act } from 'react'
 import Graph from './Graph'
 import { BUBBLE_GAP, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
@@ -23,7 +24,7 @@ beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
 test('the bubbles drift into place instead of appearing settled', () => {
-  render(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
 
   const atStart = positions();
   runFrames(10);
@@ -32,7 +33,7 @@ test('the bubbles drift into place instead of appearing settled', () => {
 });
 
 test('the drift comes to rest, so the bubbles can be aimed at', () => {
-  render(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
 
   runFrames(600);
   const settled = positions();
@@ -48,8 +49,22 @@ function centres(): Array<{ x: number; y: number }> {
   });
 }
 
+test('no bubble leaves the frame on its way there, not just once it arrives', () => {
+  renderApp(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
+
+  // Sampled throughout the animation: a bubble that flies off screen and comes
+  // back is still a bubble that flew off screen.
+  for (let frame = 0; frame < 300; frame++) {
+    runFrames(1);
+    for (const { x, y } of centres()) {
+      expect(Math.abs(x) + 62).toBeLessThanOrEqual(VIEW_WIDTH / 2);
+      expect(Math.abs(y) + 62).toBeLessThanOrEqual(VIEW_HEIGHT / 2);
+    }
+  }
+});
+
 test('every bubble ends up inside the frame, edges included', () => {
-  render(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
   runFrames(600);
 
   for (const { x, y } of centres()) {
@@ -60,7 +75,7 @@ test('every bubble ends up inside the frame, edges included', () => {
 });
 
 test('the bubbles keep clear of one another rather than touching', () => {
-  render(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
   runFrames(600);
 
   const placed = centres();
@@ -75,14 +90,14 @@ test('the bubbles keep clear of one another rather than touching', () => {
 });
 
 test('a bubble keeps its identity while it moves, so clicks stay reliable', () => {
-  render(<Graph concepts={concepts} selected={['concept-3']} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={['concept-3']} onToggle={() => {}} />);
   runFrames(40);
 
   expect(screen.getByRole('checkbox', { name: 'concept-3' })).toHaveAttribute('aria-checked', 'true');
 });
 
 test('a selected bubble carries the selected class even under the cursor', () => {
-  render(<Graph concepts={concepts} selected={['concept-2']} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={['concept-2']} onToggle={() => {}} />);
 
   const bubble = screen.getByRole('checkbox', { name: 'concept-2' });
   expect(bubble).toHaveClass('bubble--selected');
@@ -90,7 +105,7 @@ test('a selected bubble carries the selected class even under the cursor', () =>
 });
 
 test('the bubbles keep a comfortable distance on average, not just a legal one', () => {
-  render(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
   runFrames(600);
 
   const placed = centres();
@@ -104,7 +119,7 @@ test('the bubbles keep a comfortable distance on average, not just a legal one',
 });
 
 test('the bubbles are spread, not packed on a regular lattice', () => {
-  render(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
   runFrames(600);
 
   const placed = centres();

@@ -1,0 +1,86 @@
+import en from './en.json'
+import fr from './fr.json'
+import { CATALOGUE } from '../achievements/catalogue'
+import { getAllConcepts } from '../concepts'
+
+const languages = { en, fr };
+const concepts = getAllConcepts();
+const properties = [...new Set(concepts.flatMap((c) => c.properties))];
+
+describe.each(Object.entries(languages))('%s', (_name, locale) => {
+  test('names every concept on the board', () => {
+    const missing = concepts.map((c) => c.name).filter((id) => !locale.concepts[id as keyof typeof locale.concepts]);
+
+    expect(missing).toEqual([]);
+  });
+
+  test('names every category a player has to answer', () => {
+    const missing = properties.filter((id) => !locale.properties[id as keyof typeof locale.properties]);
+
+    expect(missing).toEqual([]);
+  });
+
+  test('offers other wordings for every category', () => {
+    const bare = properties.filter(
+      (id) => (locale.aliases[id as keyof typeof locale.aliases] ?? []).length === 0,
+    );
+
+    expect(bare).toEqual([]);
+  });
+
+  test('names and describes every achievement', () => {
+    const missing = CATALOGUE.filter((a) => !locale.achievements[a.id as keyof typeof locale.achievements]);
+
+    expect(missing.map((a) => a.id)).toEqual([]);
+  });
+});
+
+test('the two languages carry exactly the same keys', () => {
+  const keysOf = (locale: typeof en) => [
+    ...Object.keys(locale.concepts).map((k) => `concept:${k}`),
+    ...Object.keys(locale.properties).map((k) => `property:${k}`),
+    ...Object.keys(locale.ui).map((k) => `ui:${k}`),
+    ...Object.keys(locale.achievements).map((k) => `achievement:${k}`),
+  ].sort();
+
+  expect(keysOf(fr)).toEqual(keysOf(en));
+});
+
+/**
+ * Words that really are the same in both languages. Anything else coming back
+ * identical is a string that was forgotten rather than translated.
+ */
+const IDENTICAL_IN_BOTH = new Set([
+  'concepts:football', 'concepts:glacier', 'concepts:igloo', 'concepts:jungle',
+  'concepts:piano', 'concepts:pizza', 'concepts:robot', 'concepts:satellite',
+  'concepts:tennis', 'concepts:train',
+  'properties:animal', 'properties:communication', 'properties:exploration',
+  'properties:machine', 'properties:reptile', 'properties:sport', 'properties:transport',
+  'ui:graph.label', 'ui:panel.secretName', 'ui:language.en', 'ui:language.fr',
+]);
+
+test('nothing was left untranslated in French', () => {
+  const untranslated: string[] = [];
+
+  for (const section of ['concepts', 'properties', 'ui'] as const) {
+    for (const [key, value] of Object.entries(fr[section])) {
+      const sameAsEnglish = value === (en[section] as Record<string, string>)[key];
+      if (sameAsEnglish && !IDENTICAL_IN_BOTH.has(`${section}:${key}`)) {
+        untranslated.push(`${section}:${key}`);
+      }
+    }
+  }
+
+  expect(untranslated).toEqual([]);
+});
+
+test('each language accepts wordings the other does not', () => {
+  // Some words are spelled the same in both — "instrument", "cosmos" — and an
+  // overlap is no defect. What matters is that each language brings its own.
+  for (const [id, aliases] of Object.entries(fr.aliases)) {
+    const english = (en.aliases as Record<string, string[]>)[id] ?? [];
+    const own = (aliases as string[]).filter((alias) => !english.includes(alias));
+
+    expect(own.length, `no French wording of its own for "${id}"`).toBeGreaterThan(0);
+  }
+});

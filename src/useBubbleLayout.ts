@@ -15,7 +15,7 @@ export interface Point {
  * drifting.
  */
 export const VIEW_WIDTH = 1560;
-export const VIEW_HEIGHT = 700;
+export const VIEW_HEIGHT = 800;
 
 /**
  * The hard minimum between two bubbles. Deliberately small: when collision is
@@ -50,12 +50,14 @@ export interface Layout {
 }
 
 /**
- * Bubbles start huddled at the centre rather than on d3's default spiral, which
- * already looks settled. From here the collision force throws them apart, which
- * is the entrance worth watching.
+ * Where a bubble starts: scattered loosely rather than piled on the centre.
+ *
+ * Starting them on one spot looks dramatic for a frame and then throws them
+ * clean off the screen — with this much repulsion they reach nearly four times
+ * the width of the frame before the pull to the centre wins them back.
  */
 function huddle(): LayoutNode {
-    return { x: (Math.random() - 0.5) * 30, y: (Math.random() - 0.5) * 30 };
+    return { x: (Math.random() - 0.5) * 400, y: (Math.random() - 0.5) * 400 };
 }
 
 function prefersReducedMotion(): boolean {
@@ -112,7 +114,7 @@ export function useBubbleLayout(concepts: Concept[], radius: number): Layout {
             // Pulled harder vertically than horizontally, so the cluster comes
             // out landscape like the frame it has to fit in.
             .force('towardsCentreX', forceX(CENTRE.x).strength(0.06))
-            .force('towardsCentreY', forceY(CENTRE.y).strength(0.14))
+            .force('towardsCentreY', forceY(CENTRE.y).strength(0.16))
             // Strong enough that the distance between bubbles is settled by
             // repulsion against this pull, rather than by collision. That is
             // what gives the uneven spacing a graph has and a packed tray of
@@ -120,6 +122,9 @@ export function useBubbleLayout(concepts: Concept[], radius: number): Layout {
             .force('spread', forceManyBody().strength(-1400))
             .force('collide', forceCollide(radius + BUBBLE_GAP).strength(0.9))
             .alphaDecay(0.028)
+            // Heavier damping than d3's default, which lets the bubbles
+            // overshoot far outside the frame on the way to their places.
+            .velocityDecay(0.75)
             // Stops once the movement is no longer visible. The default would
             // keep ticking imperceptibly for another second and a half, which
             // costs nothing on screen and makes every end-to-end click wait.
