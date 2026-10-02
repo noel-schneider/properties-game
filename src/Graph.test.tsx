@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import { renderApp } from './test-utils'
 import { act } from 'react'
 import Graph, { groupOutline } from './Graph'
@@ -377,3 +377,31 @@ test('a found group is named in its middle, over the bubbles', () => {
     drawn.map((el) => el.classList.contains('bubble')).lastIndexOf(true),
   );
 });
+
+describe('telling a click from a drag', () => {
+  function gesture(travel: number) {
+    const picked: string[] = [];
+    renderApp(
+      <Graph concepts={concepts} selected={[]} found={[]} onToggle={(n) => picked.push(n)} />,
+    );
+    runFrames(600);
+
+    const bubble = screen.getByLabelText('concept-0');
+    fireEvent.pointerDown(bubble, { button: 0, clientX: 500, clientY: 300 });
+    fireEvent.pointerMove(bubble, { clientX: 500 + travel, clientY: 300 });
+    fireEvent.pointerUp(bubble, { clientX: 500 + travel, clientY: 300 });
+    fireEvent.click(bubble);
+    return picked;
+  }
+
+  test('a click that slips a few pixels still selects', () => {
+    // A hand that does not move at all is not what a mouse click is, and a
+    // bubble that silently refuses to be picked gives the player no clue why
+    // their answer was then refused.
+    expect(gesture(8)).toEqual(['concept-0']);
+  });
+
+  test('a real drag still selects nothing', () => {
+    expect(gesture(60)).toEqual([]);
+  });
+})

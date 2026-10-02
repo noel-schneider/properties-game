@@ -39,8 +39,19 @@ export function asideLabel(x: number, radius: number): { dx: number; anchor: 'st
 /** How close a label may come to the frame. */
 const LABEL_MARGIN = 14;
 
-/** Past this much travel the gesture is a drag, and must not also select. */
+/** Past this much travel the bubble starts following the pointer. */
 const DRAG_THRESHOLD = 4;
+
+/**
+ * Past this much travel the gesture was a drag, and must not also select.
+ *
+ * Deliberately far looser than the distance that starts the drag. Nobody
+ * clicks without the pointer slipping a few pixels, and a bubble that quietly
+ * refuses to be picked leaves the player staring at an answer that was refused
+ * for a reason nothing on screen explains. Moving a bubble a hair and selecting
+ * it is a fine outcome; failing to select it is not.
+ */
+const DRAG_INTENT = 16;
 
 interface GraphProps {
     concepts: Concept[];
@@ -79,6 +90,9 @@ export function groupOutline(places: Point[], centre: Point): string {
 interface Gesture {
     index: number;
     startedAt: Point;
+    /** The bubble is following the pointer. */
+    dragging: boolean;
+    /** It travelled far enough that the player meant to drag, not to click. */
     moved: boolean;
 }
 
@@ -180,7 +194,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
     const onPointerDown = (i: number) => (event: React.PointerEvent<SVGGElement>) => {
         if (event.button !== 0) return;
 
-        gesture.current = { index: i, startedAt: { x: event.clientX, y: event.clientY }, moved: false };
+        gesture.current = { index: i, startedAt: { x: event.clientX, y: event.clientY }, dragging: false, moved: false };
         event.currentTarget.setPointerCapture?.(event.pointerId);
         grab(i);
     };
@@ -193,13 +207,14 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
             event.clientX - held.startedAt.x,
             event.clientY - held.startedAt.y,
         );
-        if (travelled > DRAG_THRESHOLD) held.moved = true;
+        if (travelled > DRAG_THRESHOLD) held.dragging = true;
+        if (travelled > DRAG_INTENT) held.moved = true;
 
         // Below the threshold this is a click, not a drag. Dragging stirs the
         // whole simulation, and no human presses a bubble without the pointer
         // shifting a pixel or two — so acting on that wobble would reheat the
         // board on every click, which reads as the board refreshing itself.
-        if (!held.moved) return;
+        if (!held.dragging) return;
 
         const point = toViewBox(event);
         if (!point) return;
