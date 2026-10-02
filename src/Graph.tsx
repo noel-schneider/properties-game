@@ -29,6 +29,58 @@ interface GraphProps {
     onToggle: (name: string) => void;
 }
 
+/** How far a side of the loop bows out past the members it joins. */
+const LOOP_BOW = 0.42;
+
+/**
+ * The least a side may bow, in viewBox units.
+ *
+ * Three concepts settle almost in a line often enough, and there the bow —
+ * being a proportion of the distance from the middle — is almost nothing, so
+ * the loop collapses into a pointed crease. This keeps it a loop.
+ */
+const LOOP_BOW_FLOOR = 34;
+
+/**
+ * A closed curve running through the members of a found group.
+ *
+ * One loop rather than a spoke from each member to the middle: three straight
+ * lines meeting at a bare point read as a wiring diagram, and the point itself
+ * stands for nothing the player can see. The curve lassoes them instead, which
+ * is the same claim — these three belong together — made in the shape the rest
+ * of the board is already drawn in.
+ *
+ * The members are taken in the order they sit around the middle, or the loop
+ * crosses itself whenever the simulation moves one past another.
+ */
+export function loopAround(places: Point[], centre: Point): string {
+    const corners = [...places].sort(
+        (a, b) => Math.atan2(a.y - centre.y, a.x - centre.x) - Math.atan2(b.y - centre.y, b.x - centre.x),
+    );
+
+    const sides = corners.map((corner, i) => {
+        const next = corners[(i + 1) % corners.length];
+        const middle = { x: (corner.x + next.x) / 2, y: (corner.y + next.y) / 2 };
+        // Pushed away from the centre, so the side bulges instead of cutting
+        // the corner — and so the curve clears the bubbles it runs between.
+        // Outward from the middle, by whichever is larger: a share of how far
+        // this side already sits, or the floor below which it stops reading
+        // as a curve at all.
+        const out = { x: middle.x - centre.x, y: middle.y - centre.y };
+        const reach = Math.hypot(out.x, out.y);
+        const push = reach === 0
+            ? { x: 0, y: LOOP_BOW_FLOOR }
+            : {
+                  x: (out.x / reach) * Math.max(reach * LOOP_BOW, LOOP_BOW_FLOOR),
+                  y: (out.y / reach) * Math.max(reach * LOOP_BOW, LOOP_BOW_FLOOR),
+              };
+        const control = { x: middle.x + push.x, y: middle.y + push.y };
+        return `Q ${control.x.toFixed(2)} ${control.y.toFixed(2)} ${next.x.toFixed(2)} ${next.y.toFixed(2)}`;
+    });
+
+    return `M ${corners[0].x.toFixed(2)} ${corners[0].y.toFixed(2)} ${sides.join(' ')} Z`;
+}
+
 interface Gesture {
     index: number;
     startedAt: Point;
@@ -178,6 +230,15 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
             role="group"
             aria-label={t('graph.label')}
         >
+            <defs>
+                {/* The loops take their colours from the sunrise behind the
+                    board, so a found group looks lit by the same light. */}
+                <linearGradient id="found-loop" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#ffc38c" />
+                    <stop offset="55%" stopColor="#ffad69" />
+                    <stop offset="100%" stopColor="#e46a92" />
+                </linearGradient>
+            </defs>
             {live.map((group, groupIndex) => {
                 // Ties stay for every group. Names do not: at twenty groups the
                 // labels pile into an unreadable heap, so only the group just
@@ -205,16 +266,10 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
 
                 return (
                     <g key={`${group.property}-${groupIndex}`} className="found" data-group={group.property}>
-                        {places.map((place, i) => (
-                            <line
-                                key={group.concepts[i]}
-                                className="found__tie"
-                                x1={centre.x}
-                                y1={centre.y}
-                                x2={place.x}
-                                y2={place.y}
-                            />
-                        ))}
+                        <path
+                            className={named ? 'found__loop found__loop--latest' : 'found__loop'}
+                            d={loopAround(places, centre)}
+                        />
                         {named && <text
                             className="found__label"
                             x={labelX}

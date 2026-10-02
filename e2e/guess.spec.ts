@@ -103,7 +103,7 @@ test('a found group stays on the board, tied and named, and its concepts carry o
   for (const name of names) {
     await expect(page.getByLabel(name, { exact: true })).toBeVisible()
   }
-  await expect(page.locator('.found__tie')).toHaveCount(names.length)
+  await expect(page.locator('.found__loop')).toHaveCount(1)
   await expect(page.locator('.found__label')).toHaveText(property)
   await expect(page.getByPlaceholder('Type a category here!')).toHaveValue('')
 })

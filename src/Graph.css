@@ -60,11 +60,31 @@
     stroke-width: 4;
 }
 
-/* A group that has been found: gathered, tied together and named. */
-.found__tie {
-    stroke: #ffad69;
-    stroke-width: 2;
-    opacity: 0.5;
+/*
+ * A group that has been found: lassoed by one closed curve and named.
+ *
+ * Drawn before the bubbles, so the loop runs behind them and only its sides
+ * show — which is what makes it read as holding the three together rather than
+ * as a triangle drawn over the board.
+ */
+.found__loop {
+    /* Barely there. Thirty loops drawn to be read is a thicket, and reading
+       which concepts share a category is the pointer's job now — these are
+       texture, a record that the board has been worked on. */
+    fill: url(#found-loop);
+    fill-opacity: 0.055;
+    stroke: url(#found-loop);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    opacity: 0.38;
+    transition: opacity 0.5s ease;
+}
+
+/* Except the one just found, which is the answer the player is waiting on.
+   The same rule the group names already follow. */
+.found__loop--latest {
+    stroke-width: 2.6;
+    opacity: 0.9;
 }
 
 .found__label {

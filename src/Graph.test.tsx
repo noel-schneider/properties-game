@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react'
 import { renderApp } from './test-utils'
 import { act } from 'react'
-import Graph from './Graph'
+import Graph, { loopAround } from './Graph'
 import { BUBBLE_GAP, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Concept } from './types'
 
@@ -145,12 +145,35 @@ test('the bubbles are spread, not packed on a regular lattice', () => {
 
 const foundGroup = { property: 'thing', concepts: ['concept-0', 'concept-1', 'concept-2'] };
 
-test('a found group is drawn tied together', () => {
+test('a found group is drawn as one loop around its members', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
   runFrames(600);
 
-  const ties = document.querySelectorAll('.found__tie');
-  expect(ties).toHaveLength(foundGroup.concepts.length);
+  // One closed curve rather than three spokes meeting at a bare point, which
+  // read as a wiring diagram.
+  const loops = document.querySelectorAll('.found__loop');
+  expect(loops).toHaveLength(1);
+
+  const path = loops[0].getAttribute('d')!;
+  expect(path.endsWith('Z')).toBe(true);
+  // One curve per side of the group.
+  expect(path.match(/Q/g)).toHaveLength(foundGroup.concepts.length);
+});
+
+test('each side bows away from the middle, so the loop is not a triangle', () => {
+  const corners = [{ x: 0, y: -100 }, { x: 87, y: 50 }, { x: -87, y: 50 }];
+  const centre = { x: 0, y: 0 };
+
+  const path = loopAround(corners, centre);
+  const numbers = path.match(/-?\d+\.?\d*/g)!.map(Number);
+  const from = (i: number) => Math.hypot(numbers[i], numbers[i + 1]);
+
+  // In `M c0  Q k0 c1  Q k1 c2  Q k2 c0`, the odd positions are the control
+  // points. Each must sit further from the middle than the side's own
+  // midpoint, which for this triangle is at half the radius — that is what
+  // makes the side bulge outward instead of cutting straight across.
+  const controls = [from(2), from(6), from(10)];
+  for (const control of controls) expect(control).toBeGreaterThan(50);
 });
 
 test('the group just found says what it was', () => {
@@ -166,10 +189,10 @@ test('older groups keep their ties but drop their name', () => {
   );
 
   // Twenty groups of labels pile into an unreadable heap, so only the latest
-  // is named; every tie is still drawn.
+  // is named; every loop is still drawn.
   expect(screen.queryByText('pair-3')).toBeNull();
   expect(screen.getByText('thing')).toBeInTheDocument();
-  expect(document.querySelectorAll('.found__tie')).toHaveLength(6);
+  expect(document.querySelectorAll('.found__loop')).toHaveLength(2);
 });
 
 test('a found group draws closer together than the rest of the board', () => {
@@ -313,4 +336,33 @@ test('a concept dealt in arrives beside the others, without moving them', () => 
 
   expect(Math.max(...moved)).toBeLessThan(30);
   expect(positions()).toHaveLength(concepts.length + 1);
+});
+
+test('the group just found keeps a bright loop, and the older ones step back', () => {
+  const older = { property: 'pair-3', concepts: ['concept-3', 'concept-8', 'concept-13'] };
+  renderApp(
+    <Graph concepts={concepts} selected={[]} found={[older, foundGroup]} onToggle={() => {}} />,
+  );
+
+  // The same rule the names already follow: at twenty groups everything drawn
+  // at full strength is a thicket, and the one just found is the one the
+  // player is looking for.
+  const loops = [...document.querySelectorAll('.found__loop')];
+  const bright = loops.filter((loop) => loop.classList.contains('found__loop--latest'));
+  expect(bright).toHaveLength(1);
+  expect(loops).toHaveLength(2);
+});
+
+test('a group whose members fall in a line is still drawn as a loop', () => {
+  // Three concepts can settle almost collinear, and a bow that is only a
+  // proportion of the distance from the middle collapses to a crease there.
+  const place = (name: string, x: number) => ({ name, x, y: 0 });
+  const line = [place('a', -200), place('b', 0), place('c', 200)];
+  const centre = { x: 0, y: 0 };
+
+  const path = loopAround(line, centre);
+  const numbers = path.match(/-?\d+\.?\d*/g)!.map(Number);
+  const offLine = numbers.filter((_, i) => i % 2 === 1).map(Math.abs);
+
+  expect(Math.max(...offLine)).toBeGreaterThan(10);
 });
