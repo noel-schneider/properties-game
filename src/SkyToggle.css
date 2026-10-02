@@ -1,0 +1,31 @@
+.skies {
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+/*
+ * Each swatch wears its own palette: the deep end of the sky with the two
+ * leading washes laid over it, which is what the background will look like.
+ */
+.skies__swatch {
+    width: 1.5rem;
+    height: 2.1rem;
+    padding: 0;
+    background:
+        radial-gradient(circle at 30% 25%, rgba(var(--swatch-one), 0.85), rgba(var(--swatch-one), 0) 62%),
+        radial-gradient(circle at 72% 78%, rgba(var(--swatch-two), 0.8), rgba(var(--swatch-two), 0) 64%),
+        var(--swatch-deep);
+}
+
+.skies__swatch:hover:not(:disabled) {
+    border-color: #5a5a7d;
+    /* The gradient is the point, so hover must not repaint it. */
+    background:
+        radial-gradient(circle at 30% 25%, rgba(var(--swatch-one), 1), rgba(var(--swatch-one), 0) 62%),
+        radial-gradient(circle at 72% 78%, rgba(var(--swatch-two), 0.95), rgba(var(--swatch-two), 0) 64%),
+        var(--swatch-deep);
+}
+
+.skies__swatch--on {
+    border-color: #ffad69;
+}

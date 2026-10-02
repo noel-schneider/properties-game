@@ -9,14 +9,15 @@ import Sky from "./Sky";
 import Summary from "./Summary";
 import LanguageToggle from "./LanguageToggle";
 import Reset from "./Reset";
+import SkyToggle from "./SkyToggle";
 import SoundToggle from "./SoundToggle";
 import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
 import { playUnlockChime } from "./achievements/chime";
 import {
-    emptyRunStats, loadFound, loadLifetime, loadMuted, loadRunStats,
-    saveFound, saveLifetime, saveMuted, saveRunStats,
+    emptyRunStats, loadFound, loadLifetime, loadMuted, loadPalette, loadRunStats,
+    saveFound, saveLifetime, saveMuted, savePalette, saveRunStats,
 } from "./achievements/storage";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
@@ -76,6 +77,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
     const [muted, setMuted] = useState(loadMuted);
+    const [palette, setPalette] = useState(loadPalette);
 
     const tally = useRef<RunTally>(loadRunStats());
     if (tally.current.boards === 0) {
@@ -86,6 +88,11 @@ function App({ playChime = playUnlockChime }: AppProps) {
     const bumpTally = (change: Partial<RunTally>) => {
         tally.current = { ...tally.current, ...change };
         saveRunStats(tally.current);
+    };
+
+    const chooseSky = (id: string) => {
+        savePalette(id);
+        setPalette(id);
     };
 
     const toggleMute = () => {
@@ -198,11 +205,12 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
   return (
       <>
-          <Sky />
+          <Sky palette={palette} />
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
           <Scoreboard found={found.length} finished={finishedCount} onBoard={concepts.length} remaining={left} />
           <div className="corner corner--top-right">
+              <SkyToggle chosen={palette} onChoose={chooseSky} />
               <LanguageToggle />
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />

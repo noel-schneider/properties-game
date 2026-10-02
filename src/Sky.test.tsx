@@ -1,49 +1,42 @@
 import { render } from '@testing-library/react'
 import { act } from 'react'
-import Sky, { STAR_LAYERS } from './Sky'
+import Sky from './Sky'
+import { PALETTES } from './sky/palettes'
 
 function sky() {
   return document.querySelector('.sky') as HTMLElement;
 }
-
-afterEach(() => vi.unstubAllGlobals());
-
-test('the sky is drawn in layers, each with its own stars', () => {
-  render(<Sky />);
-
-  const layers = document.querySelectorAll('.sky__stars');
-  expect(layers).toHaveLength(STAR_LAYERS.length);
-
-  layers.forEach((layer, i) => {
-    expect(layer.querySelectorAll('circle')).toHaveLength(STAR_LAYERS[i].count);
-  });
-});
-
-test('the same sky comes back every time, so it never flickers between renders', () => {
-  const { unmount } = render(<Sky />);
-  const first = document.querySelector('.sky__stars')!.innerHTML;
-  unmount();
-
-  render(<Sky />);
-  expect(document.querySelector('.sky__stars')!.innerHTML).toBe(first);
-});
-
-test('it cannot catch a click meant for a bubble', () => {
-  render(<Sky />);
-
-  expect(getComputedStyle(sky()).pointerEvents).toBe('none');
-});
 
 /** The offset is written on the next frame, so wait for one. */
 function frame() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }
 
-test('the pointer shifts the layers, without a re-render', async () => {
+afterEach(() => vi.unstubAllGlobals());
+
+test('it wears the palette it was given', () => {
+  render(<Sky palette={PALETTES[2].id} />);
+
+  expect(sky().dataset.palette).toBe(PALETTES[2].id);
+});
+
+test('the aurora is drawn as separate washes, so they can drift apart', () => {
+  render(<Sky palette={PALETTES[0].id} />);
+
+  expect(document.querySelectorAll('.sky__wash')).toHaveLength(3);
+});
+
+test('it cannot catch a click meant for a bubble', () => {
+  render(<Sky palette={PALETTES[0].id} />);
+
+  expect(getComputedStyle(sky()).pointerEvents).toBe('none');
+});
+
+test('the pointer shifts the aurora, without a re-render', async () => {
   let renders = 0;
   function Counting() {
     renders++;
-    return <Sky />;
+    return <Sky palette={PALETTES[0].id} />;
   }
   render(<Counting />);
   const drawn = renders;
@@ -66,7 +59,7 @@ test('a player who asked for less motion gets a still sky', async () => {
     addEventListener: () => {},
     removeEventListener: () => {},
   }));
-  render(<Sky />);
+  render(<Sky palette={PALETTES[0].id} />);
 
   expect(sky().dataset.still).toBe('true');
 
