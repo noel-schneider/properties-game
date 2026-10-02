@@ -288,3 +288,43 @@ test('muting silences the sound button as well as unlocks', async () => {
   expect(screen.getByRole('button', { name: /sound is off/i })).toBeDisabled();
   expect(chime).not.toHaveBeenCalled();
 });
+
+test('starting over clears what was found and keeps the achievements', async () => {
+  const user = userEvent.setup();
+  renderApp(<App playChime={() => {}} />);
+
+  const group = formableGroupsOnScreen()[0];
+  for (const name of group.concepts) {
+    await user.click(screen.getByRole('checkbox', { name }));
+  }
+  await user.type(screen.getByPlaceholderText(/type a category here/i), group.property);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+  await screen.findByRole('status');
+
+  expect(screen.getByTestId('found')).toHaveTextContent('1');
+  const earned = screen.getByRole('button', { name: /achievements/i }).textContent;
+
+  await user.click(screen.getByRole('button', { name: /start over/i }));
+  await user.click(screen.getByRole('button', { name: /clear and start over/i }));
+
+  expect(screen.getByTestId('found')).toHaveTextContent('0');
+  expect(screen.getByRole('button', { name: /achievements/i })).toHaveTextContent(earned!);
+});
+
+test('backing out of starting over leaves the game alone', async () => {
+  const user = userEvent.setup();
+  renderApp(<App playChime={() => {}} />);
+
+  const group = formableGroupsOnScreen()[0];
+  for (const name of group.concepts) {
+    await user.click(screen.getByRole('checkbox', { name }));
+  }
+  await user.type(screen.getByPlaceholderText(/type a category here/i), group.property);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+  await screen.findByRole('status');
+
+  await user.click(screen.getByRole('button', { name: /start over/i }));
+  await user.click(screen.getByRole('button', { name: /cancel/i }));
+
+  expect(screen.getByTestId('found')).toHaveTextContent('1');
+});

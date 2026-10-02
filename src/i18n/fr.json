@@ -516,7 +516,12 @@
         "panel.testSound": "Écouter le son des succès",
         "panel.testSoundMuted": "Le son est coupé — rallume-le pour l'entendre",
         "score.found": "Groupes trouvés",
-        "score.finished": "Terminés sur ce plateau"
+        "score.finished": "Terminés sur ce plateau",
+        "reset.open": "Recommencer",
+        "reset.title": "Recommencer ?",
+        "reset.what": "Les groupes trouvés seront effacés et un nouveau plateau distribué. Tes succès restent acquis.",
+        "reset.cancel": "Annuler",
+        "reset.confirm": "Effacer et recommencer"
     },
     "achievements": {
         "first-light": {

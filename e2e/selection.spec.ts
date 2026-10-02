@@ -1,5 +1,24 @@
 import { expect, test } from '@playwright/test'
 import { boardSettled } from './board'
+import data from '../src/concepts.json' with { type: 'json' }
+
+const properties = data as Record<string, string[]>
+
+/** Three of the dealt concepts that share a category, and that category. */
+function findSolvableTriple(dealt: string[]): { names: string[]; property: string } {
+  for (let a = 0; a < dealt.length; a++) {
+    for (let b = a + 1; b < dealt.length; b++) {
+      for (let c = b + 1; c < dealt.length; c++) {
+        const triple = [dealt[a], dealt[b], dealt[c]]
+        const property = properties[triple[0]].find((p) =>
+          triple.every((name) => properties[name].includes(p)),
+        )
+        if (property) return { names: triple, property }
+      }
+    }
+  }
+  throw new Error('the board has no solvable triple, which it always should')
+}
 
 test('selecting three concepts in the browser enables submit', async ({ page }) => {
   await page.goto('/')
@@ -107,4 +126,36 @@ test.describe('with the board in motion', () => {
     await expect(bubble).toHaveAttribute('aria-checked', 'true')
     await expect(page.locator('.graph')).toHaveAttribute('data-settled', 'true')
   })
+})
+
+test('starting over asks first, and keeps the achievements', async ({ page }) => {
+  await page.goto('/')
+  await page.evaluate(() => localStorage.clear())
+  await page.reload()
+  await boardSettled(page)
+
+  // Find something, so there is progress worth protecting.
+  const dealt = await page.getByRole('checkbox').evaluateAll((nodes) =>
+    nodes.map((n) => n.getAttribute('aria-label')!),
+  )
+  const { names, property } = findSolvableTriple(dealt)
+  for (const name of names) {
+    await page.getByRole('checkbox', { name, exact: true }).click()
+  }
+  await page.getByPlaceholder('Type a category here!').fill(property)
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await expect(page.getByTestId('found')).toHaveText('1')
+
+  // Backing out leaves it alone.
+  await page.getByRole('button', { name: 'Start over', exact: true }).click()
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await expect(page.getByTestId('found')).toHaveText('1')
+
+  // Confirming clears the game but not what was earned.
+  const earned = await page.getByRole('button', { name: /Achievements/ }).textContent()
+  await page.getByRole('button', { name: 'Start over', exact: true }).click()
+  await page.getByRole('button', { name: 'Clear and start over' }).click()
+
+  await expect(page.getByTestId('found')).toHaveText('0')
+  await expect(page.getByRole('button', { name: /Achievements/ })).toHaveText(earned!)
 })
