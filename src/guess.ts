@@ -7,7 +7,7 @@ export type PropertyAliases = Record<string, string[]>;
  * no stray spaces, no trailing plural. The player is answering in prose, and
  * "Biomes" is the same answer as "biome".
  */
-function normalize(text: string): string {
+export function normalizeAnswer(text: string): string {
     const folded = text
         .trim()
         .toLowerCase()
@@ -37,11 +37,11 @@ export function matchedProperty(
     guess: string,
     aliases: PropertyAliases,
 ): string | undefined {
-    const answer = normalize(guess);
+    const answer = normalizeAnswer(guess);
     if (answer === '') return undefined;
 
     return sharedProperties(concepts).find((property) =>
-        [property, ...(aliases[property] ?? [])].some((accepted) => normalize(accepted) === answer),
+        [property, ...(aliases[property] ?? [])].some((accepted) => normalizeAnswer(accepted) === answer),
     );
 }
 
