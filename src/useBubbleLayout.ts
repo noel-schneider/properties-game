@@ -1,60 +1,96 @@
-import { useMemo } from 'react'
-import { forceCenter, forceCollide, forceSimulation, forceX, forceY } from 'd3-force'
+import { useEffect, useMemo, useState } from 'react'
+import { forceCollide, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force'
 import type { Concept } from './types'
 
-export interface Bubble {
-    concept: Concept;
+export interface Point {
     x: number;
     y: number;
 }
 
-export interface Layout {
-    bubbles: Bubble[];
-    /** Bounding box of the laid out bubbles, ready to use as an SVG viewBox. */
-    viewBox: string;
-}
+/**
+ * The frame the bubbles live in. Fixed rather than fitted to the cluster: a
+ * viewBox recomputed every tick would zoom the whole board in and out as the
+ * bubbles move, which reads as the camera lurching rather than the bubbles
+ * drifting.
+ */
+export const VIEW_WIDTH = 820;
+export const VIEW_HEIGHT = 660;
+
+const CENTRE: Point = { x: 0, y: 0 };
 
 interface LayoutNode {
-    index?: number;
-    x?: number;
-    y?: number;
+    x: number;
+    y: number;
 }
 
 /**
- * Packs the bubbles into a cluster where none overlap.
- *
- * The simulation is run to completion here rather than animated frame by
- * frame: the positions are only needed once, and a cluster that keeps
- * drifting makes the bubbles impossible to aim at.
+ * Bubbles start huddled at the centre rather than on d3's default spiral, which
+ * already looks settled. From here the collision force throws them apart, which
+ * is the entrance worth watching.
  */
-export function useBubbleLayout(concepts: Concept[], radius: number): Layout {
-    return useMemo(() => {
-        const nodes: LayoutNode[] = concepts.map(() => ({}));
+function huddle(): LayoutNode {
+    return { x: (Math.random() - 0.5) * 30, y: (Math.random() - 0.5) * 30 };
+}
 
-        forceSimulation(nodes)
-            .force('centerX', forceX(0).strength(0.05))
-            .force('centerY', forceY(0).strength(0.05))
-            .force('center', forceCenter(0, 0))
-            .force('collide', forceCollide(radius + 1).strength(1))
-            .stop()
-            .tick(400);
+function prefersReducedMotion(): boolean {
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+}
 
-        const bubbles = concepts.map((concept, i) => ({
-            concept,
-            x: nodes[i].x ?? 0,
-            y: nodes[i].y ?? 0,
-        }));
+/**
+ * Lays the bubbles out by simulation, drawing every tick.
+ *
+ * The simulation is animated rather than run to completion: watching them
+ * jostle into place is most of the character of the board. It does come to
+ * rest, though — a bubble that never stops moving is a bubble that is annoying
+ * to aim at, and the first version of this game was unplayable for exactly
+ * that reason.
+ *
+ * Only coordinates are returned, never the concepts themselves. Positions
+ * arrive a frame behind a new board, and pairing them with concepts here would
+ * mean rendering the previous board's names for that frame.
+ */
+export function useBubbleLayout(concepts: Concept[], radius: number): Point[] {
+    const nodes = useMemo<LayoutNode[]>(() => concepts.map(huddle), [concepts]);
+    const [points, setPoints] = useState<Point[]>([]);
 
-        // Fit the viewBox to the cluster so that no bubble is ever clipped,
-        // whatever the window size.
-        const pad = radius + 4;
-        const xs = bubbles.map((b) => b.x);
-        const ys = bubbles.map((b) => b.y);
-        const minX = Math.min(...xs) - pad;
-        const minY = Math.min(...ys) - pad;
-        const width = Math.max(...xs) + pad - minX;
-        const height = Math.max(...ys) + pad - minY;
+    useEffect(() => {
+        const read = () => nodes.map((node) => ({ x: node.x, y: node.y }));
 
-        return { bubbles, viewBox: `${minX} ${minY} ${width} ${height}` };
-    }, [concepts, radius]);
+        const simulation = forceSimulation(nodes)
+            // Pulled harder vertically than horizontally, so the cluster comes
+            // out landscape like the frame it has to fit in.
+            .force('towardsCentreX', forceX(CENTRE.x).strength(0.035))
+            .force('towardsCentreY', forceY(CENTRE.y).strength(0.09))
+            .force('spread', forceManyBody().strength(-24))
+            .force('collide', forceCollide(radius + 1).strength(0.9))
+            .alphaDecay(0.028)
+            // Stops once the movement is no longer visible. The default would
+            // keep ticking imperceptibly for another second and a half, which
+            // costs nothing on screen and makes every end-to-end click wait.
+            .alphaMin(0.01)
+            .stop();
+
+        if (prefersReducedMotion()) {
+            simulation.tick(400);
+            setPoints(read());
+            return;
+        }
+
+        let frame = 0;
+        const step = () => {
+            simulation.tick();
+            setPoints(read());
+
+            if (simulation.alpha() > simulation.alphaMin()) {
+                frame = requestAnimationFrame(step);
+            }
+        };
+
+        setPoints(read());
+        frame = requestAnimationFrame(step);
+
+        return () => cancelAnimationFrame(frame);
+    }, [nodes, radius]);
+
+    return points;
 }
