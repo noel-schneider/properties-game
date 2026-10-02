@@ -46,7 +46,7 @@ function Form({selectedNodes}) {
                 </button>
             </div>
             <div className="press-enter-wrapper">
-                <img className={"enter-key-image"} src={process.env.PUBLIC_URL + "/enter-key.png"} alt={'Press enter'}/>
+                <img className={"enter-key-image"} src={"/enter-key.png"} alt={'Press enter'}/>
                 <p className={'small-text'}>Press 'Enter' to start tyîng!</p>
             </div>
         </div>
