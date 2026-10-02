@@ -105,3 +105,63 @@
 .bubble--done:hover circle {
     fill: #8f8aa6;
 }
+
+/* ---------------------------------------------------------------------------
+ * Showing which concepts share a category, while we pick a way.
+ *
+ * Temporary: a dev-only bench sets data-view, and once the choice is made the
+ * winner's rules move up and the rest goes away.
+ * ------------------------------------------------------------------------ */
+
+/* The hub: a small disc standing for a found category, named. */
+.hub__dot {
+    fill: hsl(var(--hue) 65% 58%);
+    stroke: #1b1b1b;
+    stroke-width: 2;
+}
+
+.hub__name {
+    fill: hsl(var(--hue) 75% 72%);
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* The survey: what shares a found category with the bubble under the pointer
+   stays lit, and the rest steps back rather than disappearing. */
+.bubble--kin circle {
+    stroke: #ffad69;
+    stroke-width: 5;
+}
+
+.bubble--aside {
+    opacity: 0.25;
+    transition: opacity 0.18s ease;
+}
+
+/*
+ * The ring: one arc per category this concept has been used for.
+ *
+ * Written as `.bubble circle.bubble__arc` deliberately. `.bubble circle` is
+ * the more specific selector, so a plain `.bubble__arc` rule loses to it and
+ * the arcs come out painted in the contour's black, on black — present in the
+ * DOM and invisible on screen.
+ */
+.bubble circle.bubble__arc {
+    fill: none;
+    stroke: hsl(var(--hue) 70% 60%);
+    stroke-width: 5;
+    stroke-linecap: round;
+    /* The contour's shadow under ninety-odd more elements buys nothing. */
+    filter: none;
+    /* The dash starts at three o'clock, which puts the first arc across the
+       label. Rotated to start at the top. fill-box, or the rotation pivots on
+       the viewBox origin and flings the arc off the board. */
+    transform: rotate(-90deg);
+    transform-box: fill-box;
+    transform-origin: center;
+    pointer-events: none;
+}
