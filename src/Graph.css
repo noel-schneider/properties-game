@@ -24,6 +24,11 @@
     /* Heavier than it was. A hairline contour reads as a diagram; a thick one
        reads as something you are meant to poke. */
     stroke-width: 3;
+    /* Thrown down and to the side and blurred, so the bubble sits above the
+       board rather than on it. Offset rather than straight down on purpose: a
+       shadow directly under a round thing says the light is overhead and
+       nowhere in particular, which reads as flat. */
+    filter: drop-shadow(5px 9px 7px rgba(12, 12, 22, 0.5));
     transition: fill 0.15s ease;
 }
 
@@ -99,43 +104,4 @@
 
 .bubble--done:hover circle {
     fill: #8f8aa6;
-}
-
-
-/* ---------------------------------------------------------------------------
- * The looks, while we pick one.
- *
- * Temporary: a dev-only picker sets data-look on the board, and once the
- * choice is made the winner's rules move up into the block above and the rest
- * of this section goes away. They all share the heavier contour, and all but
- * the first are the same shadow asked a different question.
- * ------------------------------------------------------------------------ */
-
-/* Straight down. Reads as flat, because a shadow directly under a round thing
-   says the light is directly over it and nowhere in particular. */
-.graph[data-look="drop"] .bubble circle {
-    filter: drop-shadow(0 5px 0 rgba(20, 20, 30, 0.45));
-}
-
-/* Off to one side: now there is a light source, up and to the left. */
-.graph[data-look="drop-offset"] .bubble circle {
-    filter: drop-shadow(4px 6px 0 rgba(20, 20, 30, 0.45));
-}
-
-/* Thrown further and blurred, so the bubble sits above the board rather than
-   on it. */
-.graph[data-look="drop-soft"] .bubble circle {
-    filter: drop-shadow(5px 9px 7px rgba(12, 12, 22, 0.5));
-}
-
-/* The same offset shadow, tinted: a shadow in a warm scene is not neutral
-   grey, it carries the colour of what is lighting the room. */
-.graph[data-look="drop-warm"] .bubble circle {
-    filter: drop-shadow(4px 6px 0 rgba(86, 40, 54, 0.55));
-}
-
-/* The only one that agrees with the background: the sunrise is below the
-   board, so the light comes from underneath and the shadow goes up. */
-.graph[data-look="drop-lift"] .bubble circle {
-    filter: drop-shadow(3px -5px 0 rgba(20, 20, 30, 0.42));
 }

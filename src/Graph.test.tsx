@@ -261,3 +261,15 @@ test('finished concepts take less room, not just a smaller picture', () => {
 
   expect(spread(everything)).toBeLessThan(spread([]) * 0.75);
 });
+
+test('a bubble is drawn as something to poke, not as a diagram', () => {
+  renderApp(<Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} />);
+
+  // Chosen by eye against the alternatives, and pinned here so a later
+  // refactor cannot quietly flatten the board back to a hairline. The shadow
+  // that goes with it is pinned in the browser instead: jsdom does not
+  // implement `filter` at all, and drops it from the rule as well as from the
+  // computed style.
+  const style = getComputedStyle(document.querySelector('g.bubble circle')!);
+  expect(Number(style.strokeWidth)).toBeGreaterThanOrEqual(3);
+});

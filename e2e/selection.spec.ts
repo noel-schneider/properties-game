@@ -159,3 +159,14 @@ test('starting over asks first, and keeps the achievements', async ({ page }) =>
   await expect(page.getByTestId('found')).toHaveText('0')
   await expect(page.getByRole('button', { name: /Achievements/ })).toHaveText(earned!)
 })
+
+test('a bubble is lifted off the board by a shadow', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  // Pinned in a real browser because jsdom does not implement `filter`.
+  const filter = await page.locator('.bubble circle').first()
+    .evaluate((circle) => getComputedStyle(circle).filter)
+
+  expect(filter).toContain('drop-shadow')
+})

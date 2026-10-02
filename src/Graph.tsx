@@ -4,7 +4,6 @@ import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
 import { isSpent, progressOf } from './game'
-import { DEFAULT_LOOK } from './bubbleLooks'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -28,12 +27,6 @@ interface GraphProps {
     /** Every group found so far, drawn linked. */
     found: Solution[];
     onToggle: (name: string) => void;
-    /**
-     * Which bubble treatment to draw, while we pick one. Temporary: the
-     * stylesheet keys the variants off this, and once the choice is made the
-     * winner becomes the only rule and this prop goes away.
-     */
-    look?: string;
 }
 
 interface Gesture {
@@ -42,7 +35,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, onToggle, look = DEFAULT_LOOK }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -144,7 +137,6 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, look = DE
         <svg
             ref={svg}
             className="graph"
-            data-look={look}
             data-settled={settled}
             viewBox={`${-VIEW_WIDTH / 2} ${-VIEW_HEIGHT / 2} ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
             role="group"
