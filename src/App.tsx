@@ -1,19 +1,27 @@
-import React, {useState} from 'react';
+import { useMemo, useState } from 'react';
 import Form from "./Form";
 import Graph from "./Graph";
+import { getRandomConcepts } from "./concepts";
+
+const CONCEPTS_PER_ROUND = 15;
 
 function App() {
 
-    const [selectedNodes, setSelectedNodes] = useState([]);
+    const concepts = useMemo(() => getRandomConcepts(CONCEPTS_PER_ROUND), []);
+    const [selected, setSelected] = useState<string[]>([]);
 
-    const updateSelectedNodes = (nodes): void => {
-        setSelectedNodes(nodes);
+    const toggleConcept = (name: string) => {
+        setSelected((current) =>
+            current.includes(name)
+                ? current.filter((n) => n !== name)
+                : [...current, name]
+        );
     };
 
   return (
       <>
-          <Form selectedNodes={selectedNodes} />
-          <Graph updateSelectedNodes={updateSelectedNodes} />
+          <Graph concepts={concepts} selected={selected} onToggle={toggleConcept} />
+          <Form selected={selected} />
       </>
   );
 }
