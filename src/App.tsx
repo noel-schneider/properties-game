@@ -4,7 +4,6 @@ import "./controls.css";
 import Answers from "./Answers";
 import Form from "./Form";
 import Graph from "./Graph";
-import Links from "./Links";
 import Scoreboard from "./Scoreboard";
 import Sky from "./Sky";
 import Summary from "./Summary";
@@ -24,7 +23,6 @@ import { CATALOGUE } from "./achievements";
 import { formableGroups, openingBoard, refill } from "./board";
 import { getAllConcepts } from "./concepts";
 import { isFinished, isSpent } from "./game";
-import { DEFAULT_LINK } from "./linkStyles";
 import { isExactLabel } from "./guess";
 import { resolveGuess } from "./round";
 import { useTranslator } from "./i18n";
@@ -78,8 +76,6 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
     const [muted, setMuted] = useState(loadMuted);
-    // Dev-only bench for choosing how a found group is drawn.
-    const [link, setLink] = useState(DEFAULT_LINK);
 
     const tally = useRef<RunTally>(loadRunStats());
     if (tally.current.boards === 0) {
@@ -205,14 +201,13 @@ function App({ playChime = playUnlockChime }: AppProps) {
           <Sky />
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
-          {import.meta.env.DEV && <Links chosen={link} onChoose={setLink} enabled />}
           <Scoreboard found={found.length} finished={finishedCount} onBoard={concepts.length} remaining={left} />
           <div className="corner corner--top-right">
               <LanguageToggle />
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} link={link} />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-right">
               <Panel unlocked={unlocked} />

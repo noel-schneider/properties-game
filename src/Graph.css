@@ -68,23 +68,23 @@
  * as a triangle drawn over the board.
  */
 .found__loop {
-    /* Barely there. Thirty loops drawn to be read is a thicket, and reading
-       which concepts share a category is the pointer's job now — these are
-       texture, a record that the board has been worked on. */
-    fill: url(#found-loop);
-    fill-opacity: 0.055;
+    /* Heavy sides, mitred, no fill. Faint by default: thirty outlines drawn to
+       be read is a thicket, and reading which concepts share a category is the
+       pointer's job now — these are texture, a record of work done. */
+    fill: none;
     stroke: url(#found-loop);
-    stroke-width: 1.6;
+    stroke-width: 7;
     stroke-linejoin: round;
-    opacity: 0.38;
+    stroke-linecap: round;
+    opacity: 0.32;
     transition: opacity 0.5s ease;
 }
 
 /* Except the one just found, which is the answer the player is waiting on.
    The same rule the group names already follow. */
 .found__loop--latest {
-    stroke-width: 2.6;
-    opacity: 0.9;
+    stroke-width: 9;
+    opacity: 0.8;
 }
 
 .found__label {
@@ -147,52 +147,4 @@
    board smeared while the pointer crosses it. */
 .bubble {
     transition: opacity 0.18s ease;
-}
-
-
-/* ---------------------------------------------------------------------------
- * Ways of joining a found group, while we pick one.
- *
- * Temporary: a dev-only bench sets data-link, and once the choice is made the
- * winner's rules move up into .found__loop and the rest goes away.
- * ------------------------------------------------------------------------ */
-
-/* A band rather than a line: thick enough to read as something holding the
-   three, with round joins so the corners do not spike. */
-.graph[data-link="ribbon"] .found__loop {
-    fill: none;
-    stroke-width: 9;
-    stroke-linejoin: round;
-    opacity: 0.3;
-}
-
-.graph[data-link="ribbon"] .found__loop--latest {
-    stroke-width: 11;
-    opacity: 0.72;
-}
-
-/* No line at all. The group is a soft shape the bubbles sit on, reaching out
-   past them so it is not hidden behind them. */
-.graph[data-link="blob"] .found__loop {
-    fill: url(#found-loop);
-    fill-opacity: 0.12;
-    stroke: none;
-}
-
-.graph[data-link="blob"] .found__loop--latest {
-    fill-opacity: 0.3;
-}
-
-/* Straight sides, heavy, mitred — the bold reading of the same triangle. */
-.graph[data-link="edges"] .found__loop {
-    fill: none;
-    stroke-width: 7;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-    opacity: 0.32;
-}
-
-.graph[data-link="edges"] .found__loop--latest {
-    stroke-width: 9;
-    opacity: 0.8;
 }

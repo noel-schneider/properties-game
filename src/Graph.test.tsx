@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react'
 import { renderApp } from './test-utils'
 import { act } from 'react'
-import Graph, { loopAround } from './Graph'
+import Graph, { groupOutline } from './Graph'
 import { BUBBLE_GAP, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Concept } from './types'
 
@@ -145,7 +145,7 @@ test('the bubbles are spread, not packed on a regular lattice', () => {
 
 const foundGroup = { property: 'thing', concepts: ['concept-0', 'concept-1', 'concept-2'] };
 
-test('a found group is drawn as one loop around its members', () => {
+test('a found group is drawn as one outline around its members', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
   runFrames(600);
 
@@ -156,25 +156,10 @@ test('a found group is drawn as one loop around its members', () => {
 
   const path = loops[0].getAttribute('d')!;
   expect(path.endsWith('Z')).toBe(true);
-  // One curve per side of the group.
-  expect(path.match(/Q/g)).toHaveLength(foundGroup.concepts.length);
+  // A closed shape: one move to a corner, then a side to each of the rest.
+  expect(path.match(/L/g)).toHaveLength(foundGroup.concepts.length - 1);
 });
 
-test('each side bows away from the middle, so the loop is not a triangle', () => {
-  const corners = [{ x: 0, y: -100 }, { x: 87, y: 50 }, { x: -87, y: 50 }];
-  const centre = { x: 0, y: 0 };
-
-  const path = loopAround(corners, centre);
-  const numbers = path.match(/-?\d+\.?\d*/g)!.map(Number);
-  const from = (i: number) => Math.hypot(numbers[i], numbers[i + 1]);
-
-  // In `M c0  Q k0 c1  Q k1 c2  Q k2 c0`, the odd positions are the control
-  // points. Each must sit further from the middle than the side's own
-  // midpoint, which for this triangle is at half the radius — that is what
-  // makes the side bulge outward instead of cutting straight across.
-  const controls = [from(2), from(6), from(10)];
-  for (const control of controls) expect(control).toBeGreaterThan(50);
-});
 
 test('the group just found says what it was', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
@@ -353,16 +338,17 @@ test('the group just found keeps a bright loop, and the older ones step back', (
   expect(loops).toHaveLength(2);
 });
 
-test('a group whose members fall in a line is still drawn as a loop', () => {
-  // Three concepts can settle almost collinear, and a bow that is only a
-  // proportion of the distance from the middle collapses to a crease there.
-  const place = (name: string, x: number) => ({ name, x, y: 0 });
-  const line = [place('a', -200), place('b', 0), place('c', 200)];
+
+test('the outline takes its corners in the order they sit around the middle', () => {
+  // Fed in any other order the shape crosses itself, which is what happens
+  // every time the simulation moves one member past another.
+  const corners = [{ x: 0, y: -100 }, { x: -87, y: 50 }, { x: 87, y: 50 }];
   const centre = { x: 0, y: 0 };
 
-  const path = loopAround(line, centre);
-  const numbers = path.match(/-?\d+\.?\d*/g)!.map(Number);
-  const offLine = numbers.filter((_, i) => i % 2 === 1).map(Math.abs);
+  const path = groupOutline(corners, centre);
+  const n = path.match(/-?\d+\.?\d*/g)!.map(Number);
+  const angles = [];
+  for (let i = 0; i < n.length; i += 2) angles.push(Math.atan2(n[i + 1], n[i]));
 
-  expect(Math.max(...offLine)).toBeGreaterThan(10);
+  expect([...angles].sort((a, b) => a - b)).toEqual(angles);
 });

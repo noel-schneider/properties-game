@@ -4,7 +4,6 @@ import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
 import { donePropertiesOf, isSpent, progressOf } from './game'
-import { DEFAULT_LINK } from './linkStyles'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -28,77 +27,19 @@ interface GraphProps {
     /** Every group found so far, drawn linked. */
     found: Solution[];
     onToggle: (name: string) => void;
-    /**
-     * How a found group is joined up, while we pick a way. Temporary: once
-     * the choice is made the winner becomes the only drawing and this goes.
-     */
-    link?: string;
 }
 
-/** How far a side of the loop bows out past the members it joins. */
-const LOOP_BOW = 0.42;
-
 /**
- * The least a side may bow, in viewBox units.
+ * The outline of a found group: its three members joined by straight sides.
  *
- * Three concepts settle almost in a line often enough, and there the bow —
- * being a proportion of the distance from the middle — is almost nothing, so
- * the loop collapses into a pointed crease. This keeps it a loop.
- */
-const LOOP_BOW_FLOOR = 34;
-
-/**
- * A closed curve running through the members of a found group.
- *
- * One loop rather than a spoke from each member to the middle: three straight
+ * One closed shape rather than a spoke from each member to the middle. Three
  * lines meeting at a bare point read as a wiring diagram, and the point itself
- * stands for nothing the player can see. The curve lassoes them instead, which
- * is the same claim — these three belong together — made in the shape the rest
- * of the board is already drawn in.
+ * stands for nothing the player can see.
  *
- * The members are taken in the order they sit around the middle, or the loop
+ * The members are taken in the order they sit around the middle, or the shape
  * crosses itself whenever the simulation moves one past another.
  */
-export function loopAround(places: Point[], centre: Point, spread = 0): string {
-    const corners = [...places]
-        .sort((a, b) => Math.atan2(a.y - centre.y, a.x - centre.x) - Math.atan2(b.y - centre.y, b.x - centre.x))
-        // Pushed outward by `spread`, so a shape that is meant to hold the
-        // bubbles is not drawn entirely behind them.
-        .map((place) => {
-            if (spread === 0) return place;
-            const out = { x: place.x - centre.x, y: place.y - centre.y };
-            const reach = Math.hypot(out.x, out.y) || 1;
-            return {
-                x: place.x + (out.x / reach) * spread,
-                y: place.y + (out.y / reach) * spread,
-            };
-        });
-
-    const sides = corners.map((corner, i) => {
-        const next = corners[(i + 1) % corners.length];
-        const middle = { x: (corner.x + next.x) / 2, y: (corner.y + next.y) / 2 };
-        // Pushed away from the centre, so the side bulges instead of cutting
-        // the corner — and so the curve clears the bubbles it runs between.
-        // Outward from the middle, by whichever is larger: a share of how far
-        // this side already sits, or the floor below which it stops reading
-        // as a curve at all.
-        const out = { x: middle.x - centre.x, y: middle.y - centre.y };
-        const reach = Math.hypot(out.x, out.y);
-        const push = reach === 0
-            ? { x: 0, y: LOOP_BOW_FLOOR }
-            : {
-                  x: (out.x / reach) * Math.max(reach * LOOP_BOW, LOOP_BOW_FLOOR),
-                  y: (out.y / reach) * Math.max(reach * LOOP_BOW, LOOP_BOW_FLOOR),
-              };
-        const control = { x: middle.x + push.x, y: middle.y + push.y };
-        return `Q ${control.x.toFixed(2)} ${control.y.toFixed(2)} ${next.x.toFixed(2)} ${next.y.toFixed(2)}`;
-    });
-
-    return `M ${corners[0].x.toFixed(2)} ${corners[0].y.toFixed(2)} ${sides.join(' ')} Z`;
-}
-
-/** The same ring of members, joined by straight sides rather than curves. */
-export function straightLoop(places: Point[], centre: Point): string {
+export function groupOutline(places: Point[], centre: Point): string {
     const corners = [...places].sort(
         (a, b) => Math.atan2(a.y - centre.y, a.x - centre.x) - Math.atan2(b.y - centre.y, b.x - centre.x),
     );
@@ -113,7 +54,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, onToggle, link = DEFAULT_LINK }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -251,7 +192,6 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, link = DE
         <svg
             ref={svg}
             className="graph"
-            data-link={link}
             data-settled={settled}
             viewBox={`${-VIEW_WIDTH / 2} ${-VIEW_HEIGHT / 2} ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
             role="group"
@@ -295,11 +235,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, link = DE
                     <g key={`${group.property}-${groupIndex}`} className="found" data-group={group.property}>
                         <path
                             className={named ? 'found__loop found__loop--latest' : 'found__loop'}
-                            d={
-                                link === 'edges'
-                                    ? straightLoop(places, centre)
-                                    : loopAround(places, centre, link === 'blob' ? RADIUS * 0.95 : 0)
-                            }
+                            d={groupOutline(places, centre)}
                         />
                         {named && <text
                             className="found__label"
