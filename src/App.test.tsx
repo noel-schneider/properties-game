@@ -7,6 +7,8 @@ import type { Concept } from './types';
 
 const byName = new Map(getAllConcepts().map((c) => [c.name, c]));
 
+afterEach(() => localStorage.clear());
+
 /** The concepts on screen, in the order they are rendered. */
 function dealtConcepts(): Concept[] {
   return screen
@@ -168,4 +170,56 @@ test('a wrong answer keeps what you typed so it can be reworded', async () => {
 
   expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
   expect(input).toHaveValue('wrong on purpose');
+});
+
+test('the first category found unlocks First Light, with the chime', async () => {
+  const chime = vi.fn();
+  const user = userEvent.setup();
+  render(<App playChime={chime} />);
+
+  const { concepts, property } = findSolvableTriple();
+  await select(user, concepts);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  // Quickdraw lands too: the test answers well within ten seconds.
+  const announcements = await screen.findAllByRole('alert');
+  expect(announcements.map((a) => a.textContent).join(' ')).toContain('First Light');
+  expect(chime).toHaveBeenCalledTimes(1);
+});
+
+test('a wrong answer unlocks nothing and stays silent', async () => {
+  const chime = vi.fn();
+  const user = userEvent.setup();
+  render(<App playChime={chime} />);
+
+  const { concepts } = findSolvableTriple();
+  await select(user, concepts);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(chime).not.toHaveBeenCalled();
+});
+
+test('an achievement earned before is not announced again on a later run', async () => {
+  const user = userEvent.setup();
+  const { unmount } = render(<App playChime={() => {}} />);
+
+  const first = findSolvableTriple();
+  await select(user, first.concepts);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+  expect((await screen.findAllByRole('alert')).map((a) => a.textContent).join(' ')).toContain('First Light');
+  unmount();
+
+  render(<App playChime={() => {}} />);
+  const again = findSolvableTriple();
+  await select(user, again.concepts);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), again.property);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
+  expect(screen.queryByRole('alert')).toBeNull();
 });
