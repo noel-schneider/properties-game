@@ -307,3 +307,25 @@ test('tabbing to a concept reveals its kin, clicking one does not', async ({ pag
 
   await expect(page.locator('.bubble--kin')).toHaveCount(solved.concepts.length)
 })
+
+test('the board has a cursor of its own, and it actually draws', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  // A malformed data URI falls back to the default arrow in silence, so the
+  // only way to know the spark exists is to decode it.
+  const drawn = await page.locator('.graph').evaluate(async (graph) => {
+    const cursor = getComputedStyle(graph).cursor
+    const uri = cursor.match(/url\("([^"]+)"\)/)?.[1]
+    if (!uri) return 'no image in the cursor'
+
+    return new Promise<string>((resolve) => {
+      const image = new Image()
+      image.onload = () => resolve(`${image.width}x${image.height}`)
+      image.onerror = () => resolve('did not decode')
+      image.src = uri
+    })
+  })
+
+  expect(drawn).toMatch(/^\d+x\d+$/)
+})

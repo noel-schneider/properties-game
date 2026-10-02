@@ -519,7 +519,8 @@
         "reset.title": "Recommencer ?",
         "reset.what": "Les groupes trouvés seront effacés et un nouveau plateau distribué. Tes succès restent acquis.",
         "reset.cancel": "Annuler",
-        "reset.confirm": "Effacer et recommencer"
+        "reset.confirm": "Effacer et recommencer",
+        "drop.add": "Ajouter à"
     },
     "achievements": {
         "first-light": {

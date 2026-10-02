@@ -4,6 +4,7 @@ import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
 import { donePropertiesOf, isSpent, progressOf } from './game'
+import { groupUnderPointer } from './drop'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -50,6 +51,11 @@ interface GraphProps {
     /** Every group found so far, drawn linked. */
     found: Solution[];
     onToggle: (name: string) => void;
+    /**
+     * Dropping a concept onto a category already found. The index is into
+     * `found`; whether it is a right answer is settled by the game, not here.
+     */
+    onDropInto?: (index: number, name: string) => void;
 }
 
 /**
@@ -77,7 +83,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInto }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -93,13 +99,16 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
     // have all left or finished has nothing left to say, and every tie kept is
     // another line rebuilt on every frame.
     const live = useMemo(
-        () => found.filter((group) => group.concepts.some((name) => index.has(name))),
+        () =>
+            found
+                .map((group, where) => ({ group, where }))
+                .filter(({ group }) => group.concepts.some((name) => index.has(name))),
         [found, index],
     );
 
     const ties = useMemo<Tie[]>(
         () =>
-            live.flatMap((group) =>
+            live.flatMap(({ group }) =>
                 group.concepts
                     .slice(1)
                     .map((name) => ({ from: index.get(group.concepts[0]) ?? -1, to: index.get(name) ?? -1 }))
@@ -116,6 +125,9 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
     const { points, settled, grab, dragTo, release } = useBubbleLayout(concepts, radii, ties);
 
     const [hovered, setHovered] = useState<string | null>(null);
+
+    // Which found group the dragged bubble is currently over, if any.
+    const [over, setOver] = useState<number | null>(null);
 
     /**
      * What a concept has been used for. Only found categories: a concept's
@@ -190,7 +202,22 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
         if (!held.moved) return;
 
         const point = toViewBox(event);
-        if (point) dragTo(held.index, point);
+        if (!point) return;
+
+        dragTo(held.index, point);
+
+        // A concept can be added to a category already found by dropping it on
+        // that group. Whether it belongs there is not decided here: offering
+        // the target only where the answer is right would give the answer away.
+        const dragged = concepts[held.index]?.name;
+        setOver(
+            groupUnderPointer(
+                point,
+                live
+                    .filter(({ group }) => !group.concepts.includes(dragged))
+                    .map(({ where, group }) => ({ index: where, places: group.concepts.map(at) })),
+            ),
+        );
     };
 
     const onPointerUp = (event: React.PointerEvent<SVGGElement>) => {
@@ -199,6 +226,12 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
 
         event.currentTarget.releasePointerCapture?.(event.pointerId);
         release(held.index);
+
+        const target = over;
+        setOver(null);
+        if (target !== null && held.moved) {
+            onDropInto?.(target, concepts[held.index].name);
+        }
     };
 
     // The click arrives after the pointer is released, which is where a drag
@@ -229,7 +262,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
                     <stop offset="100%" stopColor="#e46a92" />
                 </linearGradient>
             </defs>
-            {live.map((group, groupIndex) => {
+            {live.map(({ group, where }, groupIndex) => {
                 // Ties stay for every group. Names do not: at twenty groups the
                 // labels pile into an unreadable heap, so only the group just
                 // found says what it was.
@@ -260,6 +293,11 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
                             className={named ? 'found__loop found__loop--latest' : 'found__loop'}
                             d={groupOutline(places, centre)}
                         />
+                        {over === where && (
+                            <text className="drop-hint" x={centre.x} y={centre.y - 8} textAnchor="middle">
+                                {`${t('drop.add')} « ${propertyName(group.property)} »`}
+                            </text>
+                        )}
                         {named && <text
                             className="found__label"
                             x={labelX}

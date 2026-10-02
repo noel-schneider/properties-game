@@ -25,6 +25,7 @@ import { getAllConcepts } from "./concepts";
 import { isFinished, isSpent } from "./game";
 import { isExactLabel } from "./guess";
 import { resolveGuess } from "./round";
+import { canJoin, joinGroup } from "./join";
 import { useTranslator } from "./i18n";
 import type { Achievement, GameEvent, Progress } from "./achievements";
 import type { Solution } from "./hand";
@@ -170,6 +171,44 @@ function App({ playChime = playUnlockChime }: AppProps) {
         return true;
     };
 
+    /**
+     * A concept dropped onto a category already found.
+     *
+     * Settled here rather than in the board, because it is a guess like any
+     * other: it can be wrong, and a wrong one costs what a wrong typed answer
+     * costs. Offering the target only where the answer is right would hand the
+     * player the answer with the gesture.
+     */
+    const dropInto = (index: number, name: string) => {
+        const group = found[index];
+        const concept = byName.get(name);
+        if (!group || !concept) return;
+
+        if (!canJoin(concept, group, found)) {
+            bumpTally({ wrong: tally.current.wrong + 1 });
+            record({
+                type: 'guess', at: Date.now(), correct: false,
+                exactName: false, selection: [name],
+            });
+            setFeedback('wrong');
+            return;
+        }
+
+        const next = joinGroup(found, index, name);
+        bumpTally({ correct: tally.current.correct + 1 });
+        record({
+            type: 'guess', at: Date.now(), correct: true, property: group.property,
+            exactName: false, selection: [name],
+        });
+        if (isFinished(concept, next)) record({ type: 'concept-finished', at: Date.now() });
+
+        setSelected([]);
+        setFeedback('correct');
+        setFound(next);
+        saveFound(next);
+        setBoard((current) => refill(current, pool, next, ACTIVE_CONCEPTS));
+    };
+
     const playAgain = () => {
         const kept = { ...emptyLifetime(), unlocked: progress.current!.lifetime.unlocked };
         saveLifetime(kept);
@@ -207,7 +246,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-right">
               <Panel unlocked={unlocked} />

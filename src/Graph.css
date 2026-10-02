@@ -2,10 +2,24 @@
     width: 100%;
     height: 80vh;
     display: block;
+
+    /*
+     * A spark rather than an arrow, for a board that is a night sky. Cream
+     * with a dark outline so it stays visible on both — the sky is nearly
+     * black and the bubbles are nearly white, and a cursor in either colour
+     * disappears on one of them.
+     *
+     * The hotspot is the middle of the spark, which is also the dot at its
+     * centre: what the player aims with is the thing they can see.
+     */
+    --spark: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2726%27%20height%3D%2726%27%20viewBox%3D%270%200%2026%2026%27%3E%3Cpath%20d%3D%27M13%201.5%20C14.2%208.6%2017.4%2011.8%2024.5%2013%20C17.4%2014.2%2014.2%2017.4%2013%2024.5%20C11.8%2017.4%208.6%2014.2%201.5%2013%20C8.6%2011.8%2011.8%208.6%2013%201.5%20Z%27%20fill%3D%27%2523f4efe6%27%20stroke%3D%27%25231b1b1b%27%20stroke-width%3D%271.6%27%20stroke-linejoin%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2713%27%20cy%3D%2713%27%20r%3D%271.6%27%20fill%3D%27%2523ffad69%27%2F%3E%3C%2Fsvg%3E") 13 13, crosshair;
+    --spark-held: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2726%27%20height%3D%2726%27%20viewBox%3D%270%200%2026%2026%27%3E%3Cpath%20d%3D%27M13%201.5%20C14.2%208.6%2017.4%2011.8%2024.5%2013%20C17.4%2014.2%2014.2%2017.4%2013%2024.5%20C11.8%2017.4%208.6%2014.2%201.5%2013%20C8.6%2011.8%2011.8%208.6%2013%201.5%20Z%27%20fill%3D%27%2523ffad69%27%20stroke%3D%27%25231b1b1b%27%20stroke-width%3D%271.6%27%20stroke-linejoin%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2713%27%20cy%3D%2713%27%20r%3D%271.6%27%20fill%3D%27%2523fff6ec%27%2F%3E%3C%2Fsvg%3E") 13 13, grabbing;
+
+    cursor: var(--spark);
 }
 
 .bubble {
-    cursor: grab;
+    cursor: var(--spark);
     /* The browser's own focus ring lands as a blue rectangle around the whole
        group, which reads as a selection the player did not make. Removed here
        and replaced below for keyboard users, who would otherwise be left with
@@ -15,7 +29,7 @@
 }
 
 .bubble:active {
-    cursor: grabbing;
+    cursor: var(--spark-held);
 }
 
 .bubble circle {
@@ -176,4 +190,24 @@
    board smeared while the pointer crosses it. */
 .bubble {
     transition: opacity 0.18s ease;
+}
+
+/*
+ * The offer made while a concept is held over a category already found.
+ *
+ * Shown for any group the pointer reaches, not only the ones that would
+ * accept — offering the target only where the answer is right would give the
+ * answer away with the gesture.
+ */
+.drop-hint {
+    fill: #ffd9b0;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    paint-order: stroke;
+    stroke: #16141f;
+    stroke-width: 5;
+    stroke-linejoin: round;
+    pointer-events: none;
+    user-select: none;
 }

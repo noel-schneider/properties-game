@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { boardSettled } from './board'
+import english from '../src/i18n/en.json' with { type: 'json' }
 import data from '../src/concepts.json' with { type: 'json' }
 
 
@@ -106,4 +107,88 @@ test('a found group stays on the board, tied and named, and its concepts carry o
   await expect(page.locator('.found__loop')).toHaveCount(1)
   await expect(page.locator('.found__label')).toHaveText(property)
   await expect(page.getByPlaceholder('Type a category here!')).toHaveValue('')
+})
+
+test('a concept can be dropped onto a category already found', async ({ page }) => {
+  // The scenario is worked out here rather than played for: a category only
+  // comes up twice late in a game, and playing forty-odd rounds to reach one
+  // took minutes and found a repeat only sometimes.
+  const label = (id: string) => (english.concepts as Record<string, string>)[id] ?? id
+  // `properties` is the game's own data file, already read at the top of this
+  // file for the other tests.
+  const holders = new Map<string, string[]>()
+  for (const [name, has] of Object.entries(properties)) {
+    for (const property of has) {
+      holders.set(property, [...(holders.get(property) ?? []), name])
+    }
+  }
+  const roomy = [...holders.entries()].filter(([, names]) => names.length >= 6)
+  expect(roomy.length, 'no category has enough members to join one').toBeGreaterThan(0)
+
+  // Seed a found group, then take the joiner from whatever the board deals
+  // beside it — the board is rebuilt from what has been found, so which
+  // concepts come back cannot be dictated.
+  let scenario: { property: string; host: string[]; joiner: string } | undefined
+  for (const [property, names] of roomy) {
+    const host = names.slice(0, 3)
+    await page.goto('/')
+    await page.evaluate(
+      ([key, group]) => localStorage.setItem(key as string, JSON.stringify([group])),
+      ['properties-game:found', { property, concepts: host }] as const,
+    )
+    await page.reload()
+    await boardSettled(page)
+
+    const onBoard = await page.locator('.bubble').evaluateAll(
+      (bubbles) => bubbles.map((b) => b.getAttribute('aria-label') ?? ''),
+    )
+    const joiner = names.slice(3).find((name) => onBoard.includes(label(name)))
+    if (joiner && host.every((name) => onBoard.includes(label(name)))) {
+      scenario = { property, host, joiner }
+      break
+    }
+  }
+  expect(scenario, 'no board dealt a concept that could join the seeded group').toBeDefined()
+  const { property, host, joiner } = scenario!
+
+  const middleOf = async (names: string[]) => {
+    const boxes = await Promise.all(
+      names.map((name) => page.locator(`.bubble[aria-label="${label(name)}"]`).boundingBox()),
+    )
+    return {
+      x: boxes.reduce((sum, b) => sum + b!.x + b!.width / 2, 0) / boxes.length,
+      y: boxes.reduce((sum, b) => sum + b!.y + b!.height / 2, 0) / boxes.length,
+    }
+  }
+
+  // Joining adds a member to a group, so the count of groups found does not
+  // move. What moves is the joiner: one more of its properties is spent.
+  const spent = async () => Number(
+    (await page.locator(`.bubble[aria-label="${label(joiner)}"]`).getAttribute('data-progress'))!.split('/')[0],
+  )
+  const before = await spent()
+
+  const from = await middleOf([joiner])
+  await page.mouse.move(from.x, from.y)
+  await page.mouse.down()
+
+  // Two things make a first aim miss, and a player meets both: dragging
+  // reheats the simulation so the group drifts away under the pointer, and
+  // where groups overlap a tighter neighbour can be the nearer target. The
+  // offer says which group would take it, so the answer is to nudge until it
+  // names the one wanted — which is exactly what the offer is for.
+  const offered = () => page.locator('.drop-hint').textContent().catch(() => null)
+  let aimed = false
+  for (let nudge = 0; nudge < 12 && !aimed; nudge++) {
+    const now = await middleOf(host)
+    const sway = nudge === 0 ? 0 : 16 * (nudge % 2 === 0 ? 1 : -1) * Math.ceil(nudge / 2)
+    await page.mouse.move(now.x + sway, now.y + sway / 2, { steps: 5 })
+    aimed = ((await offered()) ?? '').includes(property)
+  }
+  expect(aimed, 'never managed to aim at the wanted group').toBe(true)
+
+  await page.mouse.up()
+
+  await expect(page.getByRole('status')).toHaveText(/correct/i)
+  await expect.poll(spent).toBe(before + 1)
 })
