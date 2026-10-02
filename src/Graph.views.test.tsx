@@ -1,7 +1,6 @@
 import { fireEvent } from '@testing-library/react'
 import { renderApp } from './test-utils'
 import Graph from './Graph'
-import { DEFAULT_VIEW, VIEWS } from './boardViews'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -15,9 +14,9 @@ const concepts: Concept[] = [
 
 const found: Solution[] = [{ property: 'insect', concepts: ['ant', 'bee', 'moth'] }];
 
-function board(view: string) {
+function board(groups: Solution[] = found) {
   return renderApp(
-    <Graph concepts={concepts} selected={[]} found={found} onToggle={() => {}} view={view} />,
+    <Graph concepts={concepts} selected={[]} found={groups} onToggle={() => {}} />,
   );
 }
 
@@ -25,48 +24,55 @@ function bubble(name: string) {
   return document.querySelector(`.bubble[aria-label="${name}"]`)!;
 }
 
-test('the standing board shows none of this', () => {
-  board(DEFAULT_VIEW);
-
-  expect(document.querySelectorAll('.hub')).toHaveLength(0);
-  expect(document.querySelectorAll('.bubble__arc')).toHaveLength(0);
-});
-
-test('every view on the bench exists', () => {
-  expect(VIEWS.map((view) => view.id)).toContain(DEFAULT_VIEW);
-  expect(new Set(VIEWS.map((v) => v.id)).size).toBe(VIEWS.length);
-});
-
-test('a hub stands for each found category, and says which', () => {
-  board('hub');
-
-  const hubs = document.querySelectorAll('.hub');
-  expect(hubs).toHaveLength(found.length);
-  expect(document.querySelector('.hub__name')?.textContent).toBe('insect');
-});
+function lit(name: string) {
+  return bubble(name).classList.contains('bubble--kin');
+}
 
 test('hovering lights the concepts that share a found category', () => {
-  board('hover');
+  board();
   fireEvent.pointerEnter(bubble('ant'));
 
-  for (const name of ['ant', 'bee', 'moth']) {
-    expect(bubble(name).classList.contains('bubble--kin')).toBe(true);
-  }
+  expect(['ant', 'bee', 'moth'].every(lit)).toBe(true);
 });
 
 test('hovering never lights a concept over a category still to be found', () => {
   // ant and coin share `small`, which nobody has found. Lighting coin would
   // hand the player a category they are still meant to work out.
-  board('hover');
+  board();
   fireEvent.pointerEnter(bubble('ant'));
 
-  expect(bubble('coin').classList.contains('bubble--kin')).toBe(false);
+  expect(lit('coin')).toBe(false);
 });
 
-test('a concept wears one arc per category it has been used for', () => {
-  board('ring');
+test('the rest of the board steps back, so the kin stand out', () => {
+  board();
+  fireEvent.pointerEnter(bubble('ant'));
 
-  // ant is in one found group; coin is in none.
-  expect(bubble('ant').querySelectorAll('.bubble__arc')).toHaveLength(1);
-  expect(bubble('coin').querySelectorAll('.bubble__arc')).toHaveLength(0);
+  expect(bubble('coin').classList.contains('bubble--aside')).toBe(true);
+});
+
+test('a concept with nothing found yet leaves the board alone', () => {
+  // Otherwise every bubble on the board dims to show a kinship of none.
+  board();
+  fireEvent.pointerEnter(bubble('coin'));
+
+  expect(document.querySelectorAll('.bubble--aside')).toHaveLength(0);
+  expect(document.querySelectorAll('.bubble--kin')).toHaveLength(0);
+});
+
+test('the board comes back when the pointer leaves', () => {
+  board();
+  fireEvent.pointerEnter(bubble('ant'));
+  fireEvent.pointerLeave(bubble('ant'));
+
+  expect(document.querySelectorAll('.bubble--aside')).toHaveLength(0);
+});
+
+test('reaching a concept with the keyboard reveals its kin too', () => {
+  // The reveal is the only way to see what a concept shares, so it cannot be
+  // for mouse users alone.
+  board();
+  fireEvent.focus(bubble('ant'));
+
+  expect(lit('bee')).toBe(true);
 });

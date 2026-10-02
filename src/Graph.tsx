@@ -4,7 +4,6 @@ import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
 import { donePropertiesOf, isSpent, progressOf } from './game'
-import { DEFAULT_VIEW, hueOf } from './boardViews'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -28,12 +27,6 @@ interface GraphProps {
     /** Every group found so far, drawn linked. */
     found: Solution[];
     onToggle: (name: string) => void;
-    /**
-     * Which way of showing shared categories to draw, while we pick one.
-     * Temporary: once the choice is made the winner becomes the only
-     * behaviour and this prop goes away.
-     */
-    view?: string;
 }
 
 interface Gesture {
@@ -42,7 +35,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, onToggle, view = DEFAULT_VIEW }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -92,9 +85,13 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, view = DE
         [concepts, found],
     );
 
-    // Everything sharing a found category with whatever is under the pointer.
+    /**
+     * Everything sharing a found category with whatever the player is pointing
+     * at or has tabbed to. Empty when that concept has settled nothing, so a
+     * kinship of none does not dim the whole board to say so.
+     */
     const kin = useMemo(() => {
-        if (view !== 'hover' || hovered === null) return new Set<string>();
+        if (hovered === null) return new Set<string>();
 
         const shared = settledOf.get(hovered) ?? [];
         if (shared.length === 0) return new Set<string>();
@@ -104,7 +101,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, view = DE
                 .filter((c) => (settledOf.get(c.name) ?? []).some((p) => shared.includes(p)))
                 .map((c) => c.name),
         );
-    }, [view, hovered, concepts, settledOf]);
+    }, [hovered, concepts, settledOf]);
 
     // A concept is done when every property it has was part of a found group.
     const done = useMemo(
@@ -218,7 +215,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, view = DE
                                 y2={place.y}
                             />
                         ))}
-                        {view !== 'hub' && named && <text
+                        {named && <text
                             className="found__label"
                             x={labelX}
                             y={labelY}
@@ -241,16 +238,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, view = DE
                 if (isDone) classes.push('bubble--done');
                 else if (isSelected) classes.push('bubble--selected');
                 if (kin.has(concept.name)) classes.push('bubble--kin');
-                if (view === 'hover' && hovered !== null && !kin.has(concept.name)) {
-                    classes.push('bubble--aside');
-                }
-
-                // One arc per category this concept has been used for, laid
-                // round its rim. It says how many it has settled; which ones
-                // is only legible while few are on screen.
-                const settledHere = settledOf.get(concept.name) ?? [];
-                const arcs = view === 'ring' ? settledHere : [];
-                const circumference = 2 * Math.PI * (radius + 6);
+                else if (kin.size > 0) classes.push('bubble--aside');
 
                 return (
                     <g
@@ -261,6 +249,8 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, view = DE
                         data-progress={`${spent}/${total}`}
                         onPointerEnter={() => setHovered(concept.name)}
                         onPointerLeave={() => setHovered((current) => (current === concept.name ? null : current))}
+                        onFocus={() => setHovered(concept.name)}
+                        onBlur={() => setHovered((current) => (current === concept.name ? null : current))}
                         aria-label={conceptName(concept.name)}
                         {...(isDone
                             ? // A found concept is no longer a choice, so it stops
@@ -284,43 +274,11 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, view = DE
                               })}
                     >
                         <circle r={radius} />
-                        {arcs.map((property, slice) => (
-                            <circle
-                                key={property}
-                                className="bubble__arc"
-                                r={radius + 6}
-                                style={{ '--hue': hueOf(property) } as React.CSSProperties}
-                                strokeDasharray={`${circumference / arcs.length - 4} ${circumference}`}
-                                strokeDashoffset={-(circumference / arcs.length) * slice}
-                            />
-                        ))}
                         {!isDone && (
                             <text textAnchor="middle" dominantBaseline="middle">
                                 {conceptName(concept.name)}
                             </text>
                         )}
-                    </g>
-                );
-            })}
-
-            {/* Last, so a hub is never buried under the bubbles it names. */}
-            {view === 'hub' && live.map((group, groupIndex) => {
-                const places = group.concepts.map(at);
-                const centre = {
-                    x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
-                    y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
-                };
-
-                return (
-                    <g
-                        key={`hub-${group.property}-${groupIndex}`}
-                        className="hub"
-                        style={{ '--hue': hueOf(group.property) } as React.CSSProperties}
-                    >
-                        <circle className="hub__dot" cx={centre.x} cy={centre.y} r={13} />
-                        <text className="hub__name" x={centre.x} y={centre.y - 24} textAnchor="middle">
-                            {propertyName(group.property)}
-                        </text>
                     </g>
                 );
             })}

@@ -225,3 +225,37 @@ test('a bubble reached with the keyboard keeps the enter key for itself', async 
   await expect(page.locator(`.bubble[aria-label="${name}"]`)).toHaveAttribute('aria-checked', 'true')
   await expect(page.getByPlaceholder(/type a category here/i)).not.toBeFocused()
 })
+
+test('pointing at a concept shows what it shares, once something is found', async ({ page }) => {
+  await page.goto('/')
+  await page.evaluate(() => localStorage.clear())
+  await page.reload()
+  await boardSettled(page)
+
+  // Nothing found yet, so the board must stay as it is.
+  await page.getByRole('checkbox').first().hover()
+  await expect(page.locator('.bubble--aside')).toHaveCount(0)
+
+  // Play the one group the dev panel hands over, then point at a member.
+  const solved = await page.evaluate(() => {
+    const panel = [...document.querySelectorAll('div')]
+      .find((d) => /answers \(dev only\)/i.test(d.textContent ?? '') && d.children.length < 30)
+    const lines = (panel as HTMLElement).innerText.split('\n').map((l) => l.trim()).filter(Boolean)
+    const i = lines.findIndex((l) => l.includes('·'))
+    return { property: lines[i - 1], concepts: lines[i].split('·').map((c) => c.trim()) }
+  })
+  for (const name of solved.concepts) {
+    await page.locator(`.bubble[aria-label="${name}"]`).click({ force: true })
+  }
+  await page.getByPlaceholder(/type a category here/i).fill(solved.property)
+  await page.keyboard.press('Enter')
+  await boardSettled(page)
+
+  await page.locator(`.bubble[aria-label="${solved.concepts[0]}"]`).hover({ force: true })
+
+  // Its two companions light up, and they are the ones it was found with.
+  for (const name of solved.concepts) {
+    await expect(page.locator(`.bubble[aria-label="${name}"]`)).toHaveClass(/bubble--kin/)
+  }
+  await expect(page.locator('.bubble--aside').first()).toBeVisible()
+})
