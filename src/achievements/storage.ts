@@ -1,6 +1,5 @@
 import { CATALOGUE } from './catalogue'
 import { emptyLifetime } from './progress'
-import { DEFAULT_PALETTE, isPalette } from '../sky/palettes'
 import type { Lifetime } from './types'
 
 export const STORAGE_KEY = 'properties-game:achievements';
@@ -95,35 +94,6 @@ export function saveMuted(muted: boolean): void {
         localStorage.setItem(MUTED_KEY, String(muted));
     } catch {
         // Same bargain as the achievement record: a preference is not worth a crash.
-    }
-}
-
-/**
- * The chosen sky, under its own key for the same reason as the sound
- * preference: it is a taste, not a score, and it must not be able to take the
- * achievement record down with it.
- */
-export const PALETTE_KEY = 'properties-game:palette';
-
-export function loadPalette(): string {
-    let stored: string | null = null;
-
-    try {
-        stored = localStorage.getItem(PALETTE_KEY);
-    } catch {
-        return DEFAULT_PALETTE;
-    }
-
-    // A palette retired in a later version would otherwise leave the board on a
-    // sky with no colours defined for it.
-    return isPalette(stored) ? stored : DEFAULT_PALETTE;
-}
-
-export function savePalette(id: string): void {
-    try {
-        localStorage.setItem(PALETTE_KEY, id);
-    } catch {
-        // Same bargain as the sound preference.
     }
 }
 

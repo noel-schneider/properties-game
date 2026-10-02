@@ -143,18 +143,3 @@ test('the sound can be muted from the corner, and the choice sticks', async ({ p
   await expect(page.getByRole('button', { name: 'Unmute achievement sound' })).toBeVisible()
 })
 
-
-test('the chosen sky is still there after a reload', async ({ page }) => {
-  await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
-  await page.reload()
-  await boardSettled(page)
-
-  await page.getByRole('button', { name: 'Neon — magenta and violet', exact: true }).click()
-  await expect(page.locator('.sky')).toHaveAttribute('data-palette', 'neon')
-
-  await page.reload()
-  await boardSettled(page)
-
-  await expect(page.locator('.sky')).toHaveAttribute('data-palette', 'neon')
-})

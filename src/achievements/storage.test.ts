@@ -1,5 +1,4 @@
-import { loadLifetime, loadMuted, loadPalette, loadRunStats, MUTED_KEY, PALETTE_KEY, RUN_KEY, saveLifetime, saveMuted, savePalette, saveRunStats, STORAGE_KEY } from './storage'
-import { DEFAULT_PALETTE, PALETTES } from '../sky/palettes'
+import { loadLifetime, loadMuted, loadRunStats, MUTED_KEY, RUN_KEY, saveLifetime, saveMuted, saveRunStats, STORAGE_KEY } from './storage'
 import { emptyLifetime } from './progress'
 
 afterEach(() => {
@@ -109,19 +108,4 @@ test('storage that throws leaves a fresh run rather than crashing', () => {
 
   expect(loadRunStats()).toEqual({ boards: 0, correct: 0, wrong: 0, bestStreak: 0 });
   expect(() => saveRunStats({ boards: 1, correct: 1, wrong: 0, bestStreak: 1 })).not.toThrow();
-});
-
-test('the chosen sky is remembered', () => {
-  const other = PALETTES.find((p) => p.id !== DEFAULT_PALETTE)!;
-  savePalette(other.id);
-
-  expect(loadPalette()).toBe(other.id);
-});
-
-test('an unknown stored sky falls back rather than rendering nothing', () => {
-  // A palette dropped in a later version would otherwise leave the board on a
-  // sky that no longer has any colours defined for it.
-  localStorage.setItem(PALETTE_KEY, 'chartreuse');
-
-  expect(loadPalette()).toBe(DEFAULT_PALETTE);
 });

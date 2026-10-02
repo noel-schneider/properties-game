@@ -1,10 +1,9 @@
 /*
- * The night sky behind the board.
+ * The background: the game's indigo with a sunrise rising behind the board.
  *
- * Every moving part here is a transform on a layer the compositor already
- * holds, so the whole background costs nothing per frame. --sky-x and --sky-y
- * run from -1 to 1 and are written by Sky.tsx once per frame; the colours come
- * in as custom properties from the chosen palette.
+ * It sits on its own fixed layer behind the page, and the only thing that
+ * moves is a slow scale on a layer the compositor already holds — no repaint,
+ * no layout, nothing per frame that the board has to pay for.
  */
 .sky {
     position: fixed;
@@ -12,122 +11,88 @@
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
-
-    --sky-x: 0;
-    --sky-y: 0;
-
-    background:
-        radial-gradient(ellipse 120% 90% at 50% -10%, var(--sky-top) 0%, rgba(0, 0, 0, 0) 62%),
-        linear-gradient(170deg, var(--sky-top) 0%, var(--sky-deep) 70%, #030408 100%);
+    background-color: #2d3047;
 }
 
 /*
  * A film of noise over the lot.
  *
- * A gradient this wide crosses only a handful of 8-bit steps, and the eye
- * resolves every one of them as a concentric ring. A little noise scatters the
- * step boundary and the rings stop existing.
+ * A glow this wide crosses only a handful of 8-bit steps, and the eye resolves
+ * every one of them as a band. A little noise scatters the step boundary and
+ * the bands stop existing.
  */
 .sky::after {
     content: '';
     position: absolute;
     inset: 0;
-    opacity: 0.04;
+    opacity: 0.035;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* One wrapper carries the parallax, so each wash is free to drift on its own. */
-.sky__aurora {
+/*
+ * Both halves of the halo run down a nine-stop curve to rgba(their own colour,
+ * 0). Two things make a glow show its own outline: CSS `transparent` is
+ * transparent *black*, so a warm colour faded to it goes through grey and
+ * draws a dirty ring, and a single colour stop ends in an edge you can trace
+ * with a finger.
+ */
+.sky__glow {
     position: absolute;
-    inset: -10%;
-    transform: translate3d(calc(var(--sky-x) * 25px), calc(var(--sky-y) * 25px), 0);
-}
-
-.sky__wash {
-    position: absolute;
+    left: 50%;
     will-change: transform;
 }
 
-/*
- * Nine stops instead of one.
- *
- * A single stop out to `transparent` does two visible things wrong: CSS
- * `transparent` is transparent *black*, so a saturated wash fades through grey
- * and paints a dirty ring, and one linear stop ends in a hard edge you can
- * trace with a finger. Fading to rgba(the same colour, 0) down a curve leaves
- * no edge at all.
- */
-.sky__wash--one {
-    top: -10%;
-    left: -5%;
+/* The sun itself: the orange the game already wears on its labels and counts. */
+.sky__glow--core {
+    bottom: -22%;
     width: 70%;
-    height: 70%;
+    height: 56%;
+    margin-left: -35%;
     background: radial-gradient(closest-side,
-        rgba(var(--wash-one), calc(var(--wash-one-alpha) * 1)) 0%,
-        rgba(var(--wash-one), calc(var(--wash-one-alpha) * 0.94)) 12%,
-        rgba(var(--wash-one), calc(var(--wash-one-alpha) * 0.82)) 24%,
-        rgba(var(--wash-one), calc(var(--wash-one-alpha) * 0.66)) 36%,
-        rgba(var(--wash-one), calc(var(--wash-one-alpha) * 0.49)) 48%,
-        rgba(var(--wash-one), calc(var(--wash-one-alpha) * 0.33)) 60%,
-        rgba(var(--wash-one), calc(var(--wash-one-alpha) * 0.19)) 72%,
-        rgba(var(--wash-one), calc(var(--wash-one-alpha) * 0.08)) 84%,
-        rgba(var(--wash-one), 0) 100%);
-    animation: wash-one 54s ease-in-out infinite alternate;
+        rgba(255, 173, 105, 0.5) 0%,
+        rgba(255, 173, 105, 0.47) 12%,
+        rgba(255, 173, 105, 0.41) 24%,
+        rgba(255, 173, 105, 0.33) 36%,
+        rgba(255, 173, 105, 0.245) 48%,
+        rgba(255, 173, 105, 0.165) 60%,
+        rgba(255, 173, 105, 0.095) 72%,
+        rgba(255, 173, 105, 0.04) 84%,
+        rgba(255, 173, 105, 0) 100%);
+    animation: breathe-core 19s ease-in-out infinite alternate;
 }
 
-.sky__wash--two {
-    top: 10%;
-    right: -12%;
-    width: 65%;
-    height: 85%;
+/* The light it throws much wider, pink where it meets the indigo. */
+.sky__glow--spill {
+    bottom: -34%;
+    width: 150%;
+    height: 90%;
+    margin-left: -75%;
     background: radial-gradient(closest-side,
-        rgba(var(--wash-two), calc(var(--wash-two-alpha) * 1)) 0%,
-        rgba(var(--wash-two), calc(var(--wash-two-alpha) * 0.94)) 12%,
-        rgba(var(--wash-two), calc(var(--wash-two-alpha) * 0.82)) 24%,
-        rgba(var(--wash-two), calc(var(--wash-two-alpha) * 0.66)) 36%,
-        rgba(var(--wash-two), calc(var(--wash-two-alpha) * 0.49)) 48%,
-        rgba(var(--wash-two), calc(var(--wash-two-alpha) * 0.33)) 60%,
-        rgba(var(--wash-two), calc(var(--wash-two-alpha) * 0.19)) 72%,
-        rgba(var(--wash-two), calc(var(--wash-two-alpha) * 0.08)) 84%,
-        rgba(var(--wash-two), 0) 100%);
-    animation: wash-two 67s ease-in-out infinite alternate;
+        rgba(228, 106, 146, 0.3) 0%,
+        rgba(228, 106, 146, 0.282) 12%,
+        rgba(228, 106, 146, 0.246) 24%,
+        rgba(228, 106, 146, 0.198) 36%,
+        rgba(228, 106, 146, 0.147) 48%,
+        rgba(228, 106, 146, 0.099) 60%,
+        rgba(228, 106, 146, 0.057) 72%,
+        rgba(228, 106, 146, 0.024) 84%,
+        rgba(228, 106, 146, 0) 100%);
+    animation: breathe-spill 27s ease-in-out infinite alternate;
 }
 
-.sky__wash--three {
-    bottom: -25%;
-    left: 22%;
-    width: 60%;
-    height: 60%;
-    background: radial-gradient(closest-side,
-        rgba(var(--wash-three), calc(var(--wash-three-alpha) * 1)) 0%,
-        rgba(var(--wash-three), calc(var(--wash-three-alpha) * 0.94)) 12%,
-        rgba(var(--wash-three), calc(var(--wash-three-alpha) * 0.82)) 24%,
-        rgba(var(--wash-three), calc(var(--wash-three-alpha) * 0.66)) 36%,
-        rgba(var(--wash-three), calc(var(--wash-three-alpha) * 0.49)) 48%,
-        rgba(var(--wash-three), calc(var(--wash-three-alpha) * 0.33)) 60%,
-        rgba(var(--wash-three), calc(var(--wash-three-alpha) * 0.19)) 72%,
-        rgba(var(--wash-three), calc(var(--wash-three-alpha) * 0.08)) 84%,
-        rgba(var(--wash-three), 0) 100%);
-    animation: wash-three 81s ease-in-out infinite alternate;
+/* Two cycles that do not divide into each other, so the sunrise never
+   visibly repeats itself. Small enough that you notice it only by looking. */
+@keyframes breathe-core {
+    from { transform: scale(1); }
+    to   { transform: scale(1.07) translateY(-2%); }
 }
 
-/* Three cycles that share no common multiple, so the sky never visibly loops. */
-@keyframes wash-one {
-    from { transform: translate3d(0, 0, 0) scale(1); }
-    to   { transform: translate3d(7%, 5%, 0) scale(1.14); }
+@keyframes breathe-spill {
+    from { transform: scale(1.04); }
+    to   { transform: scale(1) translateY(-1%); }
 }
 
-@keyframes wash-two {
-    from { transform: translate3d(0, 0, 0) scale(1.08); }
-    to   { transform: translate3d(-6%, 7%, 0) scale(1); }
-}
-
-@keyframes wash-three {
-    from { transform: translate3d(0, 0, 0) scale(1); }
-    to   { transform: translate3d(5%, -6%, 0) scale(1.1); }
-}
-
-/* Asked for less motion: the same sky, holding still. */
-.sky[data-still="true"] .sky__wash {
+/* Asked for less motion: the same sunrise, holding still. */
+.sky[data-still="true"] .sky__glow {
     animation: none;
 }
