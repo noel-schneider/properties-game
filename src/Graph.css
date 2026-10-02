@@ -1,0 +1,41 @@
+.graph {
+    width: 100%;
+    height: 78vh;
+    display: block;
+}
+
+.bubble {
+    cursor: pointer;
+}
+
+.bubble circle {
+    fill: #e2dcde;
+    stroke: #1b1b1b;
+    stroke-width: 1;
+    transition: fill 0.15s ease;
+}
+
+.bubble text {
+    fill: #1b1b1b;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 15px;
+    pointer-events: none;
+    user-select: none;
+}
+
+.bubble:hover circle {
+    fill: #f3eef0;
+}
+
+.bubble--selected circle {
+    fill: #ffad69;
+}
+
+.bubble:focus-visible {
+    outline: none;
+}
+
+.bubble:focus-visible circle {
+    stroke: #ffad69;
+    stroke-width: 4;
+}

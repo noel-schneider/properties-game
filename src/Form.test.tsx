@@ -1,12 +1,28 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import Form from './Form';
 
-// The graph still renders to a <canvas>, which jsdom cannot paint, so this
-// suite covers the form on its own. App is covered end-to-end once the graph
-// is rendered as DOM nodes.
-test('renders the category input with submit disabled when nothing is selected', () => {
-  render(<Form selectedNodes={[]} />);
+test('submit stays disabled until three concepts and a category are given', async () => {
+  const user = userEvent.setup();
+  const { rerender } = render(<Form selected={[]} />);
 
-  expect(screen.getByPlaceholderText(/type a category here/i)).toBeInTheDocument();
+  const submit = screen.getByRole('button', { name: /submit/i });
+  expect(submit).toBeDisabled();
+
+  await user.type(screen.getByPlaceholderText(/type a category here/i), 'biome');
+  expect(submit).toBeDisabled();
+
+  rerender(<Form selected={['forest', 'desert']} />);
+  expect(submit).toBeDisabled();
+
+  rerender(<Form selected={['forest', 'desert', 'jungle']} />);
+  expect(submit).toBeEnabled();
+});
+
+test('whitespace alone is not a category', async () => {
+  const user = userEvent.setup();
+  render(<Form selected={['forest', 'desert', 'jungle']} />);
+
+  await user.type(screen.getByPlaceholderText(/type a category here/i), '   ');
   expect(screen.getByRole('button', { name: /submit/i })).toBeDisabled();
 });
