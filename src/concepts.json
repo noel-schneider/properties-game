@@ -1,141 +1,398 @@
 {
-    "computer": [
-        "electronic device",
-        "technology"
-    ],
-    "pizza": [
-        "food",
-        "dish"
-    ],
     "airplane": [
         "vehicle",
         "transport",
         "airborne"
     ],
-    "jungle": [
-        "biome",
-        "vegetation"
+    "apartment": [
+        "house",
+        "building",
+        "city"
     ],
-    "book": [
-        "object",
-        "reading"
+    "arcade": [
+        "location",
+        "entertainment venue",
+        "entertainment",
+        "game"
     ],
-    "ladybug": [
+    "basketball": [
+        "game",
+        "sport",
+        "ball"
+    ],
+    "beach": [
+        "water",
+        "sand",
+        "location"
+    ],
+    "bee": [
+        "airborne",
         "insect",
         "animal"
     ],
-    "piano": [
-        "musical instrument",
-        "music"
+    "bike": [
+        "vehicle",
+        "transport"
     ],
-    "beach": [
-        "location",
-        "sand",
-        "ocean"
+    "boat": [
+        "vehicle",
+        "transport",
+        "water"
     ],
-    "desert": [
-        "biome",
-        "sand"
+    "book": [
+        "reading",
+        "object"
     ],
-    "star": [
-        "celestial object",
-        "astronomy"
+    "bow": [
+        "game",
+        "sport"
     ],
-    "basketball": [
-        "sport",
-        "ball",
-        "game"
+    "bread": [
+        "food",
+        "dish"
+    ],
+    "butterfly": [
+        "airborne",
+        "insect",
+        "animal",
+        "colors"
+    ],
+    "cabin": [
+        "house",
+        "shelter",
+        "building"
+    ],
+    "calendar": [
+        "time",
+        "object"
     ],
     "camera": [
         "electronic device",
-        "photography"
+        "technology"
+    ],
+    "campfire": [
+        "heat",
+        "light",
+        "outdoor activity"
+    ],
+    "candle": [
+        "heat",
+        "light"
+    ],
+    "car": [
+        "vehicle",
+        "transport",
+        "machine"
+    ],
+    "chess": [
+        "entertainment",
+        "game"
+    ],
+    "chocolate": [
+        "food",
+        "sweet"
+    ],
+    "circus": [
+        "entertainment venue",
+        "entertainment",
+        "artistic expression"
+    ],
+    "comet": [
+        "celestial object",
+        "astronomy",
+        "space"
+    ],
+    "computer": [
+        "machine",
+        "electronic device",
+        "technology"
+    ],
+    "dance": [
+        "artistic expression",
+        "physical activity"
+    ],
+    "desert": [
+        "biome",
+        "sand",
+        "geography"
+    ],
+    "drum": [
+        "musical instrument",
+        "music"
+    ],
+    "football": [
+        "game",
+        "sport",
+        "ball"
     ],
     "forest": [
         "biome",
+        "vegetation",
         "trees"
     ],
-    "mountain": [
+    "glacier": [
+        "water",
+        "cold",
         "geography",
-        "nature"
-    ],
-    "bike": [
-        "vehicle",
-        "transport",
-        "two wheels"
-    ],
-    "moon": [
-        "astronomy",
         "white"
-    ],
-    "watch": [
-        "accessory",
-        "time"
-    ],
-    "dance": [
-        "physical activity",
-        "artistic expression"
-    ],
-    "phone": [
-        "device",
-        "communication"
-    ],
-    "campfire": [
-        "outdoor activity",
-        "heat"
-    ],
-    "rainbow": [
-        "natural phenomenon",
-        "colors"
-    ],
-    "robot": [
-        "machine",
-        "artificial intelligence"
-    ],
-    "waterfall": [
-        "natural phenomenon",
-        "water"
-    ],
-    "igloo": [
-        "house",
-        "cold"
-    ],
-    "apartment": [
-        "house"
-    ],
-    "snake": [
-        "animal",
-        "reptile"
-    ],
-    "bow": [
-        "hunting tool",
-        "sport"
     ],
     "guitar": [
         "musical instrument",
         "music"
     ],
-    "rocket": [
-        "spacecraft",
-        "exploration"
+    "hat": [
+        "accessory",
+        "object"
     ],
-    "theater": [
-        "location",
-        "show"
+    "hiking": [
+        "physical activity",
+        "outdoor activity"
+    ],
+    "honey": [
+        "food",
+        "sweet"
+    ],
+    "hourglass": [
+        "sand",
+        "time",
+        "object"
     ],
     "ice cream": [
+        "cold",
         "food",
-        "cold"
+        "sweet"
+    ],
+    "igloo": [
+        "cold",
+        "house",
+        "shelter"
+    ],
+    "jungle": [
+        "biome",
+        "vegetation",
+        "trees"
+    ],
+    "kite": [
+        "airborne",
+        "game",
+        "wind"
+    ],
+    "ladybug": [
+        "insect",
+        "animal",
+        "colors"
+    ],
+    "lava": [
+        "heat",
+        "natural phenomenon"
+    ],
+    "letter": [
+        "communication",
+        "object"
+    ],
+    "library": [
+        "building",
+        "location",
+        "reading"
+    ],
+    "lightning": [
+        "light",
+        "natural phenomenon",
+        "weather"
+    ],
+    "lizard": [
+        "animal",
+        "reptile"
+    ],
+    "moon": [
+        "night",
+        "celestial object",
+        "astronomy",
+        "white"
+    ],
+    "mountain": [
+        "cold",
+        "geography"
+    ],
+    "museum": [
+        "building",
+        "location",
+        "entertainment venue"
+    ],
+    "necklace": [
+        "accessory",
+        "object"
+    ],
+    "newspaper": [
+        "reading",
+        "communication",
+        "object"
+    ],
+    "owl": [
+        "animal",
+        "night"
+    ],
+    "painting": [
+        "artistic expression",
+        "colors"
+    ],
+    "penguin": [
+        "water",
+        "cold",
+        "animal"
+    ],
+    "phone": [
+        "electronic device",
+        "technology",
+        "communication"
+    ],
+    "piano": [
+        "musical instrument",
+        "music"
+    ],
+    "pizza": [
+        "food",
+        "dish"
+    ],
+    "planet": [
+        "celestial object",
+        "astronomy",
+        "space"
+    ],
+    "poem": [
+        "reading",
+        "artistic expression"
+    ],
+    "rain": [
+        "water",
+        "weather"
+    ],
+    "rainbow": [
+        "colors",
+        "natural phenomenon",
+        "weather"
+    ],
+    "robot": [
+        "machine",
+        "technology"
+    ],
+    "rocket": [
+        "airborne",
+        "space",
+        "exploration"
+    ],
+    "satellite": [
+        "technology",
+        "space",
+        "exploration"
+    ],
+    "savanna": [
+        "biome",
+        "vegetation",
+        "geography"
+    ],
+    "skyscraper": [
+        "building",
+        "city"
+    ],
+    "snake": [
+        "animal",
+        "reptile"
     ],
     "snow": [
         "cold",
+        "white",
         "weather"
     ],
-    "arcade": [
+    "soup": [
+        "food",
+        "dish",
+        "heat"
+    ],
+    "star": [
+        "night",
+        "celestial object",
+        "astronomy",
+        "light"
+    ],
+    "subway": [
+        "vehicle",
+        "transport",
+        "machine",
+        "city"
+    ],
+    "surfing": [
+        "water",
+        "sport",
+        "physical activity",
+        "outdoor activity"
+    ],
+    "swamp": [
+        "water",
+        "biome",
+        "vegetation",
+        "trees"
+    ],
+    "telescope": [
+        "astronomy",
+        "exploration"
+    ],
+    "television": [
+        "entertainment",
+        "electronic device",
+        "technology"
+    ],
+    "tennis": [
+        "sport",
+        "ball",
+        "physical activity"
+    ],
+    "tent": [
+        "house",
+        "shelter"
+    ],
+    "theater": [
+        "location",
         "entertainment venue",
-        "video game"
+        "artistic expression"
     ],
     "tornado": [
-        "weather phenomenon",
+        "natural phenomenon",
+        "weather",
+        "wind"
+    ],
+    "train": [
+        "vehicle",
+        "transport",
+        "machine"
+    ],
+    "tundra": [
+        "biome",
+        "cold"
+    ],
+    "turtle": [
+        "water",
+        "animal",
+        "reptile"
+    ],
+    "violin": [
+        "musical instrument",
+        "music"
+    ],
+    "watch": [
+        "time",
+        "accessory"
+    ],
+    "waterfall": [
+        "water",
+        "natural phenomenon"
+    ],
+    "whale": [
+        "water",
+        "animal"
+    ],
+    "windmill": [
+        "machine",
         "wind"
     ]
 }
