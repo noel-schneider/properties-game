@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { boardSettled } from './board'
 import data from '../src/concepts.json' with { type: 'json' }
 
 const properties = data as Record<string, string[]>
@@ -7,6 +8,7 @@ const ALL = [...new Set(Object.values(properties).flat())]
 /** Starts the game one category short of the end. */
 async function startOneShort(page: import('@playwright/test').Page, missing: string) {
   await page.goto('/')
+  await boardSettled(page)
   await page.evaluate(
     ({ missing, all }) => {
       localStorage.clear()
@@ -23,6 +25,7 @@ async function startOneShort(page: import('@playwright/test').Page, missing: str
     { missing, all: ALL },
   )
   await page.reload()
+  await boardSettled(page)
 }
 
 async function solveMissing(page: import('@playwright/test').Page, missing: string) {

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { forceCollide, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force'
+import type { Simulation } from 'd3-force'
 import type { Concept } from './types'
 
 export interface Point {
@@ -13,14 +14,34 @@ export interface Point {
  * bubbles move, which reads as the camera lurching rather than the bubbles
  * drifting.
  */
-export const VIEW_WIDTH = 820;
-export const VIEW_HEIGHT = 660;
+export const VIEW_WIDTH = 1100;
+export const VIEW_HEIGHT = 780;
+
+/** Clear space left between two bubbles once they have settled. */
+export const BUBBLE_GAP = 20;
 
 const CENTRE: Point = { x: 0, y: 0 };
+
+/** How warm the simulation is kept while a bubble is being dragged. */
+const DRAG_HEAT = 0.3;
 
 interface LayoutNode {
     x: number;
     y: number;
+    fx?: number | null;
+    fy?: number | null;
+}
+
+export interface Layout {
+    points: Point[];
+    /** True once the board has stopped moving and can be aimed at. */
+    settled: boolean;
+    /** Takes hold of a bubble, pinning it under the pointer. */
+    grab: (index: number) => void;
+    /** Moves the held bubble, in viewBox coordinates. */
+    dragTo: (index: number, point: Point) => void;
+    /** Lets go, handing the bubble back to the simulation. */
+    release: (index: number) => void;
 }
 
 /**
@@ -37,7 +58,8 @@ function prefersReducedMotion(): boolean {
 }
 
 /**
- * Lays the bubbles out by simulation, drawing every tick.
+ * Lays the bubbles out by simulation, drawing every tick, and lets them be
+ * dragged around.
  *
  * The simulation is animated rather than run to completion: watching them
  * jostle into place is most of the character of the board. It does come to
@@ -49,20 +71,45 @@ function prefersReducedMotion(): boolean {
  * arrive a frame behind a new board, and pairing them with concepts here would
  * mean rendering the previous board's names for that frame.
  */
-export function useBubbleLayout(concepts: Concept[], radius: number): Point[] {
+export function useBubbleLayout(concepts: Concept[], radius: number): Layout {
     const nodes = useMemo<LayoutNode[]>(() => concepts.map(huddle), [concepts]);
     const [points, setPoints] = useState<Point[]>([]);
 
-    useEffect(() => {
-        const read = () => nodes.map((node) => ({ x: node.x, y: node.y }));
+    const [settled, setSettled] = useState(false);
+    const simulation = useRef<Simulation<LayoutNode, undefined> | null>(null);
+    const running = useRef(false);
+    const frame = useRef(0);
 
-        const simulation = forceSimulation(nodes)
+    // Restarts the drawing loop. The loop ends itself once the board settles,
+    // so anything that disturbs it — a drag, above all — has to wake it again.
+    const wake = useCallback(() => {
+        const sim = simulation.current;
+        if (!sim || running.current || prefersReducedMotion()) return;
+
+        running.current = true;
+        setSettled(false);
+        const step = () => {
+            sim.tick();
+            setPoints(nodes.map((node) => ({ x: node.x, y: node.y })));
+
+            if (sim.alpha() > sim.alphaMin()) {
+                frame.current = requestAnimationFrame(step);
+            } else {
+                running.current = false;
+                setSettled(true);
+            }
+        };
+        frame.current = requestAnimationFrame(step);
+    }, [nodes]);
+
+    useEffect(() => {
+        const sim = forceSimulation(nodes)
             // Pulled harder vertically than horizontally, so the cluster comes
             // out landscape like the frame it has to fit in.
             .force('towardsCentreX', forceX(CENTRE.x).strength(0.035))
             .force('towardsCentreY', forceY(CENTRE.y).strength(0.09))
             .force('spread', forceManyBody().strength(-24))
-            .force('collide', forceCollide(radius + 1).strength(0.9))
+            .force('collide', forceCollide(radius + BUBBLE_GAP).strength(0.9))
             .alphaDecay(0.028)
             // Stops once the movement is no longer visible. The default would
             // keep ticking imperceptibly for another second and a half, which
@@ -70,27 +117,55 @@ export function useBubbleLayout(concepts: Concept[], radius: number): Point[] {
             .alphaMin(0.01)
             .stop();
 
+        simulation.current = sim;
+        setPoints(nodes.map((node) => ({ x: node.x, y: node.y })));
+
         if (prefersReducedMotion()) {
-            simulation.tick(400);
-            setPoints(read());
+            sim.tick(400);
+            setPoints(nodes.map((node) => ({ x: node.x, y: node.y })));
+            setSettled(true);
             return;
         }
 
-        let frame = 0;
-        const step = () => {
-            simulation.tick();
-            setPoints(read());
+        wake();
 
-            if (simulation.alpha() > simulation.alphaMin()) {
-                frame = requestAnimationFrame(step);
-            }
+        return () => {
+            cancelAnimationFrame(frame.current);
+            running.current = false;
+            simulation.current = null;
         };
+    }, [nodes, radius, wake]);
 
-        setPoints(read());
-        frame = requestAnimationFrame(step);
+    // Taking hold pins the bubble but does not stir the board. A plain click is
+    // a grab and a release with nothing in between, and it should leave a
+    // settled board exactly as it was.
+    const grab = useCallback((index: number) => {
+        const node = nodes[index];
+        if (!node) return;
 
-        return () => cancelAnimationFrame(frame);
-    }, [nodes, radius]);
+        node.fx = node.x;
+        node.fy = node.y;
+    }, [nodes]);
 
-    return points;
+    const dragTo = useCallback((index: number, point: Point) => {
+        const node = nodes[index];
+        if (!node) return;
+
+        node.fx = point.x;
+        node.fy = point.y;
+        simulation.current?.alphaTarget(DRAG_HEAT);
+        wake();
+    }, [nodes, wake]);
+
+    const release = useCallback((index: number) => {
+        const node = nodes[index];
+        if (!node) return;
+
+        node.fx = null;
+        node.fy = null;
+        simulation.current?.alphaTarget(0);
+        wake();
+    }, [nodes, wake]);
+
+    return { points, settled, grab, dragTo, release };
 }
