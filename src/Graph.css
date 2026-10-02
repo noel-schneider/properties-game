@@ -52,3 +52,33 @@
     stroke: #ffad69;
     stroke-width: 4;
 }
+
+/* A group that has been found: gathered, tied together and named. */
+.found__tie {
+    stroke: #ffad69;
+    stroke-width: 2;
+    opacity: 0.5;
+}
+
+.found__label {
+    fill: #ffad69;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    user-select: none;
+}
+
+.bubble--found {
+    cursor: default;
+}
+
+.bubble--found circle {
+    fill: #ffad69;
+    stroke: #c97f3f;
+}
+
+.bubble--found:hover circle {
+    fill: #ffad69;
+}

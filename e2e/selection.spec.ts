@@ -44,17 +44,26 @@ test.describe('with the board in motion', () => {
     const board = page.locator('.graph')
     await expect(board).toHaveAttribute('data-settled', 'false')
 
-    const bubble = page.getByRole('checkbox').first()
-    const early = (await bubble.boundingBox())!
+    // Averaged over the board: any one bubble may happen to start near where
+    // it ends up, and the claim is about the board drifting into place.
+    const places = () =>
+      page.getByRole('checkbox').evaluateAll((nodes) =>
+        nodes.map((n) => {
+          const box = n.getBoundingClientRect()
+          return { x: box.x, y: box.y }
+        }),
+      )
+    const travelled = (from: { x: number; y: number }[], to: { x: number; y: number }[]) =>
+      from.reduce((sum, a, i) => sum + Math.hypot(to[i].x - a.x, to[i].y - a.y), 0) / from.length
+
+    const early = await places()
 
     await boardSettled(page)
-    const resting = (await bubble.boundingBox())!
-
-    expect(Math.hypot(resting.x - early.x, resting.y - early.y)).toBeGreaterThan(20)
+    const resting = await places()
+    expect(travelled(early, resting)).toBeGreaterThan(10)
 
     await page.waitForTimeout(500)
-    const later = (await bubble.boundingBox())!
-    expect(Math.hypot(later.x - resting.x, later.y - resting.y)).toBeLessThan(1)
+    expect(travelled(resting, await places())).toBeLessThan(1)
   })
 
   test('a bubble can be dragged around the board', async ({ page }) => {

@@ -8,6 +8,8 @@ interface PanelProps {
     unlocked: string[];
     muted: boolean;
     onToggleMute: () => void;
+    /** Plays the unlock chime once, so it can be judged without earning anything. */
+    onTestSound: () => void;
 }
 
 function Entry({ achievement, earned }: { achievement: Achievement; earned: boolean }) {
@@ -36,7 +38,7 @@ function Entry({ achievement, earned }: { achievement: Achievement; earned: bool
     );
 }
 
-function Panel({ unlocked, muted, onToggleMute }: PanelProps) {
+function Panel({ unlocked, muted, onToggleMute, onTestSound }: PanelProps) {
     const { t } = useTranslator();
     const [open, setOpen] = useState(false);
     const earned = new Set(unlocked);
@@ -65,8 +67,19 @@ function Panel({ unlocked, muted, onToggleMute }: PanelProps) {
                     className="panel__button panel__button--icon"
                     onClick={onToggleMute}
                     aria-label={muted ? t('panel.unmute') : t('panel.mute')}
+                    title={muted ? t('panel.unmute') : t('panel.mute')}
                 >
                     {muted ? '🔇' : '🔊'}
+                </button>
+                <button
+                    type="button"
+                    className="panel__button panel__button--icon"
+                    onClick={onTestSound}
+                    disabled={muted}
+                    aria-label={muted ? t('panel.testSoundMuted') : t('panel.testSound')}
+                    title={muted ? t('panel.testSoundMuted') : t('panel.testSound')}
+                >
+                    🎵
                 </button>
             </div>
 

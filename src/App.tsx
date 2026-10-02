@@ -12,7 +12,7 @@ import { playUnlockChime } from "./achievements/chime";
 import { emptyRunStats, loadLifetime, loadMuted, loadRunStats, saveLifetime, saveMuted, saveRunStats } from "./achievements/storage";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
-import { allProperties, dealRound, getAllConcepts } from "./concepts";
+import { allProperties, dealRound } from "./concepts";
 import { isExactLabel } from "./guess";
 import { resolveGuess } from "./round";
 import { useTranslator } from "./i18n";
@@ -20,7 +20,6 @@ import type { Achievement, GameEvent, Progress } from "./achievements";
 
 export type Feedback = 'none' | 'correct' | 'wrong';
 
-const pool = getAllConcepts();
 const TOTAL_CATEGORIES = allProperties().length;
 
 interface AppProps {
@@ -107,7 +106,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
     };
 
     const submitGuess = (guess: string): boolean => {
-        const outcome = resolveGuess(hand, selected, guess, { wordings, pool });
+        const outcome = resolveGuess(hand, selected, guess, { wordings });
 
         record({
             type: 'guess',
@@ -171,9 +170,19 @@ function App({ playChime = playUnlockChime }: AppProps) {
           <Scoreboard found={found.length} total={TOTAL_CATEGORIES} remaining={hand.solutions.length} />
           <div className="top-right">
               <LanguageToggle />
-              <Panel unlocked={unlocked} muted={muted} onToggleMute={toggleMute} />
+              <Panel
+                  unlocked={unlocked}
+                  muted={muted}
+                  onToggleMute={toggleMute}
+                  onTestSound={playChime}
+              />
           </div>
-          <Graph concepts={hand.concepts} selected={selected} onToggle={toggleConcept} />
+          <Graph
+              concepts={hand.concepts}
+              selected={selected}
+              solved={hand.solved}
+              onToggle={toggleConcept}
+          />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <Toast unlocked={announcing} onDismiss={dismissAnnouncement} />
           {finished && !dismissedEnd && (

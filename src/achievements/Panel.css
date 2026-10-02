@@ -24,9 +24,14 @@
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.panel__button:hover {
+.panel__button:hover:not(:disabled) {
   background: #31344e;
   border-color: #5a5a7d;
+}
+
+.panel__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .panel__button--icon {
