@@ -51,11 +51,13 @@ test('the two languages carry exactly the same keys', () => {
  * identical is a string that was forgotten rather than translated.
  */
 const IDENTICAL_IN_BOTH = new Set([
-  'concepts:football', 'concepts:glacier', 'concepts:igloo', 'concepts:jungle',
-  'concepts:piano', 'concepts:pizza', 'concepts:robot', 'concepts:satellite',
-  'concepts:tennis', 'concepts:train',
-  'properties:animal', 'properties:communication', 'properties:exploration',
-  'properties:machine', 'properties:reptile', 'properties:sport', 'properties:transport',
+  'concepts:avalanche', 'concepts:bowling', 'concepts:bus', 'concepts:crocodile',
+  'concepts:dune', 'concepts:football', 'concepts:glacier', 'concepts:igloo',
+  'concepts:jungle', 'concepts:piano', 'concepts:pizza', 'concepts:radio',
+  'concepts:robot', 'concepts:satellite', 'concepts:tennis', 'concepts:train',
+  'properties:animal', 'properties:communication', 'properties:danger',
+  'properties:exploration', 'properties:machine', 'properties:reptile',
+  'properties:sport', 'properties:transport',
   'ui:graph.label', 'ui:panel.secretName', 'ui:language.en', 'ui:language.fr',
 ]);
 
@@ -83,4 +85,33 @@ test('each language accepts wordings the other does not', () => {
 
     expect(own.length, `no French wording of its own for "${id}"`).toBeGreaterThan(0);
   }
+});
+
+/** The same folding the game applies to an answer before comparing it. */
+function fold(text: string): string {
+  const base = text
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/\s+/g, ' ');
+  return base.endsWith('s') ? base.slice(0, -1) : base;
+}
+
+describe.each(Object.entries(languages))('%s wordings', (_name, locale) => {
+  test('no category answers to the name of another', () => {
+    // Otherwise a player naming one category is credited with a different one.
+    // This is what made 'sound' unusable while music still accepted it.
+    const named = new Map(Object.entries(locale.properties).map(([id, label]) => [fold(label), id]));
+
+    const stolen: string[] = [];
+    for (const [id, aliases] of Object.entries(locale.aliases)) {
+      for (const alias of aliases as string[]) {
+        const owner = named.get(fold(alias));
+        if (owner && owner !== id) stolen.push(`${id} answers to "${alias}", the name of ${owner}`);
+      }
+    }
+
+    expect(stolen).toEqual([]);
+  });
 });

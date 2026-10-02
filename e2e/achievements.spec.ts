@@ -25,7 +25,7 @@ async function solveOnce(page: import('@playwright/test').Page) {
   )
   const { names, property } = findSolvableTriple(dealt)
   for (const name of names) {
-    await page.getByRole('checkbox', { name }).click()
+    await page.getByRole('checkbox', { name, exact: true }).click()
   }
   await page.getByPlaceholder('Type a category here!').fill(property)
   await page.getByRole('button', { name: 'Submit' }).click()

@@ -36,7 +36,7 @@ async function solveMissing(page: import('@playwright/test').Page, missing: stri
   expect(group).toHaveLength(3)
 
   for (const name of group) {
-    await page.getByRole('checkbox', { name }).click()
+    await page.getByRole('checkbox', { name, exact: true }).click()
   }
   await page.getByPlaceholder('Type a category here!').fill(missing)
   await page.getByRole('button', { name: 'Submit' }).click()
