@@ -27,17 +27,6 @@
     transition: fill 0.15s ease;
 }
 
-/*
- * The light on a raised bubble. Drawn on every bubble whatever the look and
- * revealed only where it is wanted, so changing look repaints the board
- * instead of rebuilding it.
- */
-.bubble__sheen {
-    display: none;
-    stroke: none;
-    pointer-events: none;
-}
-
 .bubble text {
     fill: #1b1b1b;
     font-family: 'Poppins', system-ui, sans-serif;
@@ -118,24 +107,35 @@
  *
  * Temporary: a dev-only picker sets data-look on the board, and once the
  * choice is made the winner's rules move up into the block above and the rest
- * of this section goes away. They all share the heavier contour.
+ * of this section goes away. They all share the heavier contour, and all but
+ * the first are the same shadow asked a different question.
  * ------------------------------------------------------------------------ */
 
-/* Chunky sticker: a hard shadow with no blur, sitting straight underneath. */
+/* Straight down. Reads as flat, because a shadow directly under a round thing
+   says the light is directly over it and nowhere in particular. */
 .graph[data-look="drop"] .bubble circle {
     filter: drop-shadow(0 5px 0 rgba(20, 20, 30, 0.45));
 }
 
-/* Raised bead: the contour plus a light from above. */
-.graph[data-look="bead"] .bubble__sheen {
-    display: block;
+/* Off to one side: now there is a light source, up and to the left. */
+.graph[data-look="drop-offset"] .bubble circle {
+    filter: drop-shadow(4px 6px 0 rgba(20, 20, 30, 0.45));
 }
 
-/* Lit by the sunrise behind the board. */
-.graph[data-look="glow"] .bubble circle {
-    filter: drop-shadow(0 0 12px rgba(255, 173, 105, 0.55));
+/* Thrown further and blurred, so the bubble sits above the board rather than
+   on it. */
+.graph[data-look="drop-soft"] .bubble circle {
+    filter: drop-shadow(5px 9px 7px rgba(12, 12, 22, 0.5));
 }
 
-.graph[data-look="glow"] .bubble--selected circle {
-    filter: drop-shadow(0 0 18px rgba(255, 173, 105, 0.9));
+/* The same offset shadow, tinted: a shadow in a warm scene is not neutral
+   grey, it carries the colour of what is lighting the room. */
+.graph[data-look="drop-warm"] .bubble circle {
+    filter: drop-shadow(4px 6px 0 rgba(86, 40, 54, 0.55));
+}
+
+/* The only one that agrees with the background: the sunrise is below the
+   board, so the light comes from underneath and the shadow goes up. */
+.graph[data-look="drop-lift"] .bubble circle {
+    filter: drop-shadow(3px -5px 0 rgba(20, 20, 30, 0.42));
 }

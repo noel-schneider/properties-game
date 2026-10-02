@@ -150,15 +150,6 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, look = DE
             role="group"
             aria-label={t('graph.label')}
         >
-            <defs>
-                {/* A light from above, for the raised look. */}
-                <radialGradient id="bubble-sheen" cx="0.5" cy="0.28" r="0.78">
-                    <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
-                    <stop offset="42%" stopColor="#ffffff" stopOpacity="0.28" />
-                    <stop offset="72%" stopColor="#ffffff" stopOpacity="0" />
-                    <stop offset="100%" stopColor="#1b1b1b" stopOpacity="0.22" />
-                </radialGradient>
-            </defs>
             {live.map((group, groupIndex) => {
                 // Ties stay for every group. Names do not: at twenty groups the
                 // labels pile into an unreadable heap, so only the group just
@@ -249,14 +240,6 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, look = DE
                               })}
                     >
                         <circle r={radius} />
-                        <circle
-                            className="bubble__sheen"
-                            r={radius}
-                            // Drawn for every look and revealed by the
-                            // stylesheet, so switching look never rebuilds the
-                            // board — only repaints it.
-                            fill="url(#bubble-sheen)"
-                        />
                         {!isDone && (
                             <text textAnchor="middle" dominantBaseline="middle">
                                 {conceptName(concept.name)}

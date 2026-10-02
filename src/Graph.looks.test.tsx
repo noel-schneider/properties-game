@@ -36,9 +36,12 @@ test('the standing look is one that exists', () => {
   expect(LOOKS.map((look) => look.id)).toContain(DEFAULT_LOOK);
 });
 
-test('the sheen cannot swallow a click meant for the bubble under it', () => {
-  board('bead');
+test('every look on the bench has a rule, so none of the buttons does nothing', () => {
+  const styles = [...document.styleSheets]
+    .flatMap((sheet) => [...sheet.cssRules].map((rule) => rule.cssText))
+    .join(' ');
 
-  const sheen = document.querySelector('.bubble__sheen')!;
-  expect(getComputedStyle(sheen).pointerEvents).toBe('none');
+  for (const look of LOOKS.slice(1)) {
+    expect(styles).toContain(`[data-look="${look.id}"]`);
+  }
 });

@@ -15,9 +15,11 @@ export interface Look {
 
 export const LOOKS: Look[] = [
     { id: 'outline', label: 'Contour seul' },
-    { id: 'drop', label: 'Ombre portée' },
-    { id: 'bead', label: 'Relief bombé' },
-    { id: 'glow', label: 'Halo chaud' },
+    { id: 'drop', label: 'Ombre centrée (actuelle)' },
+    { id: 'drop-offset', label: 'Ombre décalée' },
+    { id: 'drop-soft', label: 'Ombre longue et douce' },
+    { id: 'drop-warm', label: 'Ombre chaude' },
+    { id: 'drop-lift', label: "Lumière d'en bas" },
 ];
 
 /**
