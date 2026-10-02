@@ -187,3 +187,41 @@ test('a bubble is lifted off the board by a shadow', async ({ page }) => {
 
   expect(filter).toContain('drop-shadow')
 })
+
+test('enter puts the cursor in the box, without disturbing the board', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  // A real mouse click leaves the focus on the bubble it hit, so this is also
+  // the guard against Enter quietly deselecting the bubble just clicked.
+  const bubble = page.getByRole('checkbox').first()
+  await bubble.click()
+  await expect(bubble).toHaveAttribute('aria-checked', 'true')
+
+  await page.keyboard.press('Enter')
+
+  await expect(page.getByPlaceholder(/type a category here/i)).toBeFocused()
+  await expect(bubble).toHaveAttribute('aria-checked', 'true')
+})
+
+test('a bubble reached with the keyboard keeps the enter key for itself', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  // Tab until a bubble has the focus ring, which is what tells a keyboard user
+  // apart from the focus a mouse click leaves behind.
+  for (let i = 0; i < 40; i++) {
+    await page.keyboard.press('Tab')
+    const onBubble = await page.evaluate(
+      () => document.activeElement?.getAttribute('role') === 'checkbox',
+    )
+    if (onBubble) break
+  }
+  const name = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))
+  expect(name).toBeTruthy()
+
+  await page.keyboard.press('Enter')
+
+  await expect(page.locator(`.bubble[aria-label="${name}"]`)).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByPlaceholder(/type a category here/i)).not.toBeFocused()
+})
