@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import './Graph.css'
 import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point } from './useBubbleLayout'
+import { useTranslator } from './i18n'
 import type { Concept } from './types'
 
 const RADIUS = 62;
@@ -22,6 +23,7 @@ interface Gesture {
 }
 
 function Graph({ concepts, selected, onToggle }: GraphProps) {
+    const { concept: conceptName, t } = useTranslator();
     const { points, settled, grab, dragTo, release } = useBubbleLayout(concepts, RADIUS);
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -85,7 +87,7 @@ function Graph({ concepts, selected, onToggle }: GraphProps) {
             data-settled={settled}
             viewBox={`${-VIEW_WIDTH / 2} ${-VIEW_HEIGHT / 2} ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
             role="group"
-            aria-label="Concepts"
+            aria-label={t('graph.label')}
         >
             {concepts.map((concept, i) => {
                 const { x, y } = points[i] ?? { x: 0, y: 0 };
@@ -97,7 +99,7 @@ function Graph({ concepts, selected, onToggle }: GraphProps) {
                         transform={`translate(${x}, ${y})`}
                         role="checkbox"
                         aria-checked={isSelected}
-                        aria-label={concept.name}
+                        aria-label={conceptName(concept.name)}
                         tabIndex={0}
                         onPointerDown={onPointerDown(i)}
                         onPointerMove={onPointerMove}
@@ -113,7 +115,7 @@ function Graph({ concepts, selected, onToggle }: GraphProps) {
                     >
                         <circle r={RADIUS} />
                         <text textAnchor="middle" dominantBaseline="middle">
-                            {concept.name}
+                            {conceptName(concept.name)}
                         </text>
                     </g>
                 );

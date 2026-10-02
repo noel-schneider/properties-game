@@ -10,10 +10,8 @@ test('nine are public and six are secret', () => {
   expect(CATALOGUE.filter((a) => a.secret)).toHaveLength(6);
 });
 
-test('every achievement is presentable', () => {
+test('every achievement has an icon; names and descriptions live in the locales', () => {
   for (const achievement of CATALOGUE) {
-    expect(achievement.name).not.toBe('');
-    expect(achievement.description).not.toBe('');
     expect(achievement.icon).not.toBe('');
   }
 });

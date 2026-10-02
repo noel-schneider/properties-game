@@ -1,4 +1,5 @@
 import './Summary.css'
+import { useTranslator } from './i18n'
 
 export interface RunStats {
     categories: number;
@@ -26,33 +27,35 @@ function Figure({ label, value }: { label: string; value: string }) {
 }
 
 function Summary({ stats, onPlayAgain, onKeepPlaying }: SummaryProps) {
+    const { t } = useTranslator();
+
     return (
-        <div className="summary" role="dialog" aria-modal="true" aria-label="Run complete">
+        <div className="summary" role="dialog" aria-modal="true" aria-label={t('summary.eyebrow')}>
             <div className="summary__card">
-                <p className="summary__eyebrow">Run complete</p>
-                <h2 className="summary__title">You found every category.</h2>
+                <p className="summary__eyebrow">{t('summary.eyebrow')}</p>
+                <h2 className="summary__title">{t('summary.title')}</h2>
 
                 <div className="summary__figures">
-                    <Figure label="categories" value={String(stats.categories)} />
-                    <Figure label="boards" value={String(stats.boards)} />
-                    <Figure label="correct" value={String(stats.correct)} />
-                    <Figure label="wrong" value={String(stats.wrong)} />
-                    <Figure label="best streak" value={String(stats.bestStreak)} />
+                    <Figure label={t('summary.categories')} value={String(stats.categories)} />
+                    <Figure label={t('summary.boards')} value={String(stats.boards)} />
+                    <Figure label={t('summary.correct')} value={String(stats.correct)} />
+                    <Figure label={t('summary.wrong')} value={String(stats.wrong)} />
+                    <Figure label={t('summary.bestStreak')} value={String(stats.bestStreak)} />
                     <Figure
-                        label="achievements"
+                        label={t('summary.achievements')}
                         value={`${stats.achievements} / ${stats.totalAchievements}`}
                     />
                 </div>
 
                 <div className="summary__actions">
                     <button type="button" className="summary__button summary__button--primary" onClick={onPlayAgain}>
-                        Play again
+                        {t('summary.playAgain')}
                     </button>
                     <button type="button" className="summary__button" onClick={onKeepPlaying}>
-                        Keep playing
+                        {t('summary.keepPlaying')}
                     </button>
                 </div>
-                <p className="summary__note">Playing again clears the categories. Your achievements stay.</p>
+                <p className="summary__note">{t('summary.note')}</p>
             </div>
         </div>
     );

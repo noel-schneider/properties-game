@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
+import { renderApp, words } from '../test-utils'
 import { act } from 'react'
 import Toast, { TOAST_MS } from './Toast'
 import { CATALOGUE } from './catalogue'
@@ -10,22 +11,22 @@ beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
 test('announces the achievement by name and description', () => {
-  render(<Toast unlocked={[firstLight]} onDismiss={() => {}} />);
+  renderApp(<Toast unlocked={[firstLight]} onDismiss={() => {}} />);
 
   const alert = screen.getByRole('alert');
-  expect(alert).toHaveTextContent(firstLight.name);
-  expect(alert).toHaveTextContent(firstLight.description);
+  expect(alert).toHaveTextContent(words.en.achievements[firstLight.id as 'first-light'].name);
+  expect(alert).toHaveTextContent(words.en.achievements[firstLight.id as 'first-light'].description);
 });
 
 test('several unlocked at once are all announced', () => {
-  render(<Toast unlocked={[firstLight, collector]} onDismiss={() => {}} />);
+  renderApp(<Toast unlocked={[firstLight, collector]} onDismiss={() => {}} />);
 
   expect(screen.getAllByRole('alert')).toHaveLength(2);
 });
 
 test('each announcement dismisses itself after its delay', () => {
   const onDismiss = vi.fn();
-  render(<Toast unlocked={[firstLight]} onDismiss={onDismiss} />);
+  renderApp(<Toast unlocked={[firstLight]} onDismiss={onDismiss} />);
 
   expect(onDismiss).not.toHaveBeenCalled();
   act(() => { vi.advanceTimersByTime(TOAST_MS); });
@@ -33,7 +34,7 @@ test('each announcement dismisses itself after its delay', () => {
 });
 
 test('nothing is rendered when nothing was unlocked', () => {
-  render(<Toast unlocked={[]} onDismiss={() => {}} />);
+  renderApp(<Toast unlocked={[]} onDismiss={() => {}} />);
 
   expect(screen.queryByRole('alert')).toBeNull();
 });

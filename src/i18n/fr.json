@@ -1,0 +1,508 @@
+{
+    "concepts": {
+        "airplane": "avion",
+        "apartment": "appartement",
+        "arcade": "salle d'arcade",
+        "basketball": "basket",
+        "beach": "plage",
+        "bee": "abeille",
+        "bike": "vélo",
+        "boat": "bateau",
+        "book": "livre",
+        "bow": "arc",
+        "bread": "pain",
+        "butterfly": "papillon",
+        "cabin": "chalet",
+        "calendar": "calendrier",
+        "camera": "appareil photo",
+        "campfire": "feu de camp",
+        "candle": "bougie",
+        "car": "voiture",
+        "chess": "échecs",
+        "chocolate": "chocolat",
+        "circus": "cirque",
+        "comet": "comète",
+        "computer": "ordinateur",
+        "dance": "danse",
+        "desert": "désert",
+        "drum": "batterie",
+        "football": "football",
+        "forest": "forêt",
+        "glacier": "glacier",
+        "guitar": "guitare",
+        "hat": "chapeau",
+        "hiking": "randonnée",
+        "honey": "miel",
+        "hourglass": "sablier",
+        "ice cream": "glace",
+        "igloo": "igloo",
+        "jungle": "jungle",
+        "kite": "cerf-volant",
+        "ladybug": "coccinelle",
+        "lava": "lave",
+        "letter": "lettre",
+        "library": "bibliothèque",
+        "lightning": "éclair",
+        "lizard": "lézard",
+        "moon": "lune",
+        "mountain": "montagne",
+        "museum": "musée",
+        "necklace": "collier",
+        "newspaper": "journal",
+        "owl": "hibou",
+        "painting": "peinture",
+        "penguin": "manchot",
+        "phone": "téléphone",
+        "piano": "piano",
+        "pizza": "pizza",
+        "planet": "planète",
+        "poem": "poème",
+        "rain": "pluie",
+        "rainbow": "arc-en-ciel",
+        "robot": "robot",
+        "rocket": "fusée",
+        "satellite": "satellite",
+        "savanna": "savane",
+        "skyscraper": "gratte-ciel",
+        "snake": "serpent",
+        "snow": "neige",
+        "soup": "soupe",
+        "star": "étoile",
+        "subway": "métro",
+        "surfing": "surf",
+        "swamp": "marais",
+        "telescope": "télescope",
+        "television": "télévision",
+        "tennis": "tennis",
+        "tent": "tente",
+        "theater": "théâtre",
+        "tornado": "tornade",
+        "train": "train",
+        "tundra": "toundra",
+        "turtle": "tortue",
+        "violin": "violon",
+        "watch": "montre",
+        "waterfall": "cascade",
+        "whale": "baleine",
+        "windmill": "moulin à vent"
+    },
+    "properties": {
+        "accessory": "accessoire",
+        "airborne": "qui vole",
+        "animal": "animal",
+        "artistic expression": "art",
+        "astronomy": "astronomie",
+        "ball": "ballon",
+        "biome": "nature",
+        "building": "bâtiment",
+        "celestial object": "astre",
+        "city": "ville",
+        "cold": "froid",
+        "colors": "couleurs",
+        "communication": "communication",
+        "dish": "plat",
+        "electronic device": "appareil électronique",
+        "entertainment": "divertissement",
+        "entertainment venue": "lieu de spectacle",
+        "exploration": "exploration",
+        "food": "nourriture",
+        "game": "jeu",
+        "geography": "géographie",
+        "heat": "chaleur",
+        "house": "habitation",
+        "insect": "insecte",
+        "light": "lumière",
+        "location": "lieu",
+        "machine": "machine",
+        "music": "musique",
+        "musical instrument": "instrument de musique",
+        "natural phenomenon": "phénomène naturel",
+        "night": "nuit",
+        "object": "objet",
+        "outdoor activity": "activité de plein air",
+        "physical activity": "activité physique",
+        "reading": "lecture",
+        "reptile": "reptile",
+        "sand": "sable",
+        "shelter": "abri",
+        "space": "espace",
+        "sport": "sport",
+        "sweet": "sucré",
+        "technology": "technologie",
+        "time": "temps",
+        "transport": "transport",
+        "trees": "arbres",
+        "vegetation": "végétation",
+        "vehicle": "véhicule",
+        "water": "eau",
+        "weather": "météo",
+        "white": "blanc",
+        "wind": "vent"
+    },
+    "aliases": {
+        "accessory": [
+            "porté",
+            "bijou",
+            "ce qu'on porte"
+        ],
+        "airborne": [
+            "vol",
+            "dans les airs",
+            "aérien",
+            "ciel"
+        ],
+        "animal": [
+            "créature",
+            "bête",
+            "faune",
+            "être vivant"
+        ],
+        "artistic expression": [
+            "artistique",
+            "expression artistique",
+            "création"
+        ],
+        "astronomy": [
+            "espace",
+            "ciel",
+            "astre",
+            "cosmos"
+        ],
+        "ball": [
+            "balle",
+            "jeu de ballon",
+            "sport de balle"
+        ],
+        "biome": [
+            "biome",
+            "écosystème",
+            "paysage",
+            "milieu naturel"
+        ],
+        "building": [
+            "construction",
+            "édifice",
+            "architecture"
+        ],
+        "celestial object": [
+            "objet céleste",
+            "corps céleste",
+            "objet spatial"
+        ],
+        "city": [
+            "urbain",
+            "cité",
+            "vie urbaine"
+        ],
+        "cold": [
+            "glacé",
+            "gelé",
+            "glace",
+            "hiver",
+            "frais"
+        ],
+        "colors": [
+            "couleur",
+            "coloré",
+            "bariolé"
+        ],
+        "communication": [
+            "message",
+            "parler",
+            "échange"
+        ],
+        "dish": [
+            "repas",
+            "recette",
+            "mets"
+        ],
+        "electronic device": [
+            "électronique",
+            "appareil",
+            "gadget",
+            "technologie"
+        ],
+        "entertainment": [
+            "loisir",
+            "amusement",
+            "distraction"
+        ],
+        "entertainment venue": [
+            "salle",
+            "sortie",
+            "lieu de sortie"
+        ],
+        "exploration": [
+            "découverte",
+            "aventure",
+            "explorer"
+        ],
+        "food": [
+            "aliment",
+            "comestible",
+            "manger",
+            "repas"
+        ],
+        "game": [
+            "jouer",
+            "jeux",
+            "passe-temps"
+        ],
+        "geography": [
+            "relief",
+            "terrain",
+            "paysage",
+            "forme du terrain"
+        ],
+        "heat": [
+            "chaud",
+            "brûlant",
+            "feu",
+            "chaleureux"
+        ],
+        "house": [
+            "maison",
+            "logement",
+            "foyer",
+            "demeure"
+        ],
+        "insect": [
+            "bestiole",
+            "petite bête",
+            "insectes"
+        ],
+        "light": [
+            "lumineux",
+            "brille",
+            "éclaire",
+            "clarté"
+        ],
+        "location": [
+            "endroit",
+            "place",
+            "site"
+        ],
+        "machine": [
+            "mécanique",
+            "mécanisme",
+            "engin"
+        ],
+        "music": [
+            "musical",
+            "mélodie",
+            "son"
+        ],
+        "musical instrument": [
+            "instrument",
+            "instruments"
+        ],
+        "natural phenomenon": [
+            "phénomène",
+            "force de la nature",
+            "événement naturel"
+        ],
+        "night": [
+            "nocturne",
+            "obscurité",
+            "la nuit"
+        ],
+        "object": [
+            "chose",
+            "truc",
+            "article"
+        ],
+        "outdoor activity": [
+            "plein air",
+            "dehors",
+            "extérieur"
+        ],
+        "physical activity": [
+            "sport",
+            "exercice",
+            "mouvement"
+        ],
+        "reading": [
+            "lire",
+            "littérature",
+            "écrit"
+        ],
+        "reptile": [
+            "sang froid",
+            "animal à sang froid",
+            "écailles"
+        ],
+        "sand": [
+            "sableux",
+            "grains de sable"
+        ],
+        "shelter": [
+            "refuge",
+            "protection",
+            "couvert"
+        ],
+        "space": [
+            "cosmos",
+            "univers",
+            "spatial"
+        ],
+        "sport": [
+            "sports",
+            "athlétisme",
+            "compétition"
+        ],
+        "sweet": [
+            "sucre",
+            "dessert",
+            "douceur",
+            "friandise"
+        ],
+        "technology": [
+            "techno",
+            "high tech",
+            "technique"
+        ],
+        "time": [
+            "heure",
+            "mesure du temps",
+            "horloge"
+        ],
+        "transport": [
+            "déplacement",
+            "voyager",
+            "se déplacer",
+            "moyen de transport"
+        ],
+        "trees": [
+            "bois",
+            "forêt",
+            "arbre"
+        ],
+        "vegetation": [
+            "plantes",
+            "verdure",
+            "flore",
+            "végétal"
+        ],
+        "vehicle": [
+            "transport",
+            "engin",
+            "moyen de transport"
+        ],
+        "water": [
+            "aquatique",
+            "liquide",
+            "mouillé"
+        ],
+        "weather": [
+            "temps qu'il fait",
+            "climat",
+            "intempéries"
+        ],
+        "white": [
+            "blancheur",
+            "pâle",
+            "couleur blanche"
+        ],
+        "wind": [
+            "venteux",
+            "brise",
+            "air",
+            "souffle"
+        ]
+    },
+    "ui": {
+        "graph.label": "Concepts",
+        "form.placeholder": "Tape une catégorie ici !",
+        "form.submit": "Valider",
+        "form.correct": "Correct !",
+        "form.wrong": "Pas tout à fait — essaie une autre catégorie.",
+        "form.enterHint": "Appuie sur « Entrée » pour valider !",
+        "form.enterAlt": "Touche Entrée",
+        "score.categories": "Catégories",
+        "score.remaining": "Restantes sur ce plateau",
+        "panel.open": "Succès",
+        "panel.title": "Succès",
+        "panel.close": "Fermer les succès",
+        "panel.mute": "Couper le son des succès",
+        "panel.unmute": "Rétablir le son des succès",
+        "panel.secretName": "???",
+        "panel.secretDescription": "Un succès secret.",
+        "toast.unlocked": "Succès débloqué",
+        "summary.eyebrow": "Partie terminée",
+        "summary.title": "Tu as trouvé toutes les catégories.",
+        "summary.categories": "catégories",
+        "summary.boards": "plateaux",
+        "summary.correct": "justes",
+        "summary.wrong": "ratées",
+        "summary.bestStreak": "meilleure série",
+        "summary.achievements": "succès",
+        "summary.playAgain": "Rejouer",
+        "summary.keepPlaying": "Continuer à jouer",
+        "summary.note": "Rejouer remet les catégories à zéro. Tes succès restent acquis.",
+        "language.en": "Switch to English",
+        "language.fr": "Passer en français",
+        "language.group": "Langue"
+    },
+    "achievements": {
+        "first-light": {
+            "name": "Première lueur",
+            "description": "Trouve ta première catégorie."
+        },
+        "hat-trick": {
+            "name": "Coup du chapeau",
+            "description": "Vide un plateau entier sans une seule erreur."
+        },
+        "in-your-words": {
+            "name": "Dans tes mots",
+            "description": "Fais accepter dix réponses formulées à ta façon plutôt qu'avec le terme exact."
+        },
+        "streak-of-five": {
+            "name": "Série de cinq",
+            "description": "Trouve cinq catégories d'affilée sans te tromper."
+        },
+        "collector": {
+            "name": "Collectionneur",
+            "description": "Trouve vingt catégories différentes."
+        },
+        "quickdraw": {
+            "name": "Dégainé",
+            "description": "Trouve une catégorie moins de dix secondes après l'apparition du plateau."
+        },
+        "marathon": {
+            "name": "Marathonien",
+            "description": "Trouve vingt-cinq catégories dans une même session."
+        },
+        "spotless": {
+            "name": "Sans accroc",
+            "description": "Vide trois plateaux de suite sans une seule erreur."
+        },
+        "completionist": {
+            "name": "Complétiste",
+            "description": "Trouve toutes les catégories du jeu."
+        },
+        "second-guessing": {
+            "name": "Cerveau qui chauffe",
+            "description": "Sélectionne et désélectionne la même bulle dix fois avant de répondre."
+        },
+        "scattershot": {
+            "name": "Au pif",
+            "description": "Donne cinq mauvaises réponses sur le même plateau."
+        },
+        "big-net": {
+            "name": "Gros filet",
+            "description": "Réponds juste avec huit bulles ou plus sélectionnées."
+        },
+        "word-for-word": {
+            "name": "Mot pour mot",
+            "description": "Donne le terme exact dix fois, sans jamais le reformuler."
+        },
+        "and-yet": {
+            "name": "Et pourtant",
+            "description": "Réponds juste juste après t'être trompé sur la même sélection."
+        },
+        "night-owl": {
+            "name": "Oiseau de nuit",
+            "description": "Joue entre deux et quatre heures du matin."
+        }
+    }
+}

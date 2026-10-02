@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react'
+import { renderApp } from './test-utils';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { allProperties, getAllConcepts } from './concepts';
@@ -41,7 +42,7 @@ async function select(user: ReturnType<typeof userEvent.setup>, concepts: Concep
 
 test('clicking three bubbles selects them and enables submit', async () => {
   const user = userEvent.setup();
-  render(<App />);
+  renderApp(<App />);
 
   const bubbles = screen.getAllByRole('checkbox');
   expect(bubbles).toHaveLength(15);
@@ -62,7 +63,7 @@ test('clicking three bubbles selects them and enables submit', async () => {
 
 test('clicking a selected bubble again deselects it', async () => {
   const user = userEvent.setup();
-  render(<App />);
+  renderApp(<App />);
 
   const bubble = screen.getAllByRole('checkbox')[0];
   expect(bubble).toHaveAttribute('aria-checked', 'false');
@@ -75,14 +76,14 @@ test('clicking a selected bubble again deselects it', async () => {
 });
 
 test('the dealt hand always contains a solvable triple', () => {
-  render(<App />);
+  renderApp(<App />);
 
   expect(() => findSolvableTriple()).not.toThrow();
 });
 
 test('naming the category the selected concepts share is accepted', async () => {
   const user = userEvent.setup();
-  render(<App />);
+  renderApp(<App />);
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
@@ -94,7 +95,7 @@ test('naming the category the selected concepts share is accepted', async () => 
 
 test('naming a category the selected concepts do not share is rejected', async () => {
   const user = userEvent.setup();
-  render(<App />);
+  renderApp(<App />);
 
   const { concepts } = findSolvableTriple();
   await select(user, concepts);
@@ -109,7 +110,7 @@ test('naming a category the selected concepts do not share is rejected', async (
 
 test('a correct answer retires the found concepts and scores a point', async () => {
   const user = userEvent.setup();
-  render(<App />);
+  renderApp(<App />);
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
@@ -129,7 +130,7 @@ test('a correct answer retires the found concepts and scores a point', async () 
 
 test('a wrong answer leaves the board and the score alone', async () => {
   const user = userEvent.setup();
-  render(<App />);
+  renderApp(<App />);
 
   const before = screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'));
   const { concepts } = findSolvableTriple();
@@ -144,7 +145,7 @@ test('a wrong answer leaves the board and the score alone', async () => {
 
 test('a correct answer clears the selection and the input', async () => {
   const user = userEvent.setup();
-  render(<App />);
+  renderApp(<App />);
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
@@ -161,7 +162,7 @@ test('a correct answer clears the selection and the input', async () => {
 
 test('a wrong answer keeps what you typed so it can be reworded', async () => {
   const user = userEvent.setup();
-  render(<App />);
+  renderApp(<App />);
 
   const { concepts } = findSolvableTriple();
   await select(user, concepts);
@@ -176,7 +177,7 @@ test('a wrong answer keeps what you typed so it can be reworded', async () => {
 test('the first category found unlocks First Light, with the chime', async () => {
   const chime = vi.fn();
   const user = userEvent.setup();
-  render(<App playChime={chime} />);
+  renderApp(<App playChime={chime} />);
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
@@ -192,7 +193,7 @@ test('the first category found unlocks First Light, with the chime', async () =>
 test('a wrong answer unlocks nothing and stays silent', async () => {
   const chime = vi.fn();
   const user = userEvent.setup();
-  render(<App playChime={chime} />);
+  renderApp(<App playChime={chime} />);
 
   const { concepts } = findSolvableTriple();
   await select(user, concepts);
@@ -206,7 +207,7 @@ test('a wrong answer unlocks nothing and stays silent', async () => {
 
 test('an achievement earned before is not announced again on a later run', async () => {
   const user = userEvent.setup();
-  const { unmount } = render(<App playChime={() => {}} />);
+  const { unmount } = renderApp(<App playChime={() => {}} />);
 
   const first = findSolvableTriple();
   await select(user, first.concepts);
@@ -215,7 +216,7 @@ test('an achievement earned before is not announced again on a later run', async
   expect((await screen.findAllByRole('alert')).map((a) => a.textContent).join(' ')).toContain('First Light');
   unmount();
 
-  render(<App playChime={() => {}} />);
+  renderApp(<App playChime={() => {}} />);
   const again = findSolvableTriple();
   await select(user, again.concepts);
   await user.type(screen.getByPlaceholderText(/type a category here/i), again.property);
@@ -227,7 +228,7 @@ test('an achievement earned before is not announced again on a later run', async
 
 test('the achievements button counts what has been earned', async () => {
   const user = userEvent.setup();
-  render(<App playChime={() => {}} />);
+  renderApp(<App playChime={() => {}} />);
 
   const button = screen.getByRole('button', { name: /achievements/i });
   expect(button).toHaveTextContent('0 / 15');
@@ -244,7 +245,7 @@ test('the achievements button counts what has been earned', async () => {
 test('muting the sound silences the next unlock, and is remembered', async () => {
   const chime = vi.fn();
   const user = userEvent.setup();
-  const { unmount } = render(<App playChime={chime} />);
+  const { unmount } = renderApp(<App playChime={chime} />);
 
   await user.click(screen.getByRole('button', { name: /mute achievement sound/i }));
 
@@ -257,12 +258,12 @@ test('muting the sound silences the next unlock, and is remembered', async () =>
   expect(chime).not.toHaveBeenCalled();
 
   unmount();
-  render(<App playChime={() => {}} />);
+  renderApp(<App playChime={() => {}} />);
   expect(screen.getByRole('button', { name: /unmute achievement sound/i })).toBeInTheDocument();
 });
 
 test('the scoreboard shows how far the run has got', () => {
-  render(<App playChime={() => {}} />);
+  renderApp(<App playChime={() => {}} />);
 
   expect(screen.getByTestId('categories')).toHaveTextContent(`0 / ${allProperties().length}`);
 });
@@ -272,7 +273,7 @@ test('no summary while categories are still missing', () => {
     'properties-game:achievements',
     JSON.stringify({ unlocked: [], propertiesFound: allProperties().slice(0, -1), aliasAnswers: 0, exactAnswers: 0 }),
   );
-  render(<App playChime={() => {}} />);
+  renderApp(<App playChime={() => {}} />);
 
   expect(screen.queryByRole('dialog', { name: /run complete/i })).toBeNull();
 });
@@ -293,7 +294,7 @@ test('finding the last category ends the run with a summary', async () => {
       exactAnswers: 0,
     }),
   );
-  render(<App playChime={() => {}} />);
+  renderApp(<App playChime={() => {}} />);
 
   const dealt = screen.getAllByRole('checkbox').map((b) => byName.get(b.getAttribute('aria-label')!)!);
   const group = dealt.filter((c) => c.properties.includes(missing)).slice(0, 3);
@@ -321,7 +322,7 @@ test('playing again clears the categories but keeps the achievements', async () 
       exactAnswers: 0,
     }),
   );
-  render(<App playChime={() => {}} />);
+  renderApp(<App playChime={() => {}} />);
 
   const dealt = screen.getAllByRole('checkbox').map((b) => byName.get(b.getAttribute('aria-label')!)!);
   const group = dealt.filter((c) => c.properties.includes(missing)).slice(0, 3);
@@ -351,7 +352,7 @@ test('keeping on playing dismisses the summary and leaves the run alone', async 
       exactAnswers: 0,
     }),
   );
-  render(<App playChime={() => {}} />);
+  renderApp(<App playChime={() => {}} />);
 
   const dealt = screen.getAllByRole('checkbox').map((b) => byName.get(b.getAttribute('aria-label')!)!);
   const group = dealt.filter((c) => c.properties.includes(missing)).slice(0, 3);

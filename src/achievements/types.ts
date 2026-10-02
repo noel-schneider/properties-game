@@ -42,8 +42,7 @@ export interface Progress {
 
 export interface Achievement {
     id: string;
-    name: string;
-    description: string;
+    /** Named and described in the locale files, never here: one source of truth. */
     icon: string;
     /** Hidden in the panel until earned. */
     secret: boolean;

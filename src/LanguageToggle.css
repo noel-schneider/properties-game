@@ -1,0 +1,28 @@
+.language {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.language__flag {
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.55rem;
+    border: 1px solid #40405c;
+    background: #272a40;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.45;
+    filter: grayscale(0.7);
+    transition: opacity 0.15s ease, filter 0.15s ease, border-color 0.15s ease;
+}
+
+.language__flag:hover {
+    opacity: 0.85;
+    filter: grayscale(0.2);
+}
+
+.language__flag--on {
+    opacity: 1;
+    filter: none;
+    border-color: #ffad69;
+}

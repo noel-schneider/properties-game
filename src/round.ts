@@ -1,11 +1,12 @@
 import { matchedProperty } from './guess'
 import { getNRandomElements } from './utils'
-import type { PropertyAliases } from './guess'
+import type { Wordings } from './guess'
 import type { Hand } from './hand'
 import type { Concept } from './types'
 
 export interface RoundOptions {
-    aliases: PropertyAliases;
+    /** What each category is called in the language being played. */
+    wordings: Wordings;
     /** Every concept the game knows, to draw replacements from. */
     pool: Concept[];
 }
@@ -27,10 +28,10 @@ export function resolveGuess(
     hand: Hand,
     selected: string[],
     guess: string,
-    { aliases, pool }: RoundOptions,
+    { wordings, pool }: RoundOptions,
 ): Outcome {
     const chosen = hand.concepts.filter((concept) => selected.includes(concept.name));
-    const property = matchedProperty(chosen, guess, aliases);
+    const property = matchedProperty(chosen, guess, wordings);
 
     if (property === undefined) {
         return { correct: false, points: 0, hand };
