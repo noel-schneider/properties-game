@@ -458,7 +458,9 @@
         "summary.note": "Playing again clears the categories. Your achievements stay.",
         "language.en": "Switch to English",
         "language.fr": "Passer en français",
-        "language.group": "Language"
+        "language.group": "Language",
+        "panel.testSound": "Hear the achievement sound",
+        "panel.testSoundMuted": "Sound is off — turn it back on to hear this"
     },
     "achievements": {
         "first-light": {

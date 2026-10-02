@@ -127,3 +127,42 @@ test('the sound can be muted and the choice is remembered', async ({ page }) => 
 
   await expect(page.getByRole('button', { name: 'Unmute achievement sound' })).toBeVisible()
 })
+
+test('the achievement sound can be tried out from the corner', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  // The Web Audio call cannot be heard from here, so what is checked is that
+  // the button reaches it: the page records the notes it was asked to play.
+  await page.evaluate(() => {
+    const played: number[] = []
+    ;(window as unknown as { played: number[] }).played = played
+    const original = AudioContext.prototype.createOscillator
+    AudioContext.prototype.createOscillator = function patched(this: AudioContext) {
+      const oscillator = original.call(this)
+      const setValueAtTime = oscillator.frequency.setValueAtTime.bind(oscillator.frequency)
+      oscillator.frequency.setValueAtTime = (value: number, when: number) => {
+        played.push(value)
+        return setValueAtTime(value, when)
+      }
+      return oscillator
+    }
+  })
+
+  await page.getByRole('button', { name: 'Hear the achievement sound' }).click()
+
+  await expect
+    .poll(() => page.evaluate(() => (window as unknown as { played: number[] }).played))
+    .toEqual([880, 1318.5])
+})
+
+test('muting disables the sound button', async ({ page }) => {
+  await page.goto('/')
+  await page.evaluate(() => localStorage.clear())
+  await page.reload()
+  await boardSettled(page)
+
+  await page.getByRole('button', { name: 'Mute achievement sound' }).click()
+
+  await expect(page.getByRole('button', { name: /Sound is off/ })).toBeDisabled()
+})

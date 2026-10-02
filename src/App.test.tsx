@@ -366,3 +366,23 @@ test('keeping on playing dismisses the summary and leaves the run alone', async 
   expect(screen.queryByRole('dialog', { name: /run complete/i })).toBeNull();
   expect(screen.getByTestId('categories')).toHaveTextContent(`${all.length} / ${all.length}`);
 });
+
+test('the sound button plays the very chime an achievement would', async () => {
+  const chime = vi.fn();
+  const user = userEvent.setup();
+  renderApp(<App playChime={chime} />);
+
+  await user.click(screen.getByRole('button', { name: /hear the achievement sound/i }));
+
+  expect(chime).toHaveBeenCalledTimes(1);
+});
+
+test('muting silences the sound button as well as unlocks', async () => {
+  const chime = vi.fn();
+  const user = userEvent.setup();
+  renderApp(<App playChime={chime} />);
+
+  await user.click(screen.getByRole('button', { name: /mute achievement sound/i }));
+  expect(screen.getByRole('button', { name: /sound is off/i })).toBeDisabled();
+  expect(chime).not.toHaveBeenCalled();
+});

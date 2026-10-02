@@ -9,19 +9,19 @@ const secretOnes = CATALOGUE.filter((a) => a.secret);
 
 async function open(unlocked: string[] = []) {
   const user = userEvent.setup();
-  renderApp(<Panel unlocked={unlocked} muted={false} onToggleMute={() => {}} />);
+  renderApp(<Panel unlocked={unlocked} muted={false} onToggleMute={() => {}} onTestSound={() => {}} />);
   await user.click(screen.getByRole('button', { name: /achievements/i }));
   return user;
 }
 
 test('the button reports how many are earned out of the total', () => {
-  renderApp(<Panel unlocked={['first-light', 'collector']} muted={false} onToggleMute={() => {}} />);
+  renderApp(<Panel unlocked={['first-light', 'collector']} muted={false} onToggleMute={() => {}} onTestSound={() => {}} />);
 
   expect(screen.getByRole('button', { name: /achievements/i })).toHaveTextContent('2 / 15');
 });
 
 test('the list is closed until the button is pressed', () => {
-  renderApp(<Panel unlocked={[]} muted={false} onToggleMute={() => {}} />);
+  renderApp(<Panel unlocked={[]} muted={false} onToggleMute={() => {}} onTestSound={() => {}} />);
 
   expect(screen.queryByRole('dialog')).toBeNull();
 });
@@ -82,14 +82,31 @@ test('the list closes on its close button', async () => {
 test('the sound can be muted from the panel', async () => {
   const onToggleMute = vi.fn();
   const user = userEvent.setup();
-  renderApp(<Panel unlocked={[]} muted={false} onToggleMute={onToggleMute} />);
+  renderApp(<Panel unlocked={[]} muted={false} onToggleMute={onToggleMute} onTestSound={() => {}} />);
 
   await user.click(screen.getByRole('button', { name: /mute/i }));
   expect(onToggleMute).toHaveBeenCalled();
 });
 
 test('the mute control says what it will do when already muted', () => {
-  renderApp(<Panel unlocked={[]} muted onToggleMute={() => {}} />);
+  renderApp(<Panel unlocked={[]} muted onToggleMute={() => {}} onTestSound={() => {}} />);
 
-  expect(screen.getByRole('button', { name: /unmute/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /unmute achievement sound/i })).toBeInTheDocument();
+});
+
+test('the chime can be heard on demand, without waiting for an achievement', async () => {
+  const onTestSound = vi.fn();
+  const user = userEvent.setup();
+  renderApp(<Panel unlocked={[]} muted={false} onToggleMute={() => {}} onTestSound={onTestSound} />);
+
+  await user.click(screen.getByRole('button', { name: /hear the achievement sound/i }));
+
+  expect(onTestSound).toHaveBeenCalledTimes(1);
+});
+
+test('there is nothing to hear while the sound is muted', async () => {
+  const onTestSound = vi.fn();
+  renderApp(<Panel unlocked={[]} muted onToggleMute={() => {}} onTestSound={onTestSound} />);
+
+  expect(screen.getByRole('button', { name: /sound is off/i })).toBeDisabled();
 });

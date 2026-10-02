@@ -171,7 +171,12 @@ function App({ playChime = playUnlockChime }: AppProps) {
           <Scoreboard found={found.length} total={TOTAL_CATEGORIES} remaining={hand.solutions.length} />
           <div className="top-right">
               <LanguageToggle />
-              <Panel unlocked={unlocked} muted={muted} onToggleMute={toggleMute} />
+              <Panel
+                  unlocked={unlocked}
+                  muted={muted}
+                  onToggleMute={toggleMute}
+                  onTestSound={playChime}
+              />
           </div>
           <Graph concepts={hand.concepts} selected={selected} onToggle={toggleConcept} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
