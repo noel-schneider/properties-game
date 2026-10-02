@@ -1,4 +1,4 @@
-import { loadLifetime, saveLifetime, STORAGE_KEY } from './storage'
+import { loadLifetime, loadMuted, MUTED_KEY, saveLifetime, saveMuted, STORAGE_KEY } from './storage'
 import { emptyLifetime } from './progress'
 
 afterEach(() => {
@@ -55,4 +55,31 @@ test('storage that throws on write is swallowed rather than crashing play', () =
   });
 
   expect(() => saveLifetime(emptyLifetime())).not.toThrow();
+});
+
+test('the sound preference survives a round trip', () => {
+  saveMuted(true);
+  expect(loadMuted()).toBe(true);
+
+  saveMuted(false);
+  expect(loadMuted()).toBe(false);
+});
+
+test('sound is on when nothing was ever chosen', () => {
+  expect(loadMuted()).toBe(false);
+});
+
+test('an unreadable sound preference falls back to sound on', () => {
+  localStorage.setItem(MUTED_KEY, 'maybe');
+  expect(loadMuted()).toBe(false);
+});
+
+test('storage that throws leaves the sound on rather than crashing', () => {
+  vi.stubGlobal('localStorage', {
+    getItem: () => { throw new DOMException('denied'); },
+    setItem: () => { throw new DOMException('denied'); },
+  });
+
+  expect(loadMuted()).toBe(false);
+  expect(() => saveMuted(true)).not.toThrow();
 });
