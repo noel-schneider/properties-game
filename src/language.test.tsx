@@ -134,3 +134,34 @@ test('the chosen language is remembered', async () => {
 
   expect(localStorage.getItem('properties-game:language')).toBe('fr');
 });
+
+test('a board started in one language can be finished in the other', async () => {
+  const user = userEvent.setup();
+  renderIn('fr', <App playChime={() => {}} />);
+
+  const { triple, property } = solvableTriple('fr');
+  for (const concept of triple) {
+    await user.click(
+      screen.getByRole('checkbox', { name: (words.fr.concepts as Record<string, string>)[concept.name] }),
+    );
+  }
+  await user.type(
+    screen.getByPlaceholderText(words.fr.ui['form.placeholder']),
+    (words.fr.properties as Record<string, string>)[property],
+  );
+  await user.click(screen.getByRole('button', { name: words.fr.ui['form.submit'] }));
+  await screen.findByRole('status');
+
+  await user.click(screen.getByRole('button', { name: words.en.ui['language.en'] }));
+
+  // Still found, and the next answer is taken in the new language.
+  const next = solvableTriple('en');
+  for (const concept of next.triple) {
+    await user.click(screen.getByRole('checkbox', { name: concept.name }));
+  }
+  await user.type(screen.getByPlaceholderText(words.en.ui['form.placeholder']), next.property);
+  await user.click(screen.getByRole('button', { name: words.en.ui['form.submit'] }));
+
+  expect(await screen.findByRole('status')).toHaveTextContent(words.en.ui['form.correct']);
+  expect(screen.getByTestId('categories')).toHaveTextContent('2 / 51');
+});

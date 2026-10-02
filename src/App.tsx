@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import "./App.css";
+import Answers from "./Answers";
 import Form from "./Form";
 import Graph from "./Graph";
 import Scoreboard from "./Scoreboard";
@@ -167,6 +168,8 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
   return (
       <>
+          {/* Debugging aid. Folded away in a built game, import and all. */}
+          {import.meta.env.DEV && <Answers hand={hand} enabled />}
           <Scoreboard found={found.length} total={TOTAL_CATEGORIES} remaining={hand.solutions.length} />
           <div className="top-right">
               <LanguageToggle />
