@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
-import { getAllConcepts } from './concepts';
+import { allProperties, getAllConcepts } from './concepts';
 import { sharedProperties } from './guess';
 import type { Concept } from './types';
 
@@ -117,7 +117,8 @@ test('a correct answer retires the found concepts and scores a point', async () 
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
-  expect(screen.getByTestId('score')).toHaveTextContent('1');
+  // The board counter now tracks categories collected, not raw finds.
+  expect(screen.getByTestId('categories')).toHaveTextContent(`1 / ${allProperties().length}`);
 
   const stillDealt = screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'));
   for (const concept of concepts) {
@@ -137,7 +138,7 @@ test('a wrong answer leaves the board and the score alone', async () => {
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
-  expect(screen.getByTestId('score')).toHaveTextContent('0');
+  expect(screen.getByTestId('categories')).toHaveTextContent(`0 / ${allProperties().length}`);
   expect(screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'))).toEqual(before);
 });
 
@@ -229,7 +230,7 @@ test('the achievements button counts what has been earned', async () => {
   render(<App playChime={() => {}} />);
 
   const button = screen.getByRole('button', { name: /achievements/i });
-  expect(button).toHaveTextContent('0 / 14');
+  expect(button).toHaveTextContent('0 / 15');
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
@@ -237,7 +238,7 @@ test('the achievements button counts what has been earned', async () => {
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   await screen.findAllByRole('alert');
-  expect(button).not.toHaveTextContent('0 / 14');
+  expect(button).not.toHaveTextContent('0 / 15');
 });
 
 test('muting the sound silences the next unlock, and is remembered', async () => {
@@ -258,4 +259,109 @@ test('muting the sound silences the next unlock, and is remembered', async () =>
   unmount();
   render(<App playChime={() => {}} />);
   expect(screen.getByRole('button', { name: /unmute achievement sound/i })).toBeInTheDocument();
+});
+
+test('the scoreboard shows how far the run has got', () => {
+  render(<App playChime={() => {}} />);
+
+  expect(screen.getByTestId('categories')).toHaveTextContent(`0 / ${allProperties().length}`);
+});
+
+test('no summary while categories are still missing', () => {
+  localStorage.setItem(
+    'properties-game:achievements',
+    JSON.stringify({ unlocked: [], propertiesFound: allProperties().slice(0, -1), aliasAnswers: 0, exactAnswers: 0 }),
+  );
+  render(<App playChime={() => {}} />);
+
+  expect(screen.queryByRole('dialog', { name: /run complete/i })).toBeNull();
+});
+
+test('finding the last category ends the run with a summary', async () => {
+  const user = userEvent.setup();
+  const all = allProperties();
+  const missing = all[0];
+
+  // One category short of the end. The deal is bound to offer what is missing,
+  // which is exactly what makes the end reachable at all.
+  localStorage.setItem(
+    'properties-game:achievements',
+    JSON.stringify({
+      unlocked: [],
+      propertiesFound: all.filter((p) => p !== missing),
+      aliasAnswers: 0,
+      exactAnswers: 0,
+    }),
+  );
+  render(<App playChime={() => {}} />);
+
+  const dealt = screen.getAllByRole('checkbox').map((b) => byName.get(b.getAttribute('aria-label')!)!);
+  const group = dealt.filter((c) => c.properties.includes(missing)).slice(0, 3);
+  expect(group).toHaveLength(3);
+
+  await select(user, group);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), missing);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  const summary = await screen.findByRole('dialog', { name: /run complete/i });
+  expect(summary).toHaveTextContent(String(all.length));
+});
+
+test('playing again clears the categories but keeps the achievements', async () => {
+  const user = userEvent.setup();
+  const all = allProperties();
+  const missing = all[0];
+
+  localStorage.setItem(
+    'properties-game:achievements',
+    JSON.stringify({
+      unlocked: ['first-light'],
+      propertiesFound: all.filter((p) => p !== missing),
+      aliasAnswers: 0,
+      exactAnswers: 0,
+    }),
+  );
+  render(<App playChime={() => {}} />);
+
+  const dealt = screen.getAllByRole('checkbox').map((b) => byName.get(b.getAttribute('aria-label')!)!);
+  const group = dealt.filter((c) => c.properties.includes(missing)).slice(0, 3);
+  await select(user, group);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), missing);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  await screen.findByRole('dialog', { name: /run complete/i });
+  await user.click(screen.getByRole('button', { name: /play again/i }));
+
+  expect(screen.queryByRole('dialog', { name: /run complete/i })).toBeNull();
+  expect(screen.getByTestId('categories')).toHaveTextContent(`0 / ${all.length}`);
+  expect(screen.getByRole('button', { name: /achievements/i })).not.toHaveTextContent('0 / 15');
+});
+
+test('keeping on playing dismisses the summary and leaves the run alone', async () => {
+  const user = userEvent.setup();
+  const all = allProperties();
+  const missing = all[0];
+
+  localStorage.setItem(
+    'properties-game:achievements',
+    JSON.stringify({
+      unlocked: [],
+      propertiesFound: all.filter((p) => p !== missing),
+      aliasAnswers: 0,
+      exactAnswers: 0,
+    }),
+  );
+  render(<App playChime={() => {}} />);
+
+  const dealt = screen.getAllByRole('checkbox').map((b) => byName.get(b.getAttribute('aria-label')!)!);
+  const group = dealt.filter((c) => c.properties.includes(missing)).slice(0, 3);
+  await select(user, group);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), missing);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  await screen.findByRole('dialog', { name: /run complete/i });
+  await user.click(screen.getByRole('button', { name: /keep playing/i }));
+
+  expect(screen.queryByRole('dialog', { name: /run complete/i })).toBeNull();
+  expect(screen.getByTestId('categories')).toHaveTextContent(`${all.length} / ${all.length}`);
 });

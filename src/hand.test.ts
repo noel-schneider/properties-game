@@ -70,3 +70,47 @@ test('a pool with no group large enough is rejected', () => {
         /no property is shared by 3 concepts/i,
     );
 });
+
+// A pool with six groups, so that leaving the choice to chance visibly fails
+// to surface the one category still missing.
+const sixGroups: Concept[] = [
+    { name: 'jungle', properties: ['biome'] },
+    { name: 'desert', properties: ['biome'] },
+    { name: 'forest', properties: ['biome'] },
+    { name: 'igloo', properties: ['cold'] },
+    { name: 'snow', properties: ['cold'] },
+    { name: 'glacier', properties: ['cold'] },
+    { name: 'piano', properties: ['music'] },
+    { name: 'guitar', properties: ['music'] },
+    { name: 'drum', properties: ['music'] },
+    { name: 'pizza', properties: ['food'] },
+    { name: 'bread', properties: ['food'] },
+    { name: 'soup', properties: ['food'] },
+    { name: 'cabin', properties: ['house'] },
+    { name: 'tent', properties: ['house'] },
+    { name: 'apartment', properties: ['house'] },
+    { name: 'star', properties: ['light'] },
+    { name: 'candle', properties: ['light'] },
+    { name: 'lamp', properties: ['light'] },
+];
+
+test('a hand always offers a category the player has not found yet', () => {
+    // Left to chance the missing category shows up perhaps a third of the time,
+    // which is what makes the end of the game a grind: against the real pool,
+    // collecting all 51 takes 87 boards, 46 of them spent on the final five.
+    const found = ['biome', 'cold', 'music', 'food', 'house'];
+
+    for (let i = 0; i < 60; i++) {
+        const hand = dealHand(sixGroups, { handSize: 9, groupSize: 3, found });
+
+        expect(hand.solutions.map((s) => s.property)).toContain('light');
+    }
+});
+
+test('a pool with nothing left to find still deals a playable hand', () => {
+    const everything = ['biome', 'cold', 'music', 'food', 'house', 'light'];
+    const hand = dealHand(sixGroups, { handSize: 9, groupSize: 3, found: everything });
+
+    expect(hand.solutions.length).toBeGreaterThanOrEqual(1);
+    expect(hand.concepts).toHaveLength(9);
+});

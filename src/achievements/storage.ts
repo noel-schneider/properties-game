@@ -93,3 +93,55 @@ export function saveMuted(muted: boolean): void {
         // Same bargain as the achievement record: a preference is not worth a crash.
     }
 }
+
+/**
+ * The run tally, under its own key for the same reason as the sound
+ * preference. It is persisted because the end of a run is reached across
+ * sessions: a summary announcing "51 categories" beside "1 board" would be
+ * counting two different things.
+ */
+export const RUN_KEY = 'properties-game:run';
+
+export interface RunTally {
+    boards: number;
+    correct: number;
+    wrong: number;
+    bestStreak: number;
+}
+
+export function emptyRunStats(): RunTally {
+    return { boards: 0, correct: 0, wrong: 0, bestStreak: 0 };
+}
+
+export function loadRunStats(): RunTally {
+    let raw: string | null = null;
+
+    try {
+        raw = localStorage.getItem(RUN_KEY);
+    } catch {
+        return emptyRunStats();
+    }
+
+    if (raw === null) return emptyRunStats();
+
+    try {
+        const stored = JSON.parse(raw) as Record<string, unknown>;
+        const { boards, correct, wrong, bestStreak } = stored;
+
+        if (!isNumber(boards) || !isNumber(correct) || !isNumber(wrong) || !isNumber(bestStreak)) {
+            return emptyRunStats();
+        }
+
+        return { boards, correct, wrong, bestStreak };
+    } catch {
+        return emptyRunStats();
+    }
+}
+
+export function saveRunStats(tally: RunTally): void {
+    try {
+        localStorage.setItem(RUN_KEY, JSON.stringify(tally));
+    } catch {
+        // As above: a tally is not worth a crash.
+    }
+}

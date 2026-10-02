@@ -1,3 +1,4 @@
+import { allProperties } from '../concepts'
 import type { Achievement, GameEvent } from './types'
 
 const QUICKDRAW_MS = 10_000;
@@ -75,6 +76,14 @@ export const CATALOGUE: Achievement[] = [
         icon: '✨',
         secret: false,
         earnedBy: ({ session }) => session.cleanBoardsInARow >= 3,
+    },
+    {
+        id: 'completionist',
+        name: 'Completionist',
+        description: 'Find every category in the game.',
+        icon: '🏅',
+        secret: false,
+        earnedBy: ({ lifetime }) => lifetime.propertiesFound.length >= allProperties().length,
     },
 
     {

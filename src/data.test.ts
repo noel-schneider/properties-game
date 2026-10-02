@@ -43,3 +43,12 @@ test('every deal offers three separate groups to find', () => {
     expect(dealRound().solutions).toHaveLength(3);
   }
 });
+
+test('a board always offers something still missing, so the game can be finished', () => {
+  const all = [...new Set(getAllConcepts().flatMap((c) => c.properties))];
+  const found = all.filter((p) => p !== all[0]);
+
+  for (let i = 0; i < 40; i++) {
+    expect(dealRound(found).solutions.map((s) => s.property)).toContain(all[0]);
+  }
+});

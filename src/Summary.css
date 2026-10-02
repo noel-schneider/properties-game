@@ -1,0 +1,104 @@
+.summary {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(17, 18, 30, 0.82);
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+.summary__card {
+  width: min(30rem, 100%);
+  padding: 2rem 2rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid #4a4063;
+  background: #1f2135;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  text-align: center;
+}
+
+.summary__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffad69;
+}
+
+.summary__title {
+  margin: 0 0 1.5rem;
+  font-size: 1.35rem;
+  color: #f0ecee;
+}
+
+.summary__figures {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem 0.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.summary__figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.summary__value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffad69;
+}
+
+.summary__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: #9a9ab0;
+}
+
+.summary__actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.summary__button {
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.55rem;
+  border: 1px solid #40405c;
+  background: #272a40;
+  color: #c9c9db;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.summary__button:hover {
+  background: #31344e;
+}
+
+.summary__button--primary {
+  background: #ffad69;
+  border-color: #ffad69;
+  color: #1f2135;
+  font-weight: 600;
+}
+
+.summary__button--primary:hover {
+  background: #ffbd87;
+}
+
+.summary__note {
+  margin: 1rem 0 0;
+  font-size: 0.72rem;
+  color: #7f7f98;
+}
+
+@media (max-width: 30rem) {
+  .summary__figures {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

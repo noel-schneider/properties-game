@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 import data from '../src/concepts.json' with { type: 'json' }
 
+const TOTAL_CATEGORIES = new Set(Object.values(data as Record<string, string[]>).flat()).size
+
 const properties = data as Record<string, string[]>
 
 /** Three concepts on screen that share a property, plus that property. */
@@ -70,15 +72,17 @@ test('pressing Enter submits the guess', async ({ page }) => {
   await expect(page.getByRole('status')).toHaveText(/correct/i)
 })
 
-test('a solved group leaves the board, the score rises, and play continues', async ({ page }) => {
+test('a solved group leaves the board, the tally rises, and play continues', async ({ page }) => {
+  // Start from a clean record, then read the board that comes with it.
   await page.goto('/')
+  await page.evaluate(() => localStorage.clear())
+  await page.reload()
+  await expect(page.getByTestId('categories')).toHaveText(`0 / ${TOTAL_CATEGORIES}`)
 
   const dealt = await page.getByRole('checkbox').evaluateAll((nodes) =>
     nodes.map((n) => n.getAttribute('aria-label')!),
   )
   const { names, property } = findSolvableTriple(dealt)
-
-  await expect(page.getByTestId('score')).toHaveText('0')
 
   for (const name of names) {
     await page.getByRole('checkbox', { name }).click()
@@ -87,7 +91,7 @@ test('a solved group leaves the board, the score rises, and play continues', asy
   await page.getByRole('button', { name: 'Submit' }).click()
 
   await expect(page.getByRole('status')).toHaveText(/correct/i)
-  await expect(page.getByTestId('score')).toHaveText('1')
+  await expect(page.getByTestId('categories')).toHaveText(`1 / ${TOTAL_CATEGORIES}`)
 
   for (const name of names) {
     await expect(page.getByRole('checkbox', { name })).toHaveCount(0)

@@ -136,6 +136,16 @@ test('two achievements earned on the same guess are both announced', () => {
   expect(seen).toEqual(expect.arrayContaining(['first-light', 'big-net', 'quickdraw', 'hat-trick']));
 });
 
+test('completionist when every category has been found', () => {
+  const everything = Array.from({ length: 51 }, (_, i) => `p${i}`);
+  const almost = everything.slice(0, 50);
+
+  expect(unlockedBy([deal(99), ...wins(50)])).not.toContain('completionist');
+  expect(unlockedBy([deal(99), ...almost.map((p) => win({ property: p })), win({ property: 'p50' })]))
+    .toContain('completionist');
+  expect(everything).toHaveLength(51);
+});
+
 test('unlocked ids are remembered in the lifetime record', () => {
   const result = recordEvent(recordEvent(emptyProgress(), deal()).progress, win());
 
