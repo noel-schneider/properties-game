@@ -1,4 +1,4 @@
-import { loadLifetime, loadMuted, MUTED_KEY, saveLifetime, saveMuted, STORAGE_KEY } from './storage'
+import { loadLifetime, loadMuted, loadRunStats, MUTED_KEY, RUN_KEY, saveLifetime, saveMuted, saveRunStats, STORAGE_KEY } from './storage'
 import { emptyLifetime } from './progress'
 
 afterEach(() => {
@@ -82,4 +82,30 @@ test('storage that throws leaves the sound on rather than crashing', () => {
 
   expect(loadMuted()).toBe(false);
   expect(() => saveMuted(true)).not.toThrow();
+});
+
+test('the run tally survives a round trip', () => {
+  saveRunStats({ boards: 29, correct: 87, wrong: 12, bestStreak: 9 });
+
+  expect(loadRunStats()).toEqual({ boards: 29, correct: 87, wrong: 12, bestStreak: 9 });
+});
+
+test('no stored tally reads as a fresh run', () => {
+  expect(loadRunStats()).toEqual({ boards: 0, correct: 0, wrong: 0, bestStreak: 0 });
+});
+
+test('a tally of the wrong shape is discarded', () => {
+  localStorage.setItem(RUN_KEY, JSON.stringify({ boards: 'lots' }));
+
+  expect(loadRunStats()).toEqual({ boards: 0, correct: 0, wrong: 0, bestStreak: 0 });
+});
+
+test('storage that throws leaves a fresh run rather than crashing', () => {
+  vi.stubGlobal('localStorage', {
+    getItem: () => { throw new DOMException('denied'); },
+    setItem: () => { throw new DOMException('denied'); },
+  });
+
+  expect(loadRunStats()).toEqual({ boards: 0, correct: 0, wrong: 0, bestStreak: 0 });
+  expect(() => saveRunStats({ boards: 1, correct: 1, wrong: 0, bestStreak: 1 })).not.toThrow();
 });

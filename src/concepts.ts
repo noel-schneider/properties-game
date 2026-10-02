@@ -16,9 +16,15 @@ export function getAllConcepts(): Concept[] {
     return allConcepts;
 }
 
-export function dealRound(): Hand {
+export function dealRound(found: string[] = []): Hand {
     return dealHand(allConcepts, {
         handSize: CONCEPTS_PER_ROUND,
         groupSize: CONCEPTS_PER_GROUP,
+        found,
     });
+}
+
+/** Every category that can ever be an answer. The goal of a full run. */
+export function allProperties(): string[] {
+    return [...new Set(allConcepts.flatMap((concept) => concept.properties))];
 }

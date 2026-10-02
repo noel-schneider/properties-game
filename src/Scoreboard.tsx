@@ -1,15 +1,17 @@
 import './Scoreboard.css'
 
 interface ScoreboardProps {
-    score: number;
+    found: number;
+    total: number;
     remaining: number;
 }
 
-function Scoreboard({ score, remaining }: ScoreboardProps) {
+function Scoreboard({ found, total, remaining }: ScoreboardProps) {
     return (
         <div className="scoreboard">
             <p className="scoreboard__item">
-                Found <span data-testid="score" className="scoreboard__value">{score}</span>
+                Categories{' '}
+                <span data-testid="categories" className="scoreboard__value">{found} / {total}</span>
             </p>
             <p className="scoreboard__item">
                 Left in this board <span className="scoreboard__value">{remaining}</span>

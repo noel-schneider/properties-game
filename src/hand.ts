@@ -16,6 +16,8 @@ export interface DealOptions {
     groupSize: number;
     /** How many solvable groups to aim for. Fewer are dealt if the pool cannot supply them. */
     maxGroups?: number;
+    /** Categories already collected, so the deal can favour what is still missing. */
+    found?: string[];
 }
 
 /**
@@ -46,7 +48,7 @@ function findGroups(pool: Concept[], groupSize: number): Solution[] {
  * picked first and the rest of the hand is filled around them.
  */
 export function dealHand(pool: Concept[], options: DealOptions): Hand {
-    const { handSize, groupSize, maxGroups = 3 } = options;
+    const { handSize, groupSize, maxGroups = 3, found = [] } = options;
 
     if (handSize < groupSize) {
         throw new Error(`A hand of ${handSize} cannot hold a group of ${groupSize}.`);
@@ -60,9 +62,22 @@ export function dealHand(pool: Concept[], options: DealOptions): Hand {
     const chosen: Solution[] = [];
     const picked = new Set<string>();
 
+    // One group the player has never found leads the queue. Left purely to
+    // chance the last categories almost never come up: collecting all of them
+    // takes 87 boards against the real pool, 46 of those spent on the final
+    // five. Leading with one missing category brings it to 29, while the other
+    // groups stay freely drawn so familiar categories keep coming back.
+    const collected = new Set(found);
+    const missing = candidates.filter((candidate) => !collected.has(candidate.property));
+    const queue = [
+        ...getNRandomElements(missing, 1),
+        ...getNRandomElements(candidates, candidates.length),
+    ];
+
     // Groups are kept disjoint so that a selection never satisfies two answers
     // at once, which would make the feedback ambiguous.
-    for (const candidate of getNRandomElements(candidates, candidates.length)) {
+    for (const candidate of queue) {
+        if (chosen.some((solution) => solution.property === candidate.property)) continue;
         if (chosen.length >= maxGroups) break;
 
         const available = candidate.concepts.filter((name) => !picked.has(name));

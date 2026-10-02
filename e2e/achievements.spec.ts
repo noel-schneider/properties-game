@@ -89,14 +89,14 @@ test('an earned achievement shows up in the panel after a reload', async ({ page
   await page.evaluate(() => localStorage.clear())
   await page.reload()
 
-  await expect(page.getByRole('button', { name: /achievements/i })).toContainText('0 / 14')
+  await expect(page.getByRole('button', { name: /achievements/i })).toContainText('0 / 15')
 
   await solveOnce(page)
   await expect(page.getByRole('alert').first()).toBeVisible()
 
   await page.reload()
   const button = page.getByRole('button', { name: /achievements/i })
-  await expect(button).not.toContainText('0 / 14')
+  await expect(button).not.toContainText('0 / 15')
 
   await button.click()
   await expect(page.getByTestId('entry-first-light')).toHaveAttribute('data-earned', 'true')

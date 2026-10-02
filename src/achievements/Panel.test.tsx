@@ -16,7 +16,7 @@ async function open(unlocked: string[] = []) {
 test('the button reports how many are earned out of the total', () => {
   render(<Panel unlocked={['first-light', 'collector']} muted={false} onToggleMute={() => {}} />);
 
-  expect(screen.getByRole('button', { name: /achievements/i })).toHaveTextContent('2 / 14');
+  expect(screen.getByRole('button', { name: /achievements/i })).toHaveTextContent('2 / 15');
 });
 
 test('the list is closed until the button is pressed', () => {
