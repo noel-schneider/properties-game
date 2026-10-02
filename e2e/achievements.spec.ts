@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { boardSettled } from './board'
 import data from '../src/concepts.json' with { type: 'json' }
 
 const properties = data as Record<string, string[]>
@@ -32,8 +33,10 @@ async function solveOnce(page: import('@playwright/test').Page) {
 
 test('the first find announces an achievement, and it survives a reload', async ({ page }) => {
   await page.goto('/')
+  await boardSettled(page)
   await page.evaluate(() => localStorage.clear())
   await page.reload()
+  await boardSettled(page)
 
   await expect(page.getByRole('alert')).toHaveCount(0)
 
@@ -44,6 +47,7 @@ test('the first find announces an achievement, and it survives a reload', async 
 
   // Earned achievements are kept, so the same one is never announced twice.
   await page.reload()
+  await boardSettled(page)
   const stored = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('properties-game:achievements') ?? '{}'),
   )
@@ -56,8 +60,10 @@ test('the first find announces an achievement, and it survives a reload', async 
 
 test('the announcement clears itself after a few seconds', async ({ page }) => {
   await page.goto('/')
+  await boardSettled(page)
   await page.evaluate(() => localStorage.clear())
   await page.reload()
+  await boardSettled(page)
 
   await solveOnce(page)
   await expect(page.getByRole('alert').first()).toBeVisible()
@@ -66,8 +72,10 @@ test('the announcement clears itself after a few seconds', async ({ page }) => {
 
 test('the panel names the public achievements and conceals the secret ones', async ({ page }) => {
   await page.goto('/')
+  await boardSettled(page)
   await page.evaluate(() => localStorage.clear())
   await page.reload()
+  await boardSettled(page)
 
   await page.getByRole('button', { name: /achievements/i }).click()
   const sheet = page.getByRole('dialog')
@@ -86,8 +94,10 @@ test('the panel names the public achievements and conceals the secret ones', asy
 
 test('an earned achievement shows up in the panel after a reload', async ({ page }) => {
   await page.goto('/')
+  await boardSettled(page)
   await page.evaluate(() => localStorage.clear())
   await page.reload()
+  await boardSettled(page)
 
   await expect(page.getByRole('button', { name: /achievements/i })).toContainText('0 / 15')
 
@@ -95,6 +105,8 @@ test('an earned achievement shows up in the panel after a reload', async ({ page
   await expect(page.getByRole('alert').first()).toBeVisible()
 
   await page.reload()
+
+  await boardSettled(page)
   const button = page.getByRole('button', { name: /achievements/i })
   await expect(button).not.toContainText('0 / 15')
 
@@ -104,11 +116,14 @@ test('an earned achievement shows up in the panel after a reload', async ({ page
 
 test('the sound can be muted and the choice is remembered', async ({ page }) => {
   await page.goto('/')
+  await boardSettled(page)
   await page.evaluate(() => localStorage.clear())
   await page.reload()
+  await boardSettled(page)
 
   await page.getByRole('button', { name: 'Mute achievement sound' }).click()
   await page.reload()
+  await boardSettled(page)
 
   await expect(page.getByRole('button', { name: 'Unmute achievement sound' })).toBeVisible()
 })

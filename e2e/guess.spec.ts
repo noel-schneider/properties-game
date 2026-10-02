@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { boardSettled } from './board'
 import data from '../src/concepts.json' with { type: 'json' }
 
 const TOTAL_CATEGORIES = new Set(Object.values(data as Record<string, string[]>).flat()).size
@@ -23,6 +24,7 @@ function findSolvableTriple(dealt: string[]): { names: string[]; property: strin
 
 test('naming the shared category is accepted', async ({ page }) => {
   await page.goto('/')
+  await boardSettled(page)
 
   const dealt = await page.getByRole('checkbox').evaluateAll((nodes) =>
     nodes.map((n) => n.getAttribute('aria-label')!),
@@ -40,6 +42,7 @@ test('naming the shared category is accepted', async ({ page }) => {
 
 test('a wrong category is rejected', async ({ page }) => {
   await page.goto('/')
+  await boardSettled(page)
 
   const dealt = await page.getByRole('checkbox').evaluateAll((nodes) =>
     nodes.map((n) => n.getAttribute('aria-label')!),
@@ -57,6 +60,7 @@ test('a wrong category is rejected', async ({ page }) => {
 
 test('pressing Enter submits the guess', async ({ page }) => {
   await page.goto('/')
+  await boardSettled(page)
 
   const dealt = await page.getByRole('checkbox').evaluateAll((nodes) =>
     nodes.map((n) => n.getAttribute('aria-label')!),
@@ -75,8 +79,10 @@ test('pressing Enter submits the guess', async ({ page }) => {
 test('a solved group leaves the board, the tally rises, and play continues', async ({ page }) => {
   // Start from a clean record, then read the board that comes with it.
   await page.goto('/')
+  await boardSettled(page)
   await page.evaluate(() => localStorage.clear())
   await page.reload()
+  await boardSettled(page)
   await expect(page.getByTestId('categories')).toHaveText(`0 / ${TOTAL_CATEGORIES}`)
 
   const dealt = await page.getByRole('checkbox').evaluateAll((nodes) =>
