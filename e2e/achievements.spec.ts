@@ -142,3 +142,4 @@ test('the sound can be muted from the corner, and the choice sticks', async ({ p
 
   await expect(page.getByRole('button', { name: 'Unmute achievement sound' })).toBeVisible()
 })
+

@@ -1,0 +1,98 @@
+/*
+ * The background: the game's indigo with a sunrise rising behind the board.
+ *
+ * It sits on its own fixed layer behind the page, and the only thing that
+ * moves is a slow scale on a layer the compositor already holds — no repaint,
+ * no layout, nothing per frame that the board has to pay for.
+ */
+.sky {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    background-color: #2d3047;
+}
+
+/*
+ * A film of noise over the lot.
+ *
+ * A glow this wide crosses only a handful of 8-bit steps, and the eye resolves
+ * every one of them as a band. A little noise scatters the step boundary and
+ * the bands stop existing.
+ */
+.sky::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/*
+ * Both halves of the halo run down a nine-stop curve to rgba(their own colour,
+ * 0). Two things make a glow show its own outline: CSS `transparent` is
+ * transparent *black*, so a warm colour faded to it goes through grey and
+ * draws a dirty ring, and a single colour stop ends in an edge you can trace
+ * with a finger.
+ */
+.sky__glow {
+    position: absolute;
+    left: 50%;
+    will-change: transform;
+}
+
+/* The sun itself: the orange the game already wears on its labels and counts. */
+.sky__glow--core {
+    bottom: -22%;
+    width: 70%;
+    height: 56%;
+    margin-left: -35%;
+    background: radial-gradient(closest-side,
+        rgba(255, 173, 105, 0.5) 0%,
+        rgba(255, 173, 105, 0.47) 12%,
+        rgba(255, 173, 105, 0.41) 24%,
+        rgba(255, 173, 105, 0.33) 36%,
+        rgba(255, 173, 105, 0.245) 48%,
+        rgba(255, 173, 105, 0.165) 60%,
+        rgba(255, 173, 105, 0.095) 72%,
+        rgba(255, 173, 105, 0.04) 84%,
+        rgba(255, 173, 105, 0) 100%);
+    animation: breathe-core 19s ease-in-out infinite alternate;
+}
+
+/* The light it throws much wider, pink where it meets the indigo. */
+.sky__glow--spill {
+    bottom: -34%;
+    width: 150%;
+    height: 90%;
+    margin-left: -75%;
+    background: radial-gradient(closest-side,
+        rgba(228, 106, 146, 0.3) 0%,
+        rgba(228, 106, 146, 0.282) 12%,
+        rgba(228, 106, 146, 0.246) 24%,
+        rgba(228, 106, 146, 0.198) 36%,
+        rgba(228, 106, 146, 0.147) 48%,
+        rgba(228, 106, 146, 0.099) 60%,
+        rgba(228, 106, 146, 0.057) 72%,
+        rgba(228, 106, 146, 0.024) 84%,
+        rgba(228, 106, 146, 0) 100%);
+    animation: breathe-spill 27s ease-in-out infinite alternate;
+}
+
+/* Two cycles that do not divide into each other, so the sunrise never
+   visibly repeats itself. Small enough that you notice it only by looking. */
+@keyframes breathe-core {
+    from { transform: scale(1); }
+    to   { transform: scale(1.07) translateY(-2%); }
+}
+
+@keyframes breathe-spill {
+    from { transform: scale(1.04); }
+    to   { transform: scale(1) translateY(-1%); }
+}
+
+/* Asked for less motion: the same sunrise, holding still. */
+.sky[data-still="true"] .sky__glow {
+    animation: none;
+}
