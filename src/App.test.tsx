@@ -269,25 +269,7 @@ test('muting the sound silences the next unlock, and is remembered', async () =>
 
 
 
-test('the sound button plays the very chime an achievement would', async () => {
-  const chime = vi.fn();
-  const user = userEvent.setup();
-  renderApp(<App playChime={chime} />);
 
-  await user.click(screen.getByRole('button', { name: /hear the achievement sound/i }));
-
-  expect(chime).toHaveBeenCalledTimes(1);
-});
-
-test('muting silences the sound button as well as unlocks', async () => {
-  const chime = vi.fn();
-  const user = userEvent.setup();
-  renderApp(<App playChime={chime} />);
-
-  await user.click(screen.getByRole('button', { name: /mute achievement sound/i }));
-  expect(screen.getByRole('button', { name: /sound is off/i })).toBeDisabled();
-  expect(chime).not.toHaveBeenCalled();
-});
 
 test('starting over clears what was found and keeps the achievements', async () => {
   const user = userEvent.setup();
@@ -327,4 +309,22 @@ test('backing out of starting over leaves the game alone', async () => {
   await user.click(screen.getByRole('button', { name: /cancel/i }));
 
   expect(screen.getByTestId('found')).toHaveTextContent('1');
+});
+
+test('the controls sit where they belong: achievements low, the rest high', () => {
+  renderApp(<App playChime={() => {}} />);
+
+  const top = document.querySelector('.corner--top-right')!;
+  const bottom = document.querySelector('.corner--bottom-right')!;
+
+  expect(bottom).toContainElement(screen.getByRole('button', { name: /achievements/i }));
+  for (const name of [/switch to english/i, /start over/i, /mute achievement sound/i]) {
+    expect(top).toContainElement(screen.getByRole('button', { name }));
+  }
+});
+
+test('the sound test button is gone', () => {
+  renderApp(<App playChime={() => {}} />);
+
+  expect(screen.queryByRole('button', { name: /hear the achievement sound/i })).toBeNull();
 });

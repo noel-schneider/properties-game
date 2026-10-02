@@ -1,0 +1,67 @@
+/*
+ * One look for every control that sits over the board, so the corners read as
+ * one set of tools rather than three stacks of unrelated widgets.
+ */
+.control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    height: 2.1rem;
+    padding: 0 0.75rem;
+    border-radius: 0.55rem;
+    border: 1px solid #40405c;
+    background: #272a40;
+    color: #c9c9db;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 0.82rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.control:hover:not(:disabled) {
+    background: #31344e;
+    border-color: #5a5a7d;
+}
+
+.control:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Square, for the ones carrying a single glyph. */
+.control--icon {
+    width: 2.1rem;
+    padding: 0;
+    font-size: 0.95rem;
+}
+
+.control--on {
+    border-color: #ffad69;
+}
+
+.control__count {
+    color: #ffad69;
+    font-weight: 600;
+}
+
+/* The two corners the controls live in. */
+.corner {
+    position: fixed;
+    z-index: 9000;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+
+.corner--top-right {
+    top: 1.25rem;
+    right: 1.25rem;
+}
+
+.corner--bottom-right {
+    bottom: 1.25rem;
+    right: 1.25rem;
+    align-items: flex-end;
+}

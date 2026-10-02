@@ -533,8 +533,6 @@
         "language.en": "Switch to English",
         "language.fr": "Passer en français",
         "language.group": "Language",
-        "panel.testSound": "Hear the achievement sound",
-        "panel.testSoundMuted": "Sound is off — turn it back on to hear this",
         "score.found": "Groups found",
         "score.finished": "Done on this board",
         "reset.open": "Start over",

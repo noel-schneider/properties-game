@@ -1,10 +1,1 @@
-/* The controls that sit over the board, gathered in one corner. */
-.top-right {
-  position: fixed;
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: 9000;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-}
+/* The corners are styled with the controls they hold, in controls.css. */
