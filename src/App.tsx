@@ -6,6 +6,7 @@ import Graph from "./Graph";
 import Scoreboard from "./Scoreboard";
 import Summary from "./Summary";
 import LanguageToggle from "./LanguageToggle";
+import Reset from "./Reset";
 import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
@@ -199,6 +200,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
           <Scoreboard found={found.length} finished={finishedCount} onBoard={concepts.length} remaining={left} />
           <div className="top-right">
               <LanguageToggle />
+              <Reset onReset={playAgain} />
               <Panel
                   unlocked={unlocked}
                   muted={muted}

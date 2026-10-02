@@ -536,7 +536,12 @@
         "panel.testSound": "Hear the achievement sound",
         "panel.testSoundMuted": "Sound is off — turn it back on to hear this",
         "score.found": "Groups found",
-        "score.finished": "Done on this board"
+        "score.finished": "Done on this board",
+        "reset.open": "Start over",
+        "reset.title": "Start over?",
+        "reset.what": "The groups you have found will be cleared and a fresh board dealt. Your achievements stay.",
+        "reset.cancel": "Cancel",
+        "reset.confirm": "Clear and start over"
     },
     "achievements": {
         "first-light": {
