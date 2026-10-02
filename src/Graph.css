@@ -82,3 +82,19 @@
 .bubble--found:hover circle {
     fill: #ffad69;
 }
+
+/* A concept with nothing left to find: small, faded, out of the way. */
+.bubble--done {
+    cursor: default;
+    opacity: 0.35;
+}
+
+.bubble--done circle {
+    fill: #8f8aa6;
+    stroke: #5a5a7d;
+    transition: opacity 0.4s ease;
+}
+
+.bubble--done:hover circle {
+    fill: #8f8aa6;
+}

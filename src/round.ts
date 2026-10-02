@@ -1,10 +1,16 @@
 import { matchedProperty } from './guess'
+import { openProperties } from './game'
 import type { Wordings } from './guess'
-import type { Hand } from './hand'
+import type { Solution } from './hand'
+import type { Concept } from './types'
 
 export interface RoundOptions {
     /** What each category is called in the language being played. */
     wordings: Wordings;
+    /** Every concept the game knows. */
+    pool: Concept[];
+    /** Every group found so far. */
+    found: Solution[];
 }
 
 export interface Outcome {
@@ -12,54 +18,48 @@ export interface Outcome {
     /** The category that was found, when the guess was right. */
     property?: string;
     points: number;
-    hand: Hand;
+    /** What has been found, with this guess added when it was right. */
+    found: Solution[];
 }
 
 /**
  * Settles one guess.
  *
- * A found group stays on the board: its concepts are locked together and drawn
- * linked, so the player can see what they have worked out. Nothing is dealt in
- * its place — the board holds what it was dealt, and once every group has been
- * found there is a new one. A wrong answer changes nothing.
+ * The three concepts must share a property that is still **open for every one
+ * of them**. A property one of them has already been used for cannot be used
+ * again by that one: it would advance nothing, and the point of the game is
+ * that each object has several properties to work through.
+ *
+ * The same property may be found over and over by different concepts, which is
+ * what lets concepts dealt later ever be finished.
  */
 export function resolveGuess(
-    hand: Hand,
     selected: string[],
     guess: string,
-    { wordings }: RoundOptions,
+    { wordings, pool, found }: RoundOptions,
 ): Outcome {
-    const locked = new Set(hand.solved.flatMap((group) => group.concepts));
-    const chosen = hand.concepts.filter(
-        (concept) => selected.includes(concept.name) && !locked.has(concept.name),
-    );
+    const byName = new Map(pool.map((concept) => [concept.name, concept]));
+    const chosen = selected.map((name) => byName.get(name)).filter((c): c is Concept => !!c);
 
-    // A selection has to stand on its own: concepts already spoken for cannot
-    // be counted towards a second group.
     if (chosen.length !== selected.length) {
-        return { correct: false, points: 0, hand };
+        return { correct: false, points: 0, found };
     }
 
-    const property = matchedProperty(chosen, guess, wordings);
+    // Only the properties none of them has spent are on the table.
+    const open = chosen.map((concept) => ({
+        name: concept.name,
+        properties: openProperties(concept, found),
+    }));
+
+    const property = matchedProperty(open, guess, wordings);
     if (property === undefined) {
-        return { correct: false, points: 0, hand };
+        return { correct: false, points: 0, found };
     }
-
-    const found = { property, concepts: chosen.map((concept) => concept.name) };
-    const nowLocked = new Set([...locked, ...found.concepts]);
-
-    // A group needing a concept that has just been locked can never be formed,
-    // so it stops being one of the board's answers.
-    const solutions = hand.solutions.filter(
-        (solution) =>
-            solution.property !== property &&
-            solution.concepts.every((name) => !nowLocked.has(name)),
-    );
 
     return {
         correct: true,
         property,
         points: 1,
-        hand: { ...hand, solutions, solved: [...hand.solved, found] },
+        found: [...found, { property, concepts: selected }],
     };
 }

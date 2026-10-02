@@ -1,7 +1,7 @@
 import type { GameEvent, Lifetime, Progress } from './types'
 
 export function emptyLifetime(): Lifetime {
-    return { unlocked: [], propertiesFound: [], aliasAnswers: 0, exactAnswers: 0 };
+    return { unlocked: [], conceptsFinished: 0, propertiesFound: [], aliasAnswers: 0, exactAnswers: 0 };
 }
 
 export function emptyProgress(lifetime: Lifetime = emptyLifetime()): Progress {
@@ -54,6 +54,13 @@ export function advance(progress: Progress, event: GameEvent): Progress {
                 toggleCounts: {},
                 lastWrongSelection: null,
             },
+        };
+    }
+
+    if (event.type === 'concept-finished') {
+        return {
+            lifetime: { ...lifetime, conceptsFinished: lifetime.conceptsFinished + 1 },
+            session: fresh,
         };
     }
 

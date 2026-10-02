@@ -1,6 +1,7 @@
 export type GameEvent =
     | { type: 'board-dealt'; at: number; groups: number }
     | { type: 'concept-toggled'; name: string }
+    | { type: 'concept-finished'; at: number }
     | {
           type: 'guess';
           at: number;
@@ -14,6 +15,8 @@ export type GameEvent =
 /** Counters that outlive the tab. Persisted. */
 export interface Lifetime {
     unlocked: string[];
+    /** Concepts with every one of their properties found. */
+    conceptsFinished: number;
     propertiesFound: string[];
     aliasAnswers: number;
     exactAnswers: number;

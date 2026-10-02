@@ -22,3 +22,21 @@ export function renderApp(ui: ReactElement) {
 }
 
 export const words = { en, fr };
+
+export interface FormableGroup {
+    property: string;
+    concepts: string[];
+}
+
+/**
+ * The groups the board can form right now, read from the developer panel.
+ *
+ * Working them out from the data is not enough: a property one of the three
+ * has already been used for is spent, and the panel is what knows.
+ */
+export function formableGroupsOnScreen(): FormableGroup[] {
+    return [...document.querySelectorAll('[data-testid^=answer-]')].map((entry) => ({
+        property: entry.getAttribute('data-testid')!.replace('answer-', ''),
+        concepts: entry.querySelectorAll('span')[1].textContent!.split(' · '),
+    }));
+}

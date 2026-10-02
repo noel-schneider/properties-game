@@ -19,7 +19,7 @@ export const CATALOGUE: Achievement[] = [
         id: 'hat-trick',
         icon: '🎩',
         secret: false,
-        earnedBy: ({ session }) => session.boardJustCleared && session.boardMistakes === 0,
+        earnedBy: ({ lifetime }) => lifetime.conceptsFinished >= 1,
     },
     {
         id: 'in-your-words',
@@ -59,7 +59,7 @@ export const CATALOGUE: Achievement[] = [
         id: 'spotless',
         icon: '✨',
         secret: false,
-        earnedBy: ({ session }) => session.cleanBoardsInARow >= 3,
+        earnedBy: ({ lifetime }) => lifetime.conceptsFinished >= 10,
     },
     {
         id: 'completionist',

@@ -510,8 +510,7 @@
         "form.wrong": "Not quite — try another category.",
         "form.enterHint": "Press 'Enter' to submit!",
         "form.enterAlt": "Press enter",
-        "score.categories": "Categories",
-        "score.remaining": "Left in this board",
+        "score.remaining": "Still findable here",
         "panel.open": "Achievements",
         "panel.title": "Achievements",
         "panel.close": "Close achievements",
@@ -535,7 +534,9 @@
         "language.fr": "Passer en français",
         "language.group": "Language",
         "panel.testSound": "Hear the achievement sound",
-        "panel.testSoundMuted": "Sound is off — turn it back on to hear this"
+        "panel.testSoundMuted": "Sound is off — turn it back on to hear this",
+        "score.found": "Groups found",
+        "score.finished": "Done on this board"
     },
     "achievements": {
         "first-light": {
@@ -544,7 +545,7 @@
         },
         "hat-trick": {
             "name": "Hat-trick",
-            "description": "Clear a whole board without a single wrong answer."
+            "description": "Finish a concept: every property it has, found."
         },
         "in-your-words": {
             "name": "In Your Words",
@@ -568,7 +569,7 @@
         },
         "spotless": {
             "name": "Spotless",
-            "description": "Clear three boards in a row without a single wrong answer."
+            "description": "Finish ten concepts."
         },
         "completionist": {
             "name": "Completionist",
@@ -580,7 +581,7 @@
         },
         "scattershot": {
             "name": "Scattershot",
-            "description": "Get five answers wrong on the same board."
+            "description": "Get five answers wrong in one sitting."
         },
         "big-net": {
             "name": "Big Net",

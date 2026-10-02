@@ -40,12 +40,9 @@ test('first-light on the first category found', () => {
   expect(unlockedBy([deal(), win()])).toContain('first-light');
 });
 
-test('hat-trick on a board cleared without a miss', () => {
-  expect(unlockedBy([deal(2), win(), win({ property: 'cold' })])).toContain('hat-trick');
-});
-
-test('hat-trick not awarded when the board cost a mistake', () => {
-  expect(unlockedBy([deal(2), miss(), win(), win({ property: 'cold' })])).not.toContain('hat-trick');
+test('hat-trick when a concept runs out of properties', () => {
+  expect(unlockedBy([deal(), { type: 'concept-finished', at: AT }])).toContain('hat-trick');
+  expect(unlockedBy([deal(), win()])).not.toContain('hat-trick');
 });
 
 test('in-your-words after ten answers in the player own wording', () => {
@@ -77,9 +74,11 @@ test('marathon after twenty-five in one sitting', () => {
   expect(unlockedBy([deal(99), ...wins(25)])).toContain('marathon');
 });
 
-test('spotless after three spotless boards running', () => {
-  const board = [deal(1, AT), win()];
-  expect(unlockedBy([...board, ...board, ...board])).toContain('spotless');
+test('spotless after ten concepts are finished', () => {
+  const finishing = Array.from({ length: 10 }, () => ({ type: 'concept-finished', at: AT }) as GameEvent);
+
+  expect(unlockedBy([deal(), ...finishing.slice(0, 9)])).not.toContain('spotless');
+  expect(unlockedBy([deal(), ...finishing])).toContain('spotless');
 });
 
 test('second-guessing after ten toggles of one concept', () => {
@@ -90,7 +89,7 @@ test('second-guessing not awarded for toggles spread over several concepts', () 
   expect(unlockedBy([deal(), ...toggles('snow', 5), ...toggles('igloo', 5)])).not.toContain('second-guessing');
 });
 
-test('scattershot after five misses on one board', () => {
+test('scattershot after five misses in one sitting', () => {
   expect(unlockedBy([deal(), miss(), miss(), miss(), miss(), miss()])).toContain('scattershot');
 });
 
@@ -134,7 +133,9 @@ test('two achievements earned on the same guess are both announced', () => {
     win({ selection, at: AT + 1_000 }),
   ).unlocked.map((a) => a.id);
 
-  expect(seen).toEqual(expect.arrayContaining(['first-light', 'big-net', 'quickdraw', 'hat-trick']));
+  // hat-trick no longer belongs here: it is about finishing a concept, not
+  // about clearing a board, which the game no longer has.
+  expect(seen).toEqual(expect.arrayContaining(['first-light', 'big-net', 'quickdraw']));
 });
 
 test('completionist when every category has been found', () => {

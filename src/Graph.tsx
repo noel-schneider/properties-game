@@ -3,10 +3,14 @@ import './Graph.css'
 import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
+import { isSpent, progressOf } from './game'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
 const RADIUS = 62;
+
+/** A concept with nothing left to find takes a third of the room. */
+const FINISHED_RADIUS = Math.round(62 * 0.34);
 
 /** Space the group's name needs, and how close it may come to the frame. */
 const LABEL_GAP = 28;
@@ -17,9 +21,11 @@ const DRAG_THRESHOLD = 4;
 
 interface GraphProps {
     concepts: Concept[];
+    /** Every concept the game knows, to tell a stranded property from an open one. */
+    pool?: Concept[];
     selected: string[];
-    /** Groups already found, drawn linked and no longer selectable. */
-    solved: Solution[];
+    /** Every group found so far, drawn linked. */
+    found: Solution[];
     onToggle: (name: string) => void;
 }
 
@@ -29,7 +35,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, selected, solved, onToggle }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -41,22 +47,36 @@ function Graph({ concepts, selected, solved, onToggle }: GraphProps) {
 
     // Every member of a found group is tied to the first, which gathers them
     // without pinning them into a rigid shape.
+    // Only groups still touching the board are drawn. A group whose members
+    // have all left or finished has nothing left to say, and every tie kept is
+    // another line rebuilt on every frame.
+    const live = useMemo(
+        () => found.filter((group) => group.concepts.some((name) => index.has(name))),
+        [found, index],
+    );
+
     const ties = useMemo<Tie[]>(
         () =>
-            solved.flatMap((group) =>
+            live.flatMap((group) =>
                 group.concepts
                     .slice(1)
                     .map((name) => ({ from: index.get(group.concepts[0]) ?? -1, to: index.get(name) ?? -1 }))
                     .filter((tie) => tie.from >= 0 && tie.to >= 0),
             ),
-        [solved, index],
+        [found, index],
     );
 
-    const { points, settled, grab, dragTo, release } = useBubbleLayout(concepts, RADIUS, ties);
+    const radii = useMemo(
+        () => concepts.map((concept) => (isSpent(concept, found, pool) ? FINISHED_RADIUS : RADIUS)),
+        [concepts, found, pool],
+    );
 
-    const found = useMemo(
-        () => new Set(solved.flatMap((group) => group.concepts)),
-        [solved],
+    const { points, settled, grab, dragTo, release } = useBubbleLayout(concepts, radii, ties);
+
+    // A concept is done when every property it has was part of a found group.
+    const done = useMemo(
+        () => new Set(concepts.filter((c) => isSpent(c, found, pool)).map((c) => c.name)),
+        [concepts, found, pool],
     );
 
     /**
@@ -122,7 +142,11 @@ function Graph({ concepts, selected, solved, onToggle }: GraphProps) {
             role="group"
             aria-label={t('graph.label')}
         >
-            {solved.map((group) => {
+            {live.map((group, groupIndex) => {
+                // Ties stay for every group. Names do not: at twenty groups the
+                // labels pile into an unreadable heap, so only the group just
+                // found says what it was.
+                const named = groupIndex === live.length - 1;
                 const places = group.concepts.map(at);
                 const centre = {
                     x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
@@ -144,7 +168,7 @@ function Graph({ concepts, selected, solved, onToggle }: GraphProps) {
                 );
 
                 return (
-                    <g key={group.property} className="found" data-group={group.property}>
+                    <g key={`${group.property}-${groupIndex}`} className="found" data-group={group.property}>
                         {places.map((place, i) => (
                             <line
                                 key={group.concepts[i]}
@@ -155,25 +179,27 @@ function Graph({ concepts, selected, solved, onToggle }: GraphProps) {
                                 y2={place.y}
                             />
                         ))}
-                        <text
+                        {named && <text
                             className="found__label"
                             x={labelX}
                             y={labelY}
                             textAnchor="middle"
                         >
                             {propertyName(group.property)}
-                        </text>
+                        </text>}
                     </g>
                 );
             })}
 
             {concepts.map((concept, i) => {
                 const { x, y } = points[i] ?? { x: 0, y: 0 };
-                const isFound = found.has(concept.name);
+                const isDone = done.has(concept.name);
+                const { done: spent, total } = progressOf(concept, found);
+                const radius = radii[i];
                 const isSelected = selected.includes(concept.name);
 
                 const classes = ['bubble'];
-                if (isFound) classes.push('bubble--found');
+                if (isDone) classes.push('bubble--done');
                 else if (isSelected) classes.push('bubble--selected');
 
                 return (
@@ -181,9 +207,10 @@ function Graph({ concepts, selected, solved, onToggle }: GraphProps) {
                         key={concept.name}
                         className={classes.join(' ')}
                         transform={`translate(${x}, ${y})`}
-                        data-found={String(isFound)}
+                        data-found={String(isDone)}
+                        data-progress={`${spent}/${total}`}
                         aria-label={conceptName(concept.name)}
-                        {...(isFound
+                        {...(isDone
                             ? // A found concept is no longer a choice, so it stops
                               // being offered as one.
                               { role: 'img' as const }
@@ -204,10 +231,12 @@ function Graph({ concepts, selected, solved, onToggle }: GraphProps) {
                                   },
                               })}
                     >
-                        <circle r={RADIUS} />
-                        <text textAnchor="middle" dominantBaseline="middle">
-                            {conceptName(concept.name)}
-                        </text>
+                        <circle r={radius} />
+                        {!isDone && (
+                            <text textAnchor="middle" dominantBaseline="middle">
+                                {conceptName(concept.name)}
+                            </text>
+                        )}
                     </g>
                 );
             })}

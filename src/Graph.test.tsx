@@ -7,11 +7,15 @@ import type { Concept } from './types'
 
 const concepts: Concept[] = Array.from({ length: 15 }, (_, i) => ({
   name: `concept-${i}`,
-  properties: ['thing'],
+  // A second property shared with two others, so one found group does not
+  // leave them stranded: a concept with nothing findable left shrinks, which
+  // most of these tests measure.
+  properties: ['thing', `pair-${i % 5}`],
 }));
 
 function positions(): string[] {
-  return screen.getAllByRole('checkbox').map((g) => g.getAttribute('transform') ?? '');
+  // By class, not by role: a finished bubble is an image rather than a checkbox.
+  return [...document.querySelectorAll('g.bubble')].map((g) => g.getAttribute('transform') ?? '');
 }
 
 function runFrames(count: number) {
@@ -24,7 +28,7 @@ beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
 test('the bubbles drift into place instead of appearing settled', () => {
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} />);
 
   const atStart = positions();
   runFrames(10);
@@ -33,7 +37,7 @@ test('the bubbles drift into place instead of appearing settled', () => {
 });
 
 test('the drift comes to rest, so the bubbles can be aimed at', () => {
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} />);
 
   runFrames(600);
   const settled = positions();
@@ -50,7 +54,7 @@ function centres(): Array<{ x: number; y: number }> {
 }
 
 test('no bubble leaves the frame on its way there, not just once it arrives', () => {
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} />);
 
   // Sampled throughout the animation: a bubble that flies off screen and comes
   // back is still a bubble that flew off screen.
@@ -64,7 +68,7 @@ test('no bubble leaves the frame on its way there, not just once it arrives', ()
 });
 
 test('every bubble ends up inside the frame, edges included', () => {
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} />);
   runFrames(600);
 
   for (const { x, y } of centres()) {
@@ -75,7 +79,7 @@ test('every bubble ends up inside the frame, edges included', () => {
 });
 
 test('the bubbles keep clear of one another rather than touching', () => {
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} />);
   runFrames(600);
 
   const placed = centres();
@@ -90,14 +94,14 @@ test('the bubbles keep clear of one another rather than touching', () => {
 });
 
 test('a bubble keeps its identity while it moves, so clicks stay reliable', () => {
-  renderApp(<Graph concepts={concepts} selected={['concept-3']} solved={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={['concept-3']} found={[]} onToggle={() => {}} />);
   runFrames(40);
 
   expect(screen.getByRole('checkbox', { name: 'concept-3' })).toHaveAttribute('aria-checked', 'true');
 });
 
 test('a selected bubble carries the selected class even under the cursor', () => {
-  renderApp(<Graph concepts={concepts} selected={['concept-2']} solved={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={['concept-2']} found={[]} onToggle={() => {}} />);
 
   const bubble = screen.getByRole('checkbox', { name: 'concept-2' });
   expect(bubble).toHaveClass('bubble--selected');
@@ -105,7 +109,7 @@ test('a selected bubble carries the selected class even under the cursor', () =>
 });
 
 test('the bubbles keep a comfortable distance on average, not just a legal one', () => {
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} />);
   runFrames(600);
 
   const placed = centres();
@@ -119,7 +123,7 @@ test('the bubbles keep a comfortable distance on average, not just a legal one',
 });
 
 test('the bubbles are spread, not packed on a regular lattice', () => {
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} />);
   runFrames(600);
 
   const placed = centres();
@@ -142,21 +146,34 @@ test('the bubbles are spread, not packed on a regular lattice', () => {
 const foundGroup = { property: 'thing', concepts: ['concept-0', 'concept-1', 'concept-2'] };
 
 test('a found group is drawn tied together', () => {
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[foundGroup]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
   runFrames(600);
 
   const ties = document.querySelectorAll('.found__tie');
   expect(ties).toHaveLength(foundGroup.concepts.length);
 });
 
-test('a found group carries the name of what it was', () => {
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[foundGroup]} onToggle={() => {}} />);
+test('the group just found says what it was', () => {
+  renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
 
   expect(screen.getByText('thing')).toBeInTheDocument();
 });
 
+test('older groups keep their ties but drop their name', () => {
+  const older = { property: 'pair-3', concepts: ['concept-3', 'concept-8', 'concept-13'] };
+  renderApp(
+    <Graph concepts={concepts} selected={[]} found={[older, foundGroup]} onToggle={() => {}} />,
+  );
+
+  // Twenty groups of labels pile into an unreadable heap, so only the latest
+  // is named; every tie is still drawn.
+  expect(screen.queryByText('pair-3')).toBeNull();
+  expect(screen.getByText('thing')).toBeInTheDocument();
+  expect(document.querySelectorAll('.found__tie')).toHaveLength(6);
+});
+
 test('a found group draws closer together than the rest of the board', () => {
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[foundGroup]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
   runFrames(600);
 
   const place = (name: string) => {
@@ -183,22 +200,35 @@ test('a found group draws closer together than the rest of the board', () => {
   expect(average(within)).toBeLessThan(average(between));
 });
 
-test('a found concept can no longer be picked', () => {
-  const onToggle = vi.fn();
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[foundGroup]} onToggle={onToggle} />);
+test('a concept with properties left can still be picked', () => {
+  renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
 
   const bubbles = screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'));
   for (const name of foundGroup.concepts) {
-    expect(bubbles).not.toContain(name);
-    expect(screen.getByLabelText(name)).toHaveAttribute('data-found', 'true');
+    expect(bubbles).toContain(name);
+    expect(screen.getByLabelText(name)).toHaveAttribute('data-found', 'false');
   }
+});
+
+test('a concept with nothing left is finished, and stops being pickable', () => {
+  // Both of its properties spent.
+  const spent = [
+    foundGroup,
+    { property: 'pair-0', concepts: ['concept-0', 'concept-5', 'concept-10'] },
+  ];
+  renderApp(<Graph concepts={concepts} selected={[]} found={spent} onToggle={() => {}} />);
+
+  const bubbles = screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'));
+  expect(bubbles).not.toContain('concept-0');
+  expect(screen.getByLabelText('concept-0')).toHaveAttribute('data-found', 'true');
+  expect(screen.getByLabelText('concept-0')).toHaveAttribute('data-progress', '2/2');
 });
 
 test('the name of a found group stays inside the frame, wherever the group lands', () => {
   // Every concept belongs to the group, so the cluster is as large and as
   // badly placed as it can get.
   const everything = { property: 'thing', concepts: concepts.map((c) => c.name) };
-  renderApp(<Graph concepts={concepts} selected={[]} solved={[everything]} onToggle={() => {}} />);
+  renderApp(<Graph concepts={concepts} selected={[]} found={[everything]} onToggle={() => {}} />);
   runFrames(600);
 
   const label = document.querySelector('.found__label')!;
@@ -207,4 +237,27 @@ test('the name of a found group stays inside the frame, wherever the group lands
 
   expect(Math.abs(y)).toBeLessThanOrEqual(VIEW_HEIGHT / 2);
   expect(Math.abs(x)).toBeLessThanOrEqual(VIEW_WIDTH / 2);
+});
+
+test('finished concepts take less room, not just a smaller picture', () => {
+  const spread = (found: Array<{ property: string; concepts: string[] }>) => {
+    const view = renderApp(
+      <Graph concepts={concepts} selected={[]} found={found} onToggle={() => {}} />,
+    );
+    runFrames(600);
+    const places = centres();
+    view.unmount();
+    return Math.max(...places.map((p) => Math.hypot(p.x, p.y)));
+  };
+
+  // Everything finished: each bubble asks for a third of the room, so the whole
+  // cluster draws in. If only the picture shrank, the spread would not move.
+  const everything = ['thing', ...Array.from({ length: 5 }, (_, i) => `pair-${i}`)].map(
+    (property) => ({
+      property,
+      concepts: concepts.filter((c) => c.properties.includes(property)).map((c) => c.name),
+    }),
+  );
+
+  expect(spread(everything)).toBeLessThan(spread([]) * 0.75);
 });

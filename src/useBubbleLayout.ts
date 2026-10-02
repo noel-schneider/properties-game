@@ -30,8 +30,8 @@ const CENTRE: Point = { x: 0, y: 0 };
 /** How warm the simulation is kept while a bubble is being dragged. */
 const DRAG_HEAT = 0.3;
 
-/** How close the members of a found group are drawn to one another. */
-const GROUP_DISTANCE = 142;
+/** Clear space left between two members of a found group. */
+const GROUP_GAP = 18;
 
 /**
  * Keeps a bubble inside the frame.
@@ -83,11 +83,12 @@ function huddle(): LayoutNode {
 }
 
 /** Holds every bubble inside the frame, edges included. */
-function hold(nodes: LayoutNode[], radius: number): void {
-    for (const node of nodes) {
+function hold(nodes: LayoutNode[], radii: number[]): void {
+    nodes.forEach((node, i) => {
+        const radius = radii[i] ?? 0;
         node.x = clamp(node.x, VIEW_WIDTH / 2 - radius);
         node.y = clamp(node.y, VIEW_HEIGHT / 2 - radius);
-    }
+    });
 }
 
 function prefersReducedMotion(): boolean {
@@ -108,8 +109,15 @@ function prefersReducedMotion(): boolean {
  * arrive a frame behind a new board, and pairing them with concepts here would
  * mean rendering the previous board's names for that frame.
  */
-export function useBubbleLayout(concepts: Concept[], radius: number, ties: Tie[] = []): Layout {
+export function useBubbleLayout(
+    concepts: Concept[],
+    radii: number[],
+    ties: Tie[] = [],
+): Layout {
     const nodes = useMemo<LayoutNode[]>(() => concepts.map(huddle), [concepts]);
+    // Re-running the simulation on every render would restart it constantly, so
+    // the sizes are compared by value rather than by array identity.
+    const radiiKey = radii.join(',');
     const [points, setPoints] = useState<Point[]>([]);
 
     const [settled, setSettled] = useState(false);
@@ -127,7 +135,7 @@ export function useBubbleLayout(concepts: Concept[], radius: number, ties: Tie[]
         setSettled(false);
         const step = () => {
             sim.tick();
-            hold(nodes, radius);
+            hold(nodes, radii);
             setPoints(nodes.map((node) => ({ x: node.x, y: node.y })));
 
             if (sim.alpha() > sim.alphaMin()) {
@@ -150,7 +158,11 @@ export function useBubbleLayout(concepts: Concept[], radius: number, ties: Tie[]
             // Found groups pull themselves together, so the board shows at a
             // glance what has been worked out.
             .force('ties', forceLink<LayoutNode, SimulationLinkDatum<LayoutNode>>(links)
-                .distance(GROUP_DISTANCE)
+                .distance((link) => {
+                    const from = typeof link.source === 'object' ? link.source : nodes[link.source as number];
+                    const to = typeof link.target === 'object' ? link.target : nodes[link.target as number];
+                    return (radii[nodes.indexOf(from)] ?? 0) + (radii[nodes.indexOf(to)] ?? 0) + GROUP_GAP;
+                })
                 .strength(0.6))
             // Pulled harder vertically than horizontally, so the cluster comes
             // out landscape like the frame it has to fit in.
@@ -160,8 +172,16 @@ export function useBubbleLayout(concepts: Concept[], radius: number, ties: Tie[]
             // repulsion against this pull, rather than by collision. That is
             // what gives the uneven spacing a graph has and a packed tray of
             // marbles does not.
-            .force('spread', forceManyBody().strength(-1400))
-            .force('collide', forceCollide(radius + BUBBLE_GAP).strength(0.9))
+            // Repulsion follows size as well: a bubble that draws small should
+            // push its neighbours away a little rather than a lot, or the
+            // finished ones keep the whole board spread out.
+            .force('spread', forceManyBody<LayoutNode>().strength((_, i) => {
+                const share = (radii[i] ?? 0) / Math.max(...radii, 1);
+                return -1400 * share * share;
+            }))
+            // Each bubble takes the room it actually draws, so a finished one
+            // shrinking really does free up space rather than only looking it.
+            .force('collide', forceCollide<LayoutNode>((_, i) => (radii[i] ?? 0) + BUBBLE_GAP).strength(0.9))
             .alphaDecay(0.028)
             // Heavier damping than d3's default, which lets the bubbles
             // overshoot far outside the frame on the way to their places.
@@ -177,7 +197,7 @@ export function useBubbleLayout(concepts: Concept[], radius: number, ties: Tie[]
 
         if (prefersReducedMotion()) {
             sim.tick(400);
-            hold(nodes, radius);
+            hold(nodes, radii);
             setPoints(nodes.map((node) => ({ x: node.x, y: node.y })));
             setSettled(true);
             return;
@@ -190,7 +210,7 @@ export function useBubbleLayout(concepts: Concept[], radius: number, ties: Tie[]
             running.current = false;
             simulation.current = null;
         };
-    }, [nodes, radius, ties, wake]);
+    }, [nodes, radiiKey, ties, wake]);
 
     // Taking hold pins the bubble but does not stir the board. A plain click is
     // a grab and a release with nothing in between, and it should leave a
