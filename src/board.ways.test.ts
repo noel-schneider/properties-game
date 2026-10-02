@@ -1,5 +1,5 @@
 import { getAllConcepts } from './concepts'
-import { formableGroups, openingBoard, refill, WAYS_ON } from './board'
+import { formableGroups, openingBoard, refill, WAYS_ON, waysWanted } from './board'
 import { getNRandomElements } from './utils'
 import type { Solution } from './hand'
 
@@ -26,13 +26,26 @@ test('topping up stops once there are enough ways on', () => {
   expect(ways(after, found)).toBeGreaterThanOrEqual(WAYS_ON);
 });
 
-test('the number of ways on is not the same every time', () => {
-  // The board shows this count. Topping up to exactly the same number every
-  // time would turn it into a constant, which tells the player nothing — and
-  // worse, a count that never moves is a count they learn to read as a hint.
+test('the number aimed at moves from deal to deal', () => {
+  // The board shows how many ways on it has. Aiming at the same number every
+  // time leaves the count sitting on it, and a count that never moves is one
+  // the player stops reading — or learns to read as a tell.
+  //
+  // This is what guards the drawing. The test below, on the counts the board
+  // actually ends up with, passes either way: one concept dealt in can open
+  // several groups at once, so some spread exists even with a fixed target.
+  const aimed = new Set<number>();
+  for (let go = 0; go < 200; go++) aimed.add(waysWanted());
+
+  expect(aimed.size).toBeGreaterThan(1);
+  expect(Math.min(...aimed)).toBeGreaterThanOrEqual(WAYS_ON - 1);
+  expect(Math.max(...aimed)).toBeLessThanOrEqual(WAYS_ON + 1);
+});
+
+test('and the count the board lands on is not fixed either', () => {
   const counts = new Set<number>();
   for (let go = 0; go < 30; go++) {
-    counts.add(ways(openingBoard(pool, WAYS_ON), []));
+    counts.add(ways(openingBoard(pool, waysWanted()), []));
   }
 
   expect(counts.size).toBeGreaterThan(1);
