@@ -20,7 +20,7 @@ import {
 } from "./achievements/storage";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
-import { formableGroups, openingBoard, refill } from "./board";
+import { formableGroups, openingBoard, refill, waysWanted } from "./board";
 import { getAllConcepts } from "./concepts";
 import { isFinished, isSpent } from "./game";
 import { isExactLabel } from "./guess";
@@ -32,8 +32,6 @@ import type { Solution } from "./hand";
 
 export type Feedback = 'none' | 'correct' | 'wrong';
 
-/** How many concepts with something left to find are kept on the board. */
-export const ACTIVE_CONCEPTS = 15;
 
 const pool = getAllConcepts();
 const byName = new Map(pool.map((concept) => [concept.name, concept]));
@@ -54,8 +52,8 @@ function App({ playChime = playUnlockChime }: AppProps) {
     const [board, setBoard] = useState<string[]>(() => {
         const stored = loadFound();
         return stored.length > 0
-            ? refill([...new Set(stored.flatMap((g) => g.concepts))], pool, stored, ACTIVE_CONCEPTS)
-            : openingBoard(pool, ACTIVE_CONCEPTS);
+            ? refill([...new Set(stored.flatMap((g) => g.concepts))], pool, stored, waysWanted())
+            : openingBoard(pool, waysWanted());
     });
 
     const [selected, setSelected] = useState<string[]>([]);
@@ -167,7 +165,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
         // Finished concepts stay on the board, small and faded; fresh ones come
         // in beside them so there is always something left to work on.
-        setBoard((current) => refill(current, pool, outcome.found, ACTIVE_CONCEPTS));
+        setBoard((current) => refill(current, pool, outcome.found, waysWanted()));
         return true;
     };
 
@@ -206,7 +204,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
         setFeedback('correct');
         setFound(next);
         saveFound(next);
-        setBoard((current) => refill(current, pool, next, ACTIVE_CONCEPTS));
+        setBoard((current) => refill(current, pool, next, waysWanted()));
     };
 
     const playAgain = () => {
@@ -214,7 +212,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
         saveLifetime(kept);
         saveFound([]);
 
-        const fresh = openingBoard(pool, ACTIVE_CONCEPTS);
+        const fresh = openingBoard(pool, waysWanted());
         progress.current = recordEvent(emptyProgress(kept), {
             type: 'board-dealt',
             at: Date.now(),

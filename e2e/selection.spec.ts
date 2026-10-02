@@ -30,8 +30,10 @@ test('selecting three concepts in the browser enables submit', async ({ page }) 
   await page.getByPlaceholder('Type a category here!').fill('biome')
   await expect(submit).toBeDisabled()
 
+  // The board is dealt to a number of moves available, not a number of
+  // concepts, so how many bubbles that takes is not fixed.
   const bubbles = page.getByRole('checkbox')
-  await expect(bubbles).toHaveCount(15)
+  await expect.poll(() => bubbles.count()).toBeGreaterThanOrEqual(3)
 
   for (let i = 0; i < 3; i++) {
     await bubbles.nth(i).click()
