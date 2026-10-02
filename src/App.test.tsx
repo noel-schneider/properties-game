@@ -223,3 +223,39 @@ test('an achievement earned before is not announced again on a later run', async
   expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
   expect(screen.queryByRole('alert')).toBeNull();
 });
+
+test('the achievements button counts what has been earned', async () => {
+  const user = userEvent.setup();
+  render(<App playChime={() => {}} />);
+
+  const button = screen.getByRole('button', { name: /achievements/i });
+  expect(button).toHaveTextContent('0 / 14');
+
+  const { concepts, property } = findSolvableTriple();
+  await select(user, concepts);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  await screen.findAllByRole('alert');
+  expect(button).not.toHaveTextContent('0 / 14');
+});
+
+test('muting the sound silences the next unlock, and is remembered', async () => {
+  const chime = vi.fn();
+  const user = userEvent.setup();
+  const { unmount } = render(<App playChime={chime} />);
+
+  await user.click(screen.getByRole('button', { name: /mute achievement sound/i }));
+
+  const { concepts, property } = findSolvableTriple();
+  await select(user, concepts);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  await screen.findAllByRole('alert');
+  expect(chime).not.toHaveBeenCalled();
+
+  unmount();
+  render(<App playChime={() => {}} />);
+  expect(screen.getByRole('button', { name: /unmute achievement sound/i })).toBeInTheDocument();
+});

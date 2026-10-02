@@ -2,10 +2,11 @@ import { useRef, useState } from 'react';
 import Form from "./Form";
 import Graph from "./Graph";
 import Scoreboard from "./Scoreboard";
+import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyProgress, recordEvent } from "./achievements";
 import { playUnlockChime } from "./achievements/chime";
-import { loadLifetime, saveLifetime } from "./achievements/storage";
+import { loadLifetime, loadMuted, saveLifetime, saveMuted } from "./achievements/storage";
 import { dealRound, getAllConcepts, propertyAliases } from "./concepts";
 import { normalizeAnswer } from "./guess";
 import { resolveGuess } from "./round";
@@ -28,27 +29,38 @@ function App({ playChime = playUnlockChime }: AppProps) {
     const [score, setScore] = useState(0);
     const [announcing, setAnnouncing] = useState<Achievement[]>([]);
 
-    // Progress is not rendered, only read when an event arrives, so it lives in
-    // a ref: a state update here would re-render the board for nothing.
-    const progress = useRef<Progress>(undefined as unknown as Progress);
-    if (progress.current === undefined) {
-        progress.current = emptyProgress(loadLifetime());
-        progress.current = recordEvent(progress.current, {
+    // Progress is read when an event arrives rather than rendered, so it lives
+    // in a ref: a state update per toggle would re-render the board for
+    // nothing. Only the earned ids, which the panel shows, are state.
+    const progress = useRef<Progress | null>(null);
+    if (progress.current === null) {
+        progress.current = recordEvent(emptyProgress(loadLifetime()), {
             type: 'board-dealt',
             at: Date.now(),
             groups: hand.solutions.length,
         }).progress;
     }
 
+    const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
+    const [muted, setMuted] = useState(loadMuted);
+
+    const toggleMute = () => {
+        setMuted((current) => {
+            saveMuted(!current);
+            return !current;
+        });
+    };
+
     const record = (event: GameEvent) => {
-        const { progress: next, unlocked } = recordEvent(progress.current, event);
+        const { progress: next, unlocked: earned } = recordEvent(progress.current!, event);
         progress.current = next;
 
-        if (unlocked.length === 0) return;
+        if (earned.length === 0) return;
 
         saveLifetime(next.lifetime);
-        setAnnouncing((current) => [...current, ...unlocked]);
-        playChime();
+        setUnlocked(next.lifetime.unlocked);
+        setAnnouncing((current) => [...current, ...earned]);
+        if (!muted) playChime();
     };
 
     const dismissAnnouncement = (id: string) => {
@@ -101,6 +113,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
   return (
       <>
           <Scoreboard score={score} remaining={hand.solutions.length} />
+          <Panel unlocked={unlocked} muted={muted} onToggleMute={toggleMute} />
           <Graph concepts={hand.concepts} selected={selected} onToggle={toggleConcept} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <Toast unlocked={announcing} onDismiss={dismissAnnouncement} />

@@ -69,3 +69,27 @@ export function saveLifetime(lifetime: Lifetime): void {
         // Storage is full, blocked, or unavailable. Play continues.
     }
 }
+
+/**
+ * The sound preference lives under its own key rather than inside the
+ * achievement record. Adding a field to that record would make every copy
+ * written by an earlier version fail validation and be discarded — which would
+ * cost players the achievements they had already earned, to store a boolean.
+ */
+export const MUTED_KEY = 'properties-game:muted';
+
+export function loadMuted(): boolean {
+    try {
+        return localStorage.getItem(MUTED_KEY) === 'true';
+    } catch {
+        return false;
+    }
+}
+
+export function saveMuted(muted: boolean): void {
+    try {
+        localStorage.setItem(MUTED_KEY, String(muted));
+    } catch {
+        // Same bargain as the achievement record: a preference is not worth a crash.
+    }
+}
