@@ -76,7 +76,7 @@ test('pressing Enter submits the guess', async ({ page }) => {
   await expect(page.getByRole('status')).toHaveText(/correct/i)
 })
 
-test('a solved group leaves the board, the tally rises, and play continues', async ({ page }) => {
+test('a solved group stays on the board, tied and named, and play continues', async ({ page }) => {
   // Start from a clean record, then read the board that comes with it.
   await page.goto('/')
   await boardSettled(page)
@@ -99,9 +99,13 @@ test('a solved group leaves the board, the tally rises, and play continues', asy
   await expect(page.getByRole('status')).toHaveText(/correct/i)
   await expect(page.getByTestId('categories')).toHaveText(`1 / ${TOTAL_CATEGORIES}`)
 
+  // The three stay on the board, no longer selectable, drawn as a found group.
   for (const name of names) {
     await expect(page.getByRole('checkbox', { name })).toHaveCount(0)
+    await expect(page.getByLabel(name)).toHaveAttribute('data-found', 'true')
   }
-  await expect(page.getByRole('checkbox')).toHaveCount(15)
+  await expect(page.getByRole('checkbox')).toHaveCount(15 - names.length)
+  await expect(page.locator('.found__tie')).toHaveCount(names.length)
+  await expect(page.locator('.found__label')).toHaveText(property)
   await expect(page.getByPlaceholder('Type a category here!')).toHaveValue('')
 })

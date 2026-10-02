@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { forceCollide, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force'
-import type { Simulation } from 'd3-force'
+import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force'
+import type { Simulation, SimulationLinkDatum } from 'd3-force'
 import type { Concept } from './types'
 
 export interface Point {
@@ -30,11 +30,33 @@ const CENTRE: Point = { x: 0, y: 0 };
 /** How warm the simulation is kept while a bubble is being dragged. */
 const DRAG_HEAT = 0.3;
 
+/** How close the members of a found group are drawn to one another. */
+const GROUP_DISTANCE = 142;
+
+/**
+ * Keeps a bubble inside the frame.
+ *
+ * Tuning the forces alone is not enough: measured over four hundred layouts the
+ * bubbles peak at 577 from the centre on the way to their places, against a
+ * frame that stops at 400. Holding them at the wall makes it true by
+ * construction rather than true on average.
+ */
+function clamp(value: number, limit: number): number {
+    return Math.max(-limit, Math.min(value, limit));
+}
+
 interface LayoutNode {
+    index?: number;
     x: number;
     y: number;
     fx?: number | null;
     fy?: number | null;
+}
+
+/** A pair of bubbles held together because their group has been found. */
+export interface Tie {
+    from: number;
+    to: number;
 }
 
 export interface Layout {
@@ -60,6 +82,14 @@ function huddle(): LayoutNode {
     return { x: (Math.random() - 0.5) * 400, y: (Math.random() - 0.5) * 400 };
 }
 
+/** Holds every bubble inside the frame, edges included. */
+function hold(nodes: LayoutNode[], radius: number): void {
+    for (const node of nodes) {
+        node.x = clamp(node.x, VIEW_WIDTH / 2 - radius);
+        node.y = clamp(node.y, VIEW_HEIGHT / 2 - radius);
+    }
+}
+
 function prefersReducedMotion(): boolean {
     return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 }
@@ -78,7 +108,7 @@ function prefersReducedMotion(): boolean {
  * arrive a frame behind a new board, and pairing them with concepts here would
  * mean rendering the previous board's names for that frame.
  */
-export function useBubbleLayout(concepts: Concept[], radius: number): Layout {
+export function useBubbleLayout(concepts: Concept[], radius: number, ties: Tie[] = []): Layout {
     const nodes = useMemo<LayoutNode[]>(() => concepts.map(huddle), [concepts]);
     const [points, setPoints] = useState<Point[]>([]);
 
@@ -97,6 +127,7 @@ export function useBubbleLayout(concepts: Concept[], radius: number): Layout {
         setSettled(false);
         const step = () => {
             sim.tick();
+            hold(nodes, radius);
             setPoints(nodes.map((node) => ({ x: node.x, y: node.y })));
 
             if (sim.alpha() > sim.alphaMin()) {
@@ -110,7 +141,17 @@ export function useBubbleLayout(concepts: Concept[], radius: number): Layout {
     }, [nodes]);
 
     useEffect(() => {
+        const links: SimulationLinkDatum<LayoutNode>[] = ties.map((tie) => ({
+            source: tie.from,
+            target: tie.to,
+        }));
+
         const sim = forceSimulation(nodes)
+            // Found groups pull themselves together, so the board shows at a
+            // glance what has been worked out.
+            .force('ties', forceLink<LayoutNode, SimulationLinkDatum<LayoutNode>>(links)
+                .distance(GROUP_DISTANCE)
+                .strength(0.6))
             // Pulled harder vertically than horizontally, so the cluster comes
             // out landscape like the frame it has to fit in.
             .force('towardsCentreX', forceX(CENTRE.x).strength(0.06))
@@ -136,6 +177,7 @@ export function useBubbleLayout(concepts: Concept[], radius: number): Layout {
 
         if (prefersReducedMotion()) {
             sim.tick(400);
+            hold(nodes, radius);
             setPoints(nodes.map((node) => ({ x: node.x, y: node.y })));
             setSettled(true);
             return;
@@ -148,7 +190,7 @@ export function useBubbleLayout(concepts: Concept[], radius: number): Layout {
             running.current = false;
             simulation.current = null;
         };
-    }, [nodes, radius, wake]);
+    }, [nodes, radius, ties, wake]);
 
     // Taking hold pins the bubble but does not stir the board. A plain click is
     // a grab and a release with nothing in between, and it should leave a

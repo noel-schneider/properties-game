@@ -8,7 +8,10 @@ export interface Solution {
 
 export interface Hand {
     concepts: Concept[];
+    /** Groups still to be found on this board. */
     solutions: Solution[];
+    /** Groups already found, which stay on the board, linked together. */
+    solved: Solution[];
 }
 
 export interface DealOptions {
@@ -94,5 +97,5 @@ export function dealHand(pool: Concept[], options: DealOptions): Hand {
     const extras = getNRandomElements(fillers, handSize - picked.size);
     const concepts = [...pool.filter((c) => picked.has(c.name)), ...extras];
 
-    return { concepts: getNRandomElements(concepts, concepts.length), solutions: chosen };
+    return { concepts: getNRandomElements(concepts, concepts.length), solutions: chosen, solved: [] };
 }

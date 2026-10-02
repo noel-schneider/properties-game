@@ -108,7 +108,7 @@ test('naming a category the selected concepts do not share is rejected', async (
   expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
 });
 
-test('a correct answer retires the found concepts and scores a point', async () => {
+test('a correct answer keeps the found concepts on the board and scores a point', async () => {
   const user = userEvent.setup();
   renderApp(<App />);
 
@@ -121,11 +121,13 @@ test('a correct answer retires the found concepts and scores a point', async () 
   // The board counter now tracks categories collected, not raw finds.
   expect(screen.getByTestId('categories')).toHaveTextContent(`1 / ${allProperties().length}`);
 
+  // They stay, shown as a found group rather than cleared away.
   const stillDealt = screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'));
+  expect(stillDealt).toHaveLength(15 - concepts.length);
+
   for (const concept of concepts) {
-    expect(stillDealt).not.toContain(concept.name);
+    expect(screen.getByLabelText(concept.name)).toHaveAttribute('data-found', 'true');
   }
-  expect(stillDealt).toHaveLength(15);
 });
 
 test('a wrong answer leaves the board and the score alone', async () => {

@@ -11,6 +11,7 @@ const drum: Concept = { name: 'drum', properties: ['music'] };
 const pizza: Concept = { name: 'pizza', properties: ['food'] };
 
 const hand: Hand = {
+    solved: [],
     concepts: [jungle, desert, forest, piano, guitar, drum, pizza],
     solutions: [
         { property: 'biome', concepts: ['jungle', 'desert', 'forest'] },
@@ -23,52 +24,61 @@ const wordings = {
     music: { label: 'music', aliases: [] },
     food: { label: 'food', aliases: [] },
 };
-const spares: Concept[] = [
-    { name: 'snow', properties: ['cold'] },
-    { name: 'igloo', properties: ['cold'] },
-    { name: 'glacier', properties: ['cold'] },
-    { name: 'bread', properties: ['food'] },
-    { name: 'soup', properties: ['food'] },
-];
-const pool: Concept[] = [...hand.concepts, ...spares];
 
 test('a correct guess reports which group was found', () => {
-    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'biome', { wordings, pool });
+    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'biome', { wordings });
 
     expect(outcome.correct).toBe(true);
     expect(outcome.property).toBe('biome');
 });
 
-test('a correct guess retires the found concepts from the hand', () => {
-    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'biome', { wordings, pool });
+test('a correct guess leaves the found concepts on the board', () => {
+    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'biome', { wordings });
     const names = outcome.hand.concepts.map((c) => c.name);
 
-    expect(names).not.toContain('jungle');
-    expect(names).not.toContain('desert');
-    expect(names).not.toContain('forest');
-});
-
-test('a correct guess keeps the hand at its original size', () => {
-    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'biome', { wordings, pool });
-
+    expect(names).toContain('jungle');
+    expect(names).toContain('desert');
+    expect(names).toContain('forest');
     expect(outcome.hand.concepts).toHaveLength(hand.concepts.length);
 });
 
+test('a correct guess records the group as found, with what it was', () => {
+    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'biome', { wordings });
+
+    expect(outcome.hand.solved).toEqual([
+        { property: 'biome', concepts: ['jungle', 'desert', 'forest'] },
+    ]);
+});
+
+test('a group found by its own wording is recorded under the same category', () => {
+    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'nature', { wordings });
+
+    expect(outcome.hand.solved[0].property).toBe('biome');
+});
+
+test('concepts already found cannot be counted twice', () => {
+    const first = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'biome', { wordings });
+    const again = resolveGuess(first.hand, ['jungle', 'desert', 'forest'], 'biome', { wordings });
+
+    expect(again.correct).toBe(false);
+    expect(again.hand.solved).toHaveLength(1);
+});
+
 test('a solved group is no longer offered as a solution', () => {
-    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'biome', { wordings, pool });
+    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'biome', { wordings });
 
     expect(outcome.hand.solutions.map((s) => s.property)).not.toContain('biome');
     expect(outcome.hand.solutions.map((s) => s.property)).toContain('music');
 });
 
 test('a correct guess scores a point', () => {
-    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'nature', { wordings, pool });
+    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'nature', { wordings });
 
     expect(outcome.points).toBe(1);
 });
 
 test('a wrong guess leaves the hand untouched and scores nothing', () => {
-    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'food', { wordings, pool });
+    const outcome = resolveGuess(hand, ['jungle', 'desert', 'forest'], 'food', { wordings });
 
     expect(outcome.correct).toBe(false);
     expect(outcome.points).toBe(0);
@@ -76,15 +86,15 @@ test('a wrong guess leaves the hand untouched and scores nothing', () => {
 });
 
 test('naming a real category over the wrong concepts is still wrong', () => {
-    const outcome = resolveGuess(hand, ['jungle', 'desert', 'pizza'], 'biome', { wordings, pool });
+    const outcome = resolveGuess(hand, ['jungle', 'desert', 'pizza'], 'biome', { wordings });
 
     expect(outcome.correct).toBe(false);
     expect(outcome.hand).toEqual(hand);
 });
 
-test('the replacement concepts are not already in the hand', () => {
-    const outcome = resolveGuess(hand, ['piano', 'guitar', 'drum'], 'music', { wordings, pool });
-    const names = outcome.hand.concepts.map((c) => c.name);
+test('a solution that can no longer be formed stops being offered', () => {
+    // 'pizza' is a filler here, but a group locking 'piano' would strand music.
+    const outcome = resolveGuess(hand, ['piano', 'guitar', 'drum'], 'music', { wordings });
 
-    expect(new Set(names).size).toBe(names.length);
+    expect(outcome.hand.solutions.map((s) => s.property)).toEqual(['biome']);
 });
