@@ -513,8 +513,6 @@
         "language.en": "Switch to English",
         "language.fr": "Passer en français",
         "language.group": "Langue",
-        "panel.testSound": "Écouter le son des succès",
-        "panel.testSoundMuted": "Le son est coupé — rallume-le pour l'entendre",
         "score.found": "Groupes trouvés",
         "score.finished": "Terminés sur ce plateau",
         "reset.open": "Recommencer",

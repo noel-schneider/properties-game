@@ -30,7 +30,7 @@ function Reset({ onReset }: ResetProps) {
         <>
             <button
                 type="button"
-                className="panel__button panel__button--icon"
+                className="control control--icon"
                 onClick={() => setAsking(true)}
                 aria-label={t('reset.open')}
                 title={t('reset.open')}

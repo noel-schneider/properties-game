@@ -13,7 +13,7 @@ function LanguageToggle() {
                 <button
                     key={code}
                     type="button"
-                    className={code === language ? 'language__flag language__flag--on' : 'language__flag'}
+                    className={code === language ? 'control control--icon control--on' : 'control control--icon language__flag'}
                     onClick={() => setLanguage(code)}
                     aria-pressed={code === language}
                     // A flag is a country, not a language, so the name carries

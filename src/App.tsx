@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import "./App.css";
+import "./controls.css";
 import Answers from "./Answers";
 import Form from "./Form";
 import Graph from "./Graph";
@@ -7,6 +8,7 @@ import Scoreboard from "./Scoreboard";
 import Summary from "./Summary";
 import LanguageToggle from "./LanguageToggle";
 import Reset from "./Reset";
+import SoundToggle from "./SoundToggle";
 import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
@@ -198,18 +200,16 @@ function App({ playChime = playUnlockChime }: AppProps) {
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
           <Scoreboard found={found.length} finished={finishedCount} onBoard={concepts.length} remaining={left} />
-          <div className="top-right">
+          <div className="corner corner--top-right">
               <LanguageToggle />
               <Reset onReset={playAgain} />
-              <Panel
-                  unlocked={unlocked}
-                  muted={muted}
-                  onToggleMute={toggleMute}
-                  onTestSound={playChime}
-              />
+              <SoundToggle muted={muted} onToggle={toggleMute} />
           </div>
           <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
+          <div className="corner corner--bottom-right">
+              <Panel unlocked={unlocked} />
+          </div>
           <Toast unlocked={announcing} onDismiss={dismissAnnouncement} />
           {exhausted && !dismissedEnd && (
               <Summary
