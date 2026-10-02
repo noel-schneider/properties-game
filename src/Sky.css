@@ -1,0 +1,119 @@
+/*
+ * The night sky behind the board.
+ *
+ * Every moving part here is a transform on a layer the compositor already
+ * holds, so the whole background costs nothing per frame. --sky-x and --sky-y
+ * run from -1 to 1 and are written by Sky.tsx once per frame; --shift is how
+ * far a given layer travels at the edge, which is what makes it read as depth.
+ */
+.sky {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+
+    --sky-x: 0;
+    --sky-y: 0;
+
+    background:
+        radial-gradient(ellipse 120% 90% at 50% -10%, #2b2d54 0%, transparent 60%),
+        radial-gradient(ellipse 90% 70% at 15% 100%, #1d2742 0%, transparent 65%),
+        linear-gradient(170deg, #191b33 0%, #10111f 55%, #0c0d18 100%);
+}
+
+/* The aurora. One wrapper carries the parallax so each wash is free to drift. */
+.sky__aurora {
+    position: absolute;
+    inset: -8%;
+    transform: translate3d(calc(var(--sky-x) * 7px), calc(var(--sky-y) * 7px), 0);
+}
+
+.sky__wash {
+    position: absolute;
+    border-radius: 50%;
+    /* The alphas below are as far as this goes. The board's group names are thin
+       orange text over this, and they have to win. */
+    will-change: transform;
+}
+
+.sky__wash--one {
+    top: -10%;
+    left: -5%;
+    width: 70%;
+    height: 70%;
+    background: radial-gradient(circle at 50% 50%, rgba(86, 196, 184, 0.34), transparent 68%);
+    animation: wash-one 54s ease-in-out infinite alternate;
+}
+
+.sky__wash--two {
+    top: 10%;
+    right: -12%;
+    width: 65%;
+    height: 85%;
+    background: radial-gradient(circle at 50% 50%, rgba(139, 109, 214, 0.36), transparent 70%);
+    animation: wash-two 67s ease-in-out infinite alternate;
+}
+
+.sky__wash--three {
+    bottom: -25%;
+    left: 22%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle at 50% 50%, rgba(214, 122, 150, 0.24), transparent 72%);
+    animation: wash-three 81s ease-in-out infinite alternate;
+}
+
+@keyframes wash-one {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(7%, 5%, 0) scale(1.14); }
+}
+
+@keyframes wash-two {
+    from { transform: translate3d(0, 0, 0) scale(1.08); }
+    to   { transform: translate3d(-6%, 7%, 0) scale(1); }
+}
+
+@keyframes wash-three {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(5%, -6%, 0) scale(1.1); }
+}
+
+/*
+ * The stars. Each layer is oversized by more than it can ever travel, so the
+ * parallax never drags a bare edge into view.
+ */
+.sky__stars {
+    position: absolute;
+    inset: -36px;
+    width: calc(100% + 72px);
+    height: calc(100% + 72px);
+    transform: translate3d(calc(var(--sky-x) * var(--shift, 0px)), calc(var(--sky-y) * var(--shift, 0px)), 0);
+    will-change: transform;
+}
+
+.sky__stars circle {
+    fill: #f2f0ff;
+}
+
+/* Only the nearest stars breathe, and never below half brightness: a blink
+   reads as something asking to be clicked. */
+.sky__stars[data-twinkle="true"] circle {
+    animation-name: twinkle;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-timing-function: ease-in-out;
+}
+
+/* Each star carries its own brightness in --glow, so the fade is relative:
+   a fixed pair of opacities would flatten the layer's depth. */
+@keyframes twinkle {
+    from { opacity: var(--glow); }
+    to   { opacity: calc(var(--glow) * 0.45); }
+}
+
+/* Asked for less motion: the sky is still there, it simply holds still. */
+.sky[data-still="true"] .sky__wash,
+.sky[data-still="true"] .sky__stars circle {
+    animation: none;
+}

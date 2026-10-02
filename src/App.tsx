@@ -5,6 +5,7 @@ import Answers from "./Answers";
 import Form from "./Form";
 import Graph from "./Graph";
 import Scoreboard from "./Scoreboard";
+import Sky from "./Sky";
 import Summary from "./Summary";
 import LanguageToggle from "./LanguageToggle";
 import Reset from "./Reset";
@@ -197,6 +198,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
   return (
       <>
+          <Sky />
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
           <Scoreboard found={found.length} finished={finishedCount} onBoard={concepts.length} remaining={left} />

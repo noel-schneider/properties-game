@@ -2,9 +2,15 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/* The sky sits behind the page on its own layer, so the page itself must not
+   paint over it. The colour stays on the root as the fallback underneath. */
+html {
+  background-color: #10111f;
+}
+
 body {
   margin: 0;
-  background-color: #2d3047;
+  background: transparent;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
