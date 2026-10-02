@@ -89,3 +89,18 @@
 .submit:hover {
   background-color: #0077cc;
 }
+
+.feedback {
+  margin: 0;
+  min-height: 1.2rem;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.feedback--correct {
+  color: #7ddf9a;
+}
+
+.feedback--wrong {
+  color: #ff8f8f;
+}
