@@ -69,3 +69,29 @@ test('pressing Enter submits the guess', async ({ page }) => {
 
   await expect(page.getByRole('status')).toHaveText(/correct/i)
 })
+
+test('a solved group leaves the board, the score rises, and play continues', async ({ page }) => {
+  await page.goto('/')
+
+  const dealt = await page.getByRole('checkbox').evaluateAll((nodes) =>
+    nodes.map((n) => n.getAttribute('aria-label')!),
+  )
+  const { names, property } = findSolvableTriple(dealt)
+
+  await expect(page.getByTestId('score')).toHaveText('0')
+
+  for (const name of names) {
+    await page.getByRole('checkbox', { name }).click()
+  }
+  await page.getByPlaceholder('Type a category here!').fill(property)
+  await page.getByRole('button', { name: 'Submit' }).click()
+
+  await expect(page.getByRole('status')).toHaveText(/correct/i)
+  await expect(page.getByTestId('score')).toHaveText('1')
+
+  for (const name of names) {
+    await expect(page.getByRole('checkbox', { name })).toHaveCount(0)
+  }
+  await expect(page.getByRole('checkbox')).toHaveCount(15)
+  await expect(page.getByPlaceholder('Type a category here!')).toHaveValue('')
+})

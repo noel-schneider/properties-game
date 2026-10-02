@@ -13,7 +13,8 @@ const FEEDBACK_MESSAGE: Record<Feedback, string> = {
 interface FormProps {
     selected: string[];
     feedback: Feedback;
-    onSubmit: (guess: string) => void;
+    /** Returns whether the guess was accepted, so the input only clears on a win. */
+    onSubmit: (guess: string) => boolean;
 }
 
 function Form({ selected, feedback, onSubmit }: FormProps) {
@@ -25,7 +26,7 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!isSubmitEnabled) return;
-        onSubmit(inputValue);
+        if (onSubmit(inputValue)) setInputValue("");
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
