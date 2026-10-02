@@ -4,6 +4,7 @@ import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
 import { donePropertiesOf, isSpent, progressOf } from './game'
+import { DEFAULT_LINK } from './linkStyles'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -27,6 +28,11 @@ interface GraphProps {
     /** Every group found so far, drawn linked. */
     found: Solution[];
     onToggle: (name: string) => void;
+    /**
+     * How a found group is joined up, while we pick a way. Temporary: once
+     * the choice is made the winner becomes the only drawing and this goes.
+     */
+    link?: string;
 }
 
 /** How far a side of the loop bows out past the members it joins. */
@@ -53,10 +59,20 @@ const LOOP_BOW_FLOOR = 34;
  * The members are taken in the order they sit around the middle, or the loop
  * crosses itself whenever the simulation moves one past another.
  */
-export function loopAround(places: Point[], centre: Point): string {
-    const corners = [...places].sort(
-        (a, b) => Math.atan2(a.y - centre.y, a.x - centre.x) - Math.atan2(b.y - centre.y, b.x - centre.x),
-    );
+export function loopAround(places: Point[], centre: Point, spread = 0): string {
+    const corners = [...places]
+        .sort((a, b) => Math.atan2(a.y - centre.y, a.x - centre.x) - Math.atan2(b.y - centre.y, b.x - centre.x))
+        // Pushed outward by `spread`, so a shape that is meant to hold the
+        // bubbles is not drawn entirely behind them.
+        .map((place) => {
+            if (spread === 0) return place;
+            const out = { x: place.x - centre.x, y: place.y - centre.y };
+            const reach = Math.hypot(out.x, out.y) || 1;
+            return {
+                x: place.x + (out.x / reach) * spread,
+                y: place.y + (out.y / reach) * spread,
+            };
+        });
 
     const sides = corners.map((corner, i) => {
         const next = corners[(i + 1) % corners.length];
@@ -81,13 +97,23 @@ export function loopAround(places: Point[], centre: Point): string {
     return `M ${corners[0].x.toFixed(2)} ${corners[0].y.toFixed(2)} ${sides.join(' ')} Z`;
 }
 
+/** The same ring of members, joined by straight sides rather than curves. */
+export function straightLoop(places: Point[], centre: Point): string {
+    const corners = [...places].sort(
+        (a, b) => Math.atan2(a.y - centre.y, a.x - centre.x) - Math.atan2(b.y - centre.y, b.x - centre.x),
+    );
+
+    const steps = corners.map((corner) => `L ${corner.x.toFixed(2)} ${corner.y.toFixed(2)}`);
+    return `M ${corners[0].x.toFixed(2)} ${corners[0].y.toFixed(2)} ${steps.slice(1).join(' ')} Z`;
+}
+
 interface Gesture {
     index: number;
     startedAt: Point;
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, onToggle, link = DEFAULT_LINK }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -225,6 +251,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
         <svg
             ref={svg}
             className="graph"
+            data-link={link}
             data-settled={settled}
             viewBox={`${-VIEW_WIDTH / 2} ${-VIEW_HEIGHT / 2} ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
             role="group"
@@ -268,7 +295,11 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
                     <g key={`${group.property}-${groupIndex}`} className="found" data-group={group.property}>
                         <path
                             className={named ? 'found__loop found__loop--latest' : 'found__loop'}
-                            d={loopAround(places, centre)}
+                            d={
+                                link === 'edges'
+                                    ? straightLoop(places, centre)
+                                    : loopAround(places, centre, link === 'blob' ? RADIUS * 0.95 : 0)
+                            }
                         />
                         {named && <text
                             className="found__label"
