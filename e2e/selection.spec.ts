@@ -120,11 +120,28 @@ test.describe('with the board in motion', () => {
     await page.goto('/')
     await boardSettled(page)
 
+    const places = () => page.locator('g.bubble').evaluateAll(
+      (bubbles) => bubbles.map((b) => b.getAttribute('transform') ?? ''),
+    )
+    const before = await places()
+
     const bubble = page.getByRole('checkbox').first()
     await bubble.click()
 
     await expect(bubble).toHaveAttribute('aria-checked', 'true')
     await expect(page.locator('.graph')).toHaveAttribute('data-settled', 'true')
+    // Settling again is not the same as never having moved: a board that
+    // re-scatters on every click reads as a refresh, and comes back to rest
+    // fast enough that only the positions give it away. Compared with a
+    // tolerance rather than exactly, because letting go of a bubble costs one
+    // tick of the simulation and that lands as a hundredth of a pixel.
+    const after = await places()
+    const moved = before.map((place, i) => {
+      const [bx, by] = place.match(/-?\d+\.?\d*/g)!.map(Number)
+      const [ax, ay] = after[i].match(/-?\d+\.?\d*/g)!.map(Number)
+      return Math.hypot(ax - bx, ay - by)
+    })
+    expect(Math.max(...moved)).toBeLessThan(1)
   })
 })
 

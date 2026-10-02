@@ -114,10 +114,25 @@ export function useBubbleLayout(
     radii: number[],
     ties: Tie[] = [],
 ): Layout {
-    const nodes = useMemo<LayoutNode[]>(() => concepts.map(huddle), [concepts]);
-    // Re-running the simulation on every render would restart it constantly, so
-    // the sizes are compared by value rather than by array identity.
+    // Everything the simulation is keyed on is compared by value, never by
+    // array identity. App rebuilds its concepts array on every render, so
+    // identity changes on every click — and restarting the simulation then
+    // re-scatters the whole board, which reads as a refresh.
+    const conceptsKey = concepts.map((concept) => concept.name).join('\u0000');
     const radiiKey = radii.join(',');
+    const tiesKey = ties.map((tie) => `${tie.from}-${tie.to}`).join(',');
+
+    // Where each concept already sits, so a bubble that was on the board before
+    // is still in the same place after. Only a concept that has just been dealt
+    // comes in cold, which is what lets the new ones arrive beside the others
+    // rather than the board dealing itself again.
+    const placed = useRef(new Map<string, LayoutNode>());
+    const nodes = useMemo<LayoutNode[]>(() => {
+        const next = concepts.map((concept) => placed.current.get(concept.name) ?? huddle());
+        placed.current = new Map(concepts.map((concept, i) => [concept.name, next[i]]));
+        return next;
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by value, see above
+    }, [conceptsKey]);
     const [points, setPoints] = useState<Point[]>([]);
 
     const [settled, setSettled] = useState(false);
@@ -210,7 +225,7 @@ export function useBubbleLayout(
             running.current = false;
             simulation.current = null;
         };
-    }, [nodes, radiiKey, ties, wake]);
+    }, [nodes, radiiKey, tiesKey, wake]);
 
     // Taking hold pins the bubble but does not stir the board. A plain click is
     // a grab and a release with nothing in between, and it should leave a

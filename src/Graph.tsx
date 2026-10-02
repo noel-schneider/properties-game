@@ -111,6 +111,12 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
         );
         if (travelled > DRAG_THRESHOLD) held.moved = true;
 
+        // Below the threshold this is a click, not a drag. Dragging stirs the
+        // whole simulation, and no human presses a bubble without the pointer
+        // shifting a pixel or two — so acting on that wobble would reheat the
+        // board on every click, which reads as the board refreshing itself.
+        if (!held.moved) return;
+
         const point = toViewBox(event);
         if (point) dragTo(held.index, point);
     };

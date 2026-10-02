@@ -273,3 +273,44 @@ test('a bubble is drawn as something to poke, not as a diagram', () => {
   const style = getComputedStyle(document.querySelector('g.bubble circle')!);
   expect(Number(style.strokeWidth)).toBeGreaterThanOrEqual(3);
 });
+
+test('a board redrawn with the same concepts stays exactly where it was', () => {
+  // App rebuilds its concepts array on every render, so every click hands the
+  // board a new array holding the same things. That must change nothing: a
+  // board that re-scatters when you select a bubble reads as a refresh.
+  const props = { selected: [] as string[], found: [], onToggle: () => {} };
+  const { rerender } = renderApp(<Graph concepts={concepts} {...props} />);
+  runFrames(400);
+  const before = positions();
+
+  rerender(<Graph concepts={[...concepts]} {...props} selected={[concepts[0].name]} />);
+  runFrames(1);
+
+  expect(positions()).toEqual(before);
+});
+
+test('a concept dealt in arrives beside the others, without moving them', () => {
+  // The board is meant to persist: finding a group adds concepts beside the
+  // ones already there. Re-scattering everything would throw away the shape
+  // the player has been reading.
+  const props = { selected: [], found: [], onToggle: () => {} };
+  const { rerender } = renderApp(<Graph concepts={concepts} {...props} />);
+  runFrames(400);
+  const before = positions();
+
+  const newcomer: Concept = { name: 'newcomer', properties: ['thing'] };
+  rerender(<Graph concepts={[...concepts, newcomer]} {...props} />);
+  runFrames(1);
+
+  // Near where they were, not identical: the newcomer pushes in and the
+  // others give it room, which is the point. What must not happen is being
+  // dealt again from scratch, which throws them the width of the frame.
+  const moved = positions().slice(0, concepts.length).map((now, i) => {
+    const [nx, ny] = now.match(/-?\d+\.?\d*/g)!.map(Number);
+    const [bx, by] = before[i].match(/-?\d+\.?\d*/g)!.map(Number);
+    return Math.hypot(nx - bx, ny - by);
+  });
+
+  expect(Math.max(...moved)).toBeLessThan(30);
+  expect(positions()).toHaveLength(concepts.length + 1);
+});
