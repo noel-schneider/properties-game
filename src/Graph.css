@@ -107,6 +107,12 @@
     font-size: 19px;
     font-weight: 600;
     letter-spacing: 0.04em;
+    /* Sat in the middle of the group, so it lands on the bubbles as often as
+       not. The dark outline is what keeps it readable on cream. */
+    paint-order: stroke;
+    stroke: #16141f;
+    stroke-width: 5;
+    stroke-linejoin: round;
     pointer-events: none;
     user-select: none;
 }

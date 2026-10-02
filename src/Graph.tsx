@@ -36,8 +36,7 @@ export function asideLabel(x: number, radius: number): { dx: number; anchor: 'st
         : { dx: -(radius + ASIDE_GAP), anchor: 'end' };
 }
 
-/** Space the group's name needs, and how close it may come to the frame. */
-const LABEL_GAP = 28;
+/** How close a label may come to the frame. */
 const LABEL_MARGIN = 14;
 
 /** Past this much travel the gesture is a drag, and must not also select. */
@@ -272,20 +271,6 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                     x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
                     y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
                 };
-                const furthest = Math.max(
-                    ...places.map((p) => Math.hypot(p.x - centre.x, p.y - centre.y)),
-                );
-
-                // Below the group where there is room, above it where there is
-                // not: a name that falls off the frame names nothing.
-                const edge = VIEW_HEIGHT / 2 - LABEL_MARGIN;
-                const below = centre.y + furthest + RADIUS + LABEL_GAP;
-                const above = centre.y - furthest - RADIUS - LABEL_GAP / 2;
-                const labelY = Math.max(-edge, Math.min(below <= edge ? below : above, edge));
-                const labelX = Math.max(
-                    -(VIEW_WIDTH / 2 - LABEL_MARGIN),
-                    Math.min(centre.x, VIEW_WIDTH / 2 - LABEL_MARGIN),
-                );
 
                 return (
                     <g key={`${group.property}-${groupIndex}`} className="found" data-group={group.property}>
@@ -298,14 +283,6 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                                 {`${t('drop.add')} « ${propertyName(group.property)} »`}
                             </text>
                         )}
-                        {named && <text
-                            className="found__label"
-                            x={labelX}
-                            y={labelY}
-                            textAnchor="middle"
-                        >
-                            {propertyName(group.property)}
-                        </text>}
                     </g>
                 );
             })}
@@ -379,6 +356,34 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                     </g>
                 );
             })}
+
+            {/*
+              * The name of the group just found, in its middle and over the
+              * bubbles.
+              *
+              * In the middle because that is the thing being named, and the
+              * outline has a hole there once a group grows past three. Over
+              * the bubbles because a tight group would otherwise hide its own
+              * name behind them.
+              *
+              * Still only the latest: at twenty groups every name drawn is an
+              * unreadable heap. Which group is which, for the rest, is what
+              * the offer under a dragged concept answers.
+              */}
+            {live.length > 0 && (() => {
+                const group = live[live.length - 1].group;
+                const places = group.concepts.map(at);
+                const middle = {
+                    x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
+                    y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
+                };
+
+                return (
+                    <text className="found__label" x={middle.x} y={middle.y} textAnchor="middle" dominantBaseline="middle">
+                        {propertyName(group.property)}
+                    </text>
+                );
+            })()}
 
             {/*
               * The names of the spent concepts, drawn after every bubble.

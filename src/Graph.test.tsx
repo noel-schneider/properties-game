@@ -352,3 +352,28 @@ test('the outline takes its corners in the order they sit around the middle', ()
 
   expect([...angles].sort((a, b) => a - b)).toEqual(angles);
 });
+
+test('a found group is named in its middle, over the bubbles', () => {
+  renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
+  runFrames(600);
+
+  const places = foundGroup.concepts.map((name) => {
+    const [x, y] = screen.getByLabelText(name).getAttribute('transform')!
+      .match(/-?\d+\.?\d*/g)!.map(Number);
+    return { x, y };
+  });
+  const middle = {
+    x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
+    y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
+  };
+
+  const label = document.querySelector('.found__label')!;
+  expect(Number(label.getAttribute('x'))).toBeCloseTo(middle.x, 0);
+  expect(Number(label.getAttribute('y'))).toBeCloseTo(middle.y, 0);
+
+  // Drawn after every bubble, or a tight group hides its own name.
+  const drawn = [...document.querySelectorAll('.bubble, .found__label')];
+  expect(drawn.indexOf(label)).toBeGreaterThan(
+    drawn.map((el) => el.classList.contains('bubble')).lastIndexOf(true),
+  );
+});
