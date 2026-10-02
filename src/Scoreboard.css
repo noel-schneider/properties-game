@@ -1,0 +1,19 @@
+.scoreboard {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1.25rem 1rem 0.25rem;
+  font-family: 'Poppins', system-ui, sans-serif;
+  color: #9a9ab0;
+  font-size: 0.9rem;
+}
+
+.scoreboard__item {
+  margin: 0;
+}
+
+.scoreboard__value {
+  color: #e2dcde;
+  font-weight: 600;
+  margin-left: 0.35rem;
+}

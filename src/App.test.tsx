@@ -104,3 +104,68 @@ test('naming a category the selected concepts do not share is rejected', async (
 
   expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
 });
+
+test('a correct answer retires the found concepts and scores a point', async () => {
+  const user = userEvent.setup();
+  render(<App />);
+
+  const { concepts, property } = findSolvableTriple();
+  await select(user, concepts);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
+  expect(screen.getByTestId('score')).toHaveTextContent('1');
+
+  const stillDealt = screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'));
+  for (const concept of concepts) {
+    expect(stillDealt).not.toContain(concept.name);
+  }
+  expect(stillDealt).toHaveLength(15);
+});
+
+test('a wrong answer leaves the board and the score alone', async () => {
+  const user = userEvent.setup();
+  render(<App />);
+
+  const before = screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'));
+  const { concepts } = findSolvableTriple();
+  await select(user, concepts);
+  await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(screen.getByTestId('score')).toHaveTextContent('0');
+  expect(screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'))).toEqual(before);
+});
+
+test('a correct answer clears the selection and the input', async () => {
+  const user = userEvent.setup();
+  render(<App />);
+
+  const { concepts, property } = findSolvableTriple();
+  await select(user, concepts);
+  const input = screen.getByPlaceholderText(/type a category here/i);
+  await user.type(input, property);
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
+  expect(input).toHaveValue('');
+  for (const bubble of screen.getAllByRole('checkbox')) {
+    expect(bubble).toHaveAttribute('aria-checked', 'false');
+  }
+});
+
+test('a wrong answer keeps what you typed so it can be reworded', async () => {
+  const user = userEvent.setup();
+  render(<App />);
+
+  const { concepts } = findSolvableTriple();
+  await select(user, concepts);
+  const input = screen.getByPlaceholderText(/type a category here/i);
+  await user.type(input, 'wrong on purpose');
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(input).toHaveValue('wrong on purpose');
+});

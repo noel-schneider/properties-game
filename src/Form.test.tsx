@@ -4,7 +4,7 @@ import Form from './Form';
 
 test('submit stays disabled until three concepts and a category are given', async () => {
   const user = userEvent.setup();
-  const { rerender } = render(<Form selected={[]} feedback="none" onSubmit={() => {}} />);
+  const { rerender } = render(<Form selected={[]} feedback="none" onSubmit={() => true} />);
 
   const submit = screen.getByRole('button', { name: /submit/i });
   expect(submit).toBeDisabled();
@@ -12,16 +12,16 @@ test('submit stays disabled until three concepts and a category are given', asyn
   await user.type(screen.getByPlaceholderText(/type a category here/i), 'biome');
   expect(submit).toBeDisabled();
 
-  rerender(<Form selected={['forest', 'desert']} feedback="none" onSubmit={() => {}} />);
+  rerender(<Form selected={['forest', 'desert']} feedback="none" onSubmit={() => true} />);
   expect(submit).toBeDisabled();
 
-  rerender(<Form selected={['forest', 'desert', 'jungle']} feedback="none" onSubmit={() => {}} />);
+  rerender(<Form selected={['forest', 'desert', 'jungle']} feedback="none" onSubmit={() => true} />);
   expect(submit).toBeEnabled();
 });
 
 test('whitespace alone is not a category', async () => {
   const user = userEvent.setup();
-  render(<Form selected={['forest', 'desert', 'jungle']} feedback="none" onSubmit={() => {}} />);
+  render(<Form selected={['forest', 'desert', 'jungle']} feedback="none" onSubmit={() => true} />);
 
   await user.type(screen.getByPlaceholderText(/type a category here/i), '   ');
   expect(screen.getByRole('button', { name: /submit/i })).toBeDisabled();

@@ -29,18 +29,30 @@ export function sharedProperties(concepts: Concept[]): string[] {
 }
 
 /**
+ * The shared property the written answer names, if any, accepting the aliases
+ * declared for that property.
+ */
+export function matchedProperty(
+    concepts: Concept[],
+    guess: string,
+    aliases: PropertyAliases,
+): string | undefined {
+    const answer = normalize(guess);
+    if (answer === '') return undefined;
+
+    return sharedProperties(concepts).find((property) =>
+        [property, ...(aliases[property] ?? [])].some((accepted) => normalize(accepted) === answer),
+    );
+}
+
+/**
  * Whether the written answer names a property that all the selected concepts
- * share, accepting the aliases declared for that property.
+ * share.
  */
 export function checkGuess(
     concepts: Concept[],
     guess: string,
     aliases: PropertyAliases,
 ): boolean {
-    const answer = normalize(guess);
-    if (answer === '') return false;
-
-    return sharedProperties(concepts).some((property) =>
-        [property, ...(aliases[property] ?? [])].some((accepted) => normalize(accepted) === answer),
-    );
+    return matchedProperty(concepts, guess, aliases) !== undefined;
 }
