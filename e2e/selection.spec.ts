@@ -259,3 +259,51 @@ test('pointing at a concept shows what it shares, once something is found', asyn
   }
   await expect(page.locator('.bubble--aside').first()).toBeVisible()
 })
+
+test('tabbing to a concept reveals its kin, clicking one does not', async ({ page }) => {
+  await page.goto('/')
+  await page.evaluate(() => localStorage.clear())
+  await page.reload()
+  await boardSettled(page)
+
+  const solved = await page.evaluate(() => {
+    const panel = [...document.querySelectorAll('div')]
+      .find((d) => /answers \(dev only\)/i.test(d.textContent ?? '') && d.children.length < 30)
+    const lines = (panel as HTMLElement).innerText.split('\n').map((l) => l.trim()).filter(Boolean)
+    const i = lines.findIndex((l) => l.includes('·'))
+    return { property: lines[i - 1], concepts: lines[i].split('·').map((c) => c.trim()) }
+  })
+  for (const name of solved.concepts) {
+    await page.locator(`.bubble[aria-label="${name}"]`).click({ force: true })
+  }
+  await page.getByPlaceholder(/type a category here/i).fill(solved.property)
+  await page.keyboard.press('Enter')
+  await boardSettled(page)
+
+  // A mouse click leaves the focus on the bubble it hit, and that must not
+  // count as a reveal, or the board stays stepped back until the next click.
+  // Focus is given here without the pointer, so the pointer's own leaving
+  // cannot clear the state and hide the fault.
+  await page.locator(`.bubble[aria-label="${solved.concepts[0]}"]`).click({ force: true })
+  await page.mouse.move(5, 5)
+  await page.locator(`.bubble[aria-label="${solved.concepts[1]}"]`)
+    .evaluate((bubble: SVGGElement) => bubble.focus())
+
+  await expect(page.locator('.bubble--aside')).toHaveCount(0)
+  await expect(page.locator('.bubble--kin')).toHaveCount(0)
+
+  // Tabbing to one does count: it is the only way a keyboard reaches this.
+  // Aimed at a member of the group just found, since a concept that has
+  // settled nothing has no kin to reveal.
+  let reached = false
+  for (let i = 0; i < 60 && !reached; i++) {
+    await page.keyboard.press('Tab')
+    reached = await page.evaluate(
+      (names) => names.includes(document.activeElement?.getAttribute('aria-label') ?? ''),
+      solved.concepts,
+    )
+  }
+  expect(reached).toBe(true)
+
+  await expect(page.locator('.bubble--kin')).toHaveCount(solved.concepts.length)
+})

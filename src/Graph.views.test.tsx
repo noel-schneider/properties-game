@@ -68,11 +68,7 @@ test('the board comes back when the pointer leaves', () => {
   expect(document.querySelectorAll('.bubble--aside')).toHaveLength(0);
 });
 
-test('reaching a concept with the keyboard reveals its kin too', () => {
-  // The reveal is the only way to see what a concept shares, so it cannot be
-  // for mouse users alone.
-  board();
-  fireEvent.focus(bubble('ant'));
-
-  expect(lit('bee')).toBe(true);
-});
+// The keyboard reveal is covered end to end instead: jsdom reports
+// :focus-visible as false for every element, so it cannot tell a focus the
+// browser would draw a ring around from one left behind by a mouse click —
+// which is the whole distinction.

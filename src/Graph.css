@@ -113,13 +113,42 @@
 /* A concept with nothing left to find: small, faded, out of the way. */
 .bubble--done {
     cursor: default;
-    opacity: 0.35;
 }
 
+/* Faded on the dot rather than on the whole group, so the name beside it can
+   be legible while the dot stays quiet. */
 .bubble--done circle {
     fill: #8f8aa6;
     stroke: #5a5a7d;
+    stroke-width: 2;
+    opacity: 0.35;
     transition: opacity 0.4s ease;
+}
+
+/*
+ * The name of a spent concept, set beside its dot.
+ *
+ * Kept readable but plainly secondary: nothing shrunken can join another
+ * group, whatever its progress says, so a name that looked like a target
+ * would send the player after it for nothing. It is there to remind them
+ * which categories are in play.
+ */
+/* Stepped back with the rest of the board during a reveal. */
+.bubble__name--muted {
+    opacity: 0.25;
+}
+
+.bubble text.bubble__name--aside,
+.graph > text.bubble__name--aside {
+    /* Written long-hand deliberately. `.bubble text` is the more specific
+       selector, so a plain `.bubble__name--aside` rule loses to it and the
+       name comes out in the contour's near-black, on a near-black board. */
+    fill: #a9a3bd;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    pointer-events: none;
+    user-select: none;
 }
 
 .bubble--done:hover circle {

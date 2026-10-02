@@ -10,7 +10,30 @@ import type { Concept } from './types'
 const RADIUS = 62;
 
 /** A concept with nothing left to find takes a third of the room. */
-const FINISHED_RADIUS = Math.round(62 * 0.34);
+export const FINISHED_RADIUS = Math.round(62 * 0.34);
+
+/** Clear space between a spent concept's dot and the name beside it. */
+export const ASIDE_GAP = 9;
+
+/** Room a name beside a dot needs, give or take, for deciding which side. */
+const ASIDE_WIDTH = 96;
+
+/**
+ * Which side of a spent concept's dot its name goes, and where.
+ *
+ * A name is kept even though the concept can never join another group: it is
+ * what reminds the player which categories are in play while they work on the
+ * ones still live. Put beside rather than inside because the dot is a third
+ * of the size and nothing legible fits in it.
+ */
+export function asideLabel(x: number, radius: number): { dx: number; anchor: 'start' | 'end' } {
+    const wall = VIEW_WIDTH / 2 - LABEL_MARGIN;
+    const fitsRight = x + radius + ASIDE_GAP + ASIDE_WIDTH <= wall;
+
+    return fitsRight
+        ? { dx: radius + ASIDE_GAP, anchor: 'start' }
+        : { dx: -(radius + ASIDE_GAP), anchor: 'end' };
+}
 
 /** Space the group's name needs, and how close it may come to the frame. */
 const LABEL_GAP = 28;
@@ -271,7 +294,21 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
                         data-progress={`${spent}/${total}`}
                         onPointerEnter={() => setHovered(concept.name)}
                         onPointerLeave={() => setHovered((current) => (current === concept.name ? null : current))}
-                        onFocus={() => setHovered(concept.name)}
+                        onFocus={(event) => {
+                            // Only a focus the browser would draw a ring around.
+                            // A mouse click leaves the focus on the bubble it
+                            // hit, and treating that as a reveal leaves the
+                            // board stepped back for as long as the click
+                            // lasts — which is until the next one.
+                            //
+                            // Reliable here, unlike inside a keydown handler,
+                            // where pressing the key has already put the
+                            // browser into keyboard modality before the
+                            // handler runs. Measured both ways.
+                            if (event.currentTarget.matches?.(':focus-visible')) {
+                                setHovered(concept.name);
+                            }
+                        }}
                         onBlur={() => setHovered((current) => (current === concept.name ? null : current))}
                         aria-label={conceptName(concept.name)}
                         {...(isDone
@@ -302,6 +339,43 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle }: GraphPr
                             </text>
                         )}
                     </g>
+                );
+            })}
+
+            {/*
+              * The names of the spent concepts, drawn after every bubble.
+              *
+              * A spent dot is a third of the size and usually ends up tucked
+              * between full-size bubbles, so a name drawn with its own group
+              * is painted over by whatever is dealt next to it. Last, it is
+              * always readable.
+              */}
+            {concepts.map((concept, i) => {
+                if (!done.has(concept.name)) return null;
+
+                const { x, y } = points[i] ?? { x: 0, y: 0 };
+                const aside = asideLabel(x, radii[i]);
+
+                // Drawn outside the bubble groups, so these miss the reveal's
+                // dimming unless it is applied to them by hand — and then they
+                // are the brightest thing on a board that has just stepped back.
+                const muted = kin.size > 0 && !kin.has(concept.name);
+
+                return (
+                    <text
+                        key={`aside-${concept.name}`}
+                        className={
+                            muted
+                                ? 'bubble__name--aside bubble__name--muted'
+                                : 'bubble__name--aside'
+                        }
+                        x={x + aside.dx}
+                        y={y}
+                        textAnchor={aside.anchor}
+                        dominantBaseline="middle"
+                    >
+                        {conceptName(concept.name)}
+                    </text>
                 );
             })}
         </svg>
