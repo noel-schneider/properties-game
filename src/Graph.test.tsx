@@ -69,7 +69,7 @@ test('the bubbles keep clear of one another rather than touching', () => {
       const apart = Math.hypot(placed[a].x - placed[b].x, placed[a].y - placed[b].y);
 
       // Edge to edge, not centre to centre.
-      expect(apart - 2 * 62).toBeGreaterThan(BUBBLE_GAP / 2);
+      expect(apart - 2 * 62).toBeGreaterThanOrEqual(BUBBLE_GAP - 1);
     }
   }
 });
@@ -87,4 +87,39 @@ test('a selected bubble carries the selected class even under the cursor', () =>
   const bubble = screen.getByRole('checkbox', { name: 'concept-2' });
   expect(bubble).toHaveClass('bubble--selected');
   expect(bubble).toHaveAttribute('aria-checked', 'true');
+});
+
+test('the bubbles keep a comfortable distance on average, not just a legal one', () => {
+  render(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
+  runFrames(600);
+
+  const placed = centres();
+  const nearest = placed.map((a, i) => {
+    const others = placed.filter((_, j) => j !== i);
+    return Math.min(...others.map((b) => Math.hypot(a.x - b.x, a.y - b.y)));
+  });
+  const mean = nearest.reduce((sum, d) => sum + d, 0) / nearest.length - 2 * 62;
+
+  expect(mean).toBeGreaterThan(25);
+});
+
+test('the bubbles are spread, not packed on a regular lattice', () => {
+  render(<Graph concepts={concepts} selected={[]} onToggle={() => {}} />);
+  runFrames(600);
+
+  const placed = centres();
+  const nearest = placed.map((a, i) => {
+    const others = placed.filter((_, j) => j !== i);
+    return Math.min(...others.map((b) => Math.hypot(a.x - b.x, a.y - b.y)));
+  });
+
+  const mean = nearest.reduce((sum, d) => sum + d, 0) / nearest.length;
+  const spread = Math.sqrt(
+    nearest.reduce((sum, d) => sum + (d - mean) ** 2, 0) / nearest.length,
+  );
+
+  // Collision alone puts every bubble at exactly the same distance from its
+  // neighbours, which is a honeycomb rather than a graph. Repulsion has to be
+  // what sets the spacing for the distances to vary at all.
+  expect(spread).toBeGreaterThan(5);
 });

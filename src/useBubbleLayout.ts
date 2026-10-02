@@ -14,11 +14,16 @@ export interface Point {
  * bubbles move, which reads as the camera lurching rather than the bubbles
  * drifting.
  */
-export const VIEW_WIDTH = 1100;
-export const VIEW_HEIGHT = 780;
+export const VIEW_WIDTH = 1560;
+export const VIEW_HEIGHT = 700;
 
-/** Clear space left between two bubbles once they have settled. */
-export const BUBBLE_GAP = 20;
+/**
+ * The hard minimum between two bubbles. Deliberately small: when collision is
+ * what sets the spacing, every bubble ends up at exactly this distance from its
+ * neighbours and the board comes out as a honeycomb. Repulsion sets the real
+ * spacing, and collision only stops bubbles overlapping when it is crowded.
+ */
+export const BUBBLE_GAP = 6;
 
 const CENTRE: Point = { x: 0, y: 0 };
 
@@ -106,9 +111,13 @@ export function useBubbleLayout(concepts: Concept[], radius: number): Layout {
         const sim = forceSimulation(nodes)
             // Pulled harder vertically than horizontally, so the cluster comes
             // out landscape like the frame it has to fit in.
-            .force('towardsCentreX', forceX(CENTRE.x).strength(0.035))
-            .force('towardsCentreY', forceY(CENTRE.y).strength(0.09))
-            .force('spread', forceManyBody().strength(-24))
+            .force('towardsCentreX', forceX(CENTRE.x).strength(0.06))
+            .force('towardsCentreY', forceY(CENTRE.y).strength(0.14))
+            // Strong enough that the distance between bubbles is settled by
+            // repulsion against this pull, rather than by collision. That is
+            // what gives the uneven spacing a graph has and a packed tray of
+            // marbles does not.
+            .force('spread', forceManyBody().strength(-1400))
             .force('collide', forceCollide(radius + BUBBLE_GAP).strength(0.9))
             .alphaDecay(0.028)
             // Stops once the movement is no longer visible. The default would
