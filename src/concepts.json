@@ -4,6 +4,11 @@
         "transport",
         "airborne"
     ],
+    "ant": [
+        "insect",
+        "animal",
+        "underground"
+    ],
     "apartment": [
         "house",
         "building",
@@ -15,10 +20,22 @@
         "entertainment",
         "game"
     ],
+    "avalanche": [
+        "danger",
+        "cold",
+        "natural phenomenon",
+        "geography"
+    ],
     "basketball": [
         "game",
         "sport",
         "ball"
+    ],
+    "bat": [
+        "animal",
+        "night",
+        "airborne",
+        "underground"
     ],
     "beach": [
         "water",
@@ -28,7 +45,19 @@
     "bee": [
         "airborne",
         "insect",
-        "animal"
+        "animal",
+        "small",
+        "sound"
+    ],
+    "beetle": [
+        "insect",
+        "animal",
+        "colors"
+    ],
+    "bell": [
+        "sound",
+        "object",
+        "metal"
     ],
     "bike": [
         "vehicle",
@@ -47,9 +76,25 @@
         "game",
         "sport"
     ],
+    "bowling": [
+        "ball",
+        "sport",
+        "game",
+        "entertainment"
+    ],
     "bread": [
         "food",
         "dish"
+    ],
+    "bridge": [
+        "building",
+        "city",
+        "geography"
+    ],
+    "bus": [
+        "vehicle",
+        "transport",
+        "city"
     ],
     "butterfly": [
         "airborne",
@@ -57,10 +102,20 @@
         "animal",
         "colors"
     ],
+    "button": [
+        "small",
+        "object",
+        "colors"
+    ],
     "cabin": [
         "house",
         "shelter",
         "building"
+    ],
+    "cake": [
+        "food",
+        "dish",
+        "sweet"
     ],
     "calendar": [
         "time",
@@ -79,10 +134,26 @@
         "heat",
         "light"
     ],
+    "candy": [
+        "food",
+        "sweet",
+        "colors"
+    ],
     "car": [
         "vehicle",
         "transport",
         "machine"
+    ],
+    "cave": [
+        "shelter",
+        "underground",
+        "geography",
+        "night"
+    ],
+    "chameleon": [
+        "reptile",
+        "animal",
+        "colors"
     ],
     "chess": [
         "entertainment",
@@ -97,15 +168,42 @@
         "entertainment",
         "artistic expression"
     ],
+    "climbing": [
+        "outdoor activity",
+        "physical activity",
+        "sport"
+    ],
+    "cloud": [
+        "white",
+        "weather",
+        "airborne"
+    ],
+    "coin": [
+        "metal",
+        "object",
+        "small",
+        "city"
+    ],
     "comet": [
         "celestial object",
         "astronomy",
         "space"
     ],
+    "compass": [
+        "exploration",
+        "object",
+        "time"
+    ],
     "computer": [
         "machine",
         "electronic device",
         "technology"
+    ],
+    "crocodile": [
+        "reptile",
+        "animal",
+        "water",
+        "danger"
     ],
     "dance": [
         "artistic expression",
@@ -119,6 +217,16 @@
     "drum": [
         "musical instrument",
         "music"
+    ],
+    "dune": [
+        "sand",
+        "geography",
+        "biome"
+    ],
+    "fishing": [
+        "outdoor activity",
+        "physical activity",
+        "water"
     ],
     "football": [
         "game",
@@ -157,6 +265,12 @@
         "time",
         "object"
     ],
+    "hurricane": [
+        "wind",
+        "weather",
+        "natural phenomenon",
+        "danger"
+    ],
     "ice cream": [
         "cold",
         "food",
@@ -172,6 +286,11 @@
         "vegetation",
         "trees"
     ],
+    "key": [
+        "metal",
+        "object",
+        "small"
+    ],
     "kite": [
         "airborne",
         "game",
@@ -180,11 +299,19 @@
     "ladybug": [
         "insect",
         "animal",
-        "colors"
+        "colors",
+        "small"
+    ],
+    "lantern": [
+        "night",
+        "light",
+        "object"
     ],
     "lava": [
         "heat",
-        "natural phenomenon"
+        "natural phenomenon",
+        "danger",
+        "liquid"
     ],
     "letter": [
         "communication",
@@ -198,11 +325,28 @@
     "lightning": [
         "light",
         "natural phenomenon",
-        "weather"
+        "weather",
+        "danger"
     ],
     "lizard": [
         "animal",
         "reptile"
+    ],
+    "map": [
+        "exploration",
+        "object",
+        "reading",
+        "geography"
+    ],
+    "milk": [
+        "white",
+        "food",
+        "liquid"
+    ],
+    "mole": [
+        "underground",
+        "animal",
+        "night"
     ],
     "moon": [
         "night",
@@ -221,20 +365,43 @@
     ],
     "necklace": [
         "accessory",
-        "object"
+        "object",
+        "metal",
+        "small"
+    ],
+    "nest": [
+        "shelter",
+        "animal",
+        "trees"
     ],
     "newspaper": [
         "reading",
         "communication",
         "object"
     ],
+    "orchard": [
+        "trees",
+        "vegetation",
+        "food"
+    ],
     "owl": [
         "animal",
-        "night"
+        "night",
+        "sound"
     ],
     "painting": [
         "artistic expression",
         "colors"
+    ],
+    "park": [
+        "trees",
+        "location",
+        "outdoor activity",
+        "city"
+    ],
+    "pasta": [
+        "food",
+        "dish"
     ],
     "penguin": [
         "water",
@@ -248,7 +415,8 @@
     ],
     "piano": [
         "musical instrument",
-        "music"
+        "music",
+        "sound"
     ],
     "pizza": [
         "food",
@@ -263,14 +431,31 @@
         "reading",
         "artistic expression"
     ],
+    "radio": [
+        "communication",
+        "electronic device",
+        "sound"
+    ],
     "rain": [
         "water",
-        "weather"
+        "weather",
+        "liquid"
     ],
     "rainbow": [
         "colors",
         "natural phenomenon",
         "weather"
+    ],
+    "ring": [
+        "accessory",
+        "object",
+        "white"
+    ],
+    "river": [
+        "liquid",
+        "water",
+        "geography",
+        "biome"
     ],
     "robot": [
         "machine",
@@ -280,6 +465,12 @@
         "airborne",
         "space",
         "exploration"
+    ],
+    "sailboat": [
+        "wind",
+        "vehicle",
+        "transport",
+        "water"
     ],
     "satellite": [
         "technology",
@@ -291,13 +482,19 @@
         "vegetation",
         "geography"
     ],
+    "scarf": [
+        "accessory",
+        "cold",
+        "object"
+    ],
     "skyscraper": [
         "building",
         "city"
     ],
     "snake": [
         "animal",
-        "reptile"
+        "reptile",
+        "danger"
     ],
     "snow": [
         "cold",
@@ -307,7 +504,13 @@
     "soup": [
         "food",
         "dish",
-        "heat"
+        "heat",
+        "liquid"
+    ],
+    "stamp": [
+        "communication",
+        "object",
+        "small"
     ],
     "star": [
         "night",
@@ -315,11 +518,24 @@
         "astronomy",
         "light"
     ],
+    "submarine": [
+        "exploration",
+        "vehicle",
+        "transport",
+        "water",
+        "underground"
+    ],
     "subway": [
         "vehicle",
         "transport",
         "machine",
-        "city"
+        "city",
+        "underground"
+    ],
+    "sundial": [
+        "time",
+        "sand",
+        "astronomy"
     ],
     "surfing": [
         "water",
@@ -332,6 +548,11 @@
         "biome",
         "vegetation",
         "trees"
+    ],
+    "sword": [
+        "metal",
+        "object",
+        "danger"
     ],
     "telescope": [
         "astronomy",
@@ -356,6 +577,12 @@
         "entertainment venue",
         "artistic expression"
     ],
+    "thunder": [
+        "sound",
+        "weather",
+        "natural phenomenon",
+        "danger"
+    ],
     "tornado": [
         "natural phenomenon",
         "weather",
@@ -379,13 +606,22 @@
         "musical instrument",
         "music"
     ],
+    "volleyball": [
+        "ball",
+        "sport",
+        "game"
+    ],
     "watch": [
         "time",
-        "accessory"
+        "accessory",
+        "small",
+        "metal"
     ],
     "waterfall": [
         "water",
-        "natural phenomenon"
+        "natural phenomenon",
+        "liquid",
+        "sound"
     ],
     "whale": [
         "water",

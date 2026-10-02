@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 import { renderIn, words } from './test-utils'
-import { getAllConcepts } from './concepts'
+import { allProperties, getAllConcepts } from './concepts'
 import { sharedProperties } from './guess'
 import type { Concept } from './types'
 
@@ -163,5 +163,5 @@ test('a board started in one language can be finished in the other', async () =>
   await user.click(screen.getByRole('button', { name: words.en.ui['form.submit'] }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(words.en.ui['form.correct']);
-  expect(screen.getByTestId('categories')).toHaveTextContent('2 / 51');
+  expect(screen.getByTestId('categories')).toHaveTextContent(`2 / ${allProperties().length}`);
 });

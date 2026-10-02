@@ -1,31 +1,51 @@
 {
     "concepts": {
         "airplane": "avion",
+        "ant": "fourmi",
         "apartment": "appartement",
         "arcade": "salle d'arcade",
+        "avalanche": "avalanche",
         "basketball": "basket",
+        "bat": "chauve-souris",
         "beach": "plage",
         "bee": "abeille",
+        "beetle": "scarabée",
+        "bell": "cloche",
         "bike": "vélo",
         "boat": "bateau",
         "book": "livre",
         "bow": "arc",
+        "bowling": "bowling",
         "bread": "pain",
+        "bridge": "pont",
+        "bus": "bus",
         "butterfly": "papillon",
+        "button": "bouton",
         "cabin": "chalet",
+        "cake": "gâteau",
         "calendar": "calendrier",
         "camera": "appareil photo",
         "campfire": "feu de camp",
         "candle": "bougie",
+        "candy": "bonbon",
         "car": "voiture",
+        "cave": "grotte",
+        "chameleon": "caméléon",
         "chess": "échecs",
         "chocolate": "chocolat",
         "circus": "cirque",
+        "climbing": "escalade",
+        "cloud": "nuage",
+        "coin": "pièce",
         "comet": "comète",
+        "compass": "boussole",
         "computer": "ordinateur",
+        "crocodile": "crocodile",
         "dance": "danse",
         "desert": "désert",
         "drum": "batterie",
+        "dune": "dune",
+        "fishing": "pêche",
         "football": "football",
         "forest": "forêt",
         "glacier": "glacier",
@@ -34,53 +54,74 @@
         "hiking": "randonnée",
         "honey": "miel",
         "hourglass": "sablier",
+        "hurricane": "ouragan",
         "ice cream": "glace",
         "igloo": "igloo",
         "jungle": "jungle",
+        "key": "clé",
         "kite": "cerf-volant",
         "ladybug": "coccinelle",
+        "lantern": "lanterne",
         "lava": "lave",
         "letter": "lettre",
         "library": "bibliothèque",
         "lightning": "éclair",
         "lizard": "lézard",
+        "map": "carte",
+        "milk": "lait",
+        "mole": "taupe",
         "moon": "lune",
         "mountain": "montagne",
         "museum": "musée",
         "necklace": "collier",
+        "nest": "nid",
         "newspaper": "journal",
+        "orchard": "verger",
         "owl": "hibou",
         "painting": "peinture",
+        "park": "parc",
+        "pasta": "pâtes",
         "penguin": "manchot",
         "phone": "téléphone",
         "piano": "piano",
         "pizza": "pizza",
         "planet": "planète",
         "poem": "poème",
+        "radio": "radio",
         "rain": "pluie",
         "rainbow": "arc-en-ciel",
+        "ring": "bague",
+        "river": "rivière",
         "robot": "robot",
         "rocket": "fusée",
+        "sailboat": "voilier",
         "satellite": "satellite",
         "savanna": "savane",
+        "scarf": "écharpe",
         "skyscraper": "gratte-ciel",
         "snake": "serpent",
         "snow": "neige",
         "soup": "soupe",
+        "stamp": "timbre",
         "star": "étoile",
+        "submarine": "sous-marin",
         "subway": "métro",
+        "sundial": "cadran solaire",
         "surfing": "surf",
         "swamp": "marais",
+        "sword": "épée",
         "telescope": "télescope",
         "television": "télévision",
         "tennis": "tennis",
         "tent": "tente",
         "theater": "théâtre",
+        "thunder": "tonnerre",
         "tornado": "tornade",
         "train": "train",
         "tundra": "toundra",
         "turtle": "tortue",
         "violin": "violon",
+        "volleyball": "volley",
         "watch": "montre",
         "waterfall": "cascade",
         "whale": "baleine",
@@ -100,6 +141,7 @@
         "cold": "froid",
         "colors": "couleurs",
         "communication": "communication",
+        "danger": "danger",
         "dish": "plat",
         "electronic device": "appareil électronique",
         "entertainment": "divertissement",
@@ -112,8 +154,10 @@
         "house": "habitation",
         "insect": "insecte",
         "light": "lumière",
+        "liquid": "liquide",
         "location": "lieu",
         "machine": "machine",
+        "metal": "métal",
         "music": "musique",
         "musical instrument": "instrument de musique",
         "natural phenomenon": "phénomène naturel",
@@ -125,6 +169,8 @@
         "reptile": "reptile",
         "sand": "sable",
         "shelter": "abri",
+        "small": "petit",
+        "sound": "son",
         "space": "espace",
         "sport": "sport",
         "sweet": "sucré",
@@ -132,6 +178,7 @@
         "time": "temps",
         "transport": "transport",
         "trees": "arbres",
+        "underground": "souterrain",
         "vegetation": "végétation",
         "vehicle": "véhicule",
         "water": "eau",
@@ -163,9 +210,7 @@
             "création"
         ],
         "astronomy": [
-            "espace",
             "ciel",
-            "astre",
             "cosmos"
         ],
         "ball": [
@@ -211,6 +256,12 @@
             "parler",
             "échange"
         ],
+        "danger": [
+            "dangereux",
+            "mortel",
+            "risqué",
+            "péril"
+        ],
         "dish": [
             "repas",
             "recette",
@@ -219,8 +270,7 @@
         "electronic device": [
             "électronique",
             "appareil",
-            "gadget",
-            "technologie"
+            "gadget"
         ],
         "entertainment": [
             "loisir",
@@ -277,6 +327,11 @@
             "éclaire",
             "clarté"
         ],
+        "liquid": [
+            "fluide",
+            "ça coule",
+            "écoulement"
+        ],
         "location": [
             "endroit",
             "place",
@@ -287,10 +342,13 @@
             "mécanisme",
             "engin"
         ],
+        "metal": [
+            "métallique",
+            "en métal"
+        ],
         "music": [
             "musical",
-            "mélodie",
-            "son"
+            "mélodie"
         ],
         "musical instrument": [
             "instrument",
@@ -317,7 +375,6 @@
             "extérieur"
         ],
         "physical activity": [
-            "sport",
             "exercice",
             "mouvement"
         ],
@@ -339,6 +396,17 @@
             "refuge",
             "protection",
             "couvert"
+        ],
+        "small": [
+            "minuscule",
+            "petite chose",
+            "menu"
+        ],
+        "sound": [
+            "bruit",
+            "sonore",
+            "audible",
+            "ça fait du bruit"
         ],
         "space": [
             "cosmos",
@@ -377,6 +445,12 @@
             "forêt",
             "arbre"
         ],
+        "underground": [
+            "sous terre",
+            "en dessous",
+            "enterré",
+            "sous le sol"
+        ],
         "vegetation": [
             "plantes",
             "verdure",
@@ -384,13 +458,11 @@
             "végétal"
         ],
         "vehicle": [
-            "transport",
             "engin",
             "moyen de transport"
         ],
         "water": [
             "aquatique",
-            "liquide",
             "mouillé"
         ],
         "weather": [

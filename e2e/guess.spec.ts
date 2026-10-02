@@ -32,7 +32,7 @@ test('naming the shared category is accepted', async ({ page }) => {
   const { names, property } = findSolvableTriple(dealt)
 
   for (const name of names) {
-    await page.getByRole('checkbox', { name }).click()
+    await page.getByRole('checkbox', { name, exact: true }).click()
   }
   await page.getByPlaceholder('Type a category here!').fill(property)
   await page.getByRole('button', { name: 'Submit' }).click()
@@ -50,7 +50,7 @@ test('a wrong category is rejected', async ({ page }) => {
   const { names } = findSolvableTriple(dealt)
 
   for (const name of names) {
-    await page.getByRole('checkbox', { name }).click()
+    await page.getByRole('checkbox', { name, exact: true }).click()
   }
   await page.getByPlaceholder('Type a category here!').fill('not a real category at all')
   await page.getByRole('button', { name: 'Submit' }).click()
@@ -68,7 +68,7 @@ test('pressing Enter submits the guess', async ({ page }) => {
   const { names, property } = findSolvableTriple(dealt)
 
   for (const name of names) {
-    await page.getByRole('checkbox', { name }).click()
+    await page.getByRole('checkbox', { name, exact: true }).click()
   }
   await page.getByPlaceholder('Type a category here!').fill(property)
   await page.getByPlaceholder('Type a category here!').press('Enter')
@@ -91,7 +91,7 @@ test('a solved group stays on the board, tied and named, and play continues', as
   const { names, property } = findSolvableTriple(dealt)
 
   for (const name of names) {
-    await page.getByRole('checkbox', { name }).click()
+    await page.getByRole('checkbox', { name, exact: true }).click()
   }
   await page.getByPlaceholder('Type a category here!').fill(property)
   await page.getByRole('button', { name: 'Submit' }).click()
@@ -101,8 +101,8 @@ test('a solved group stays on the board, tied and named, and play continues', as
 
   // The three stay on the board, no longer selectable, drawn as a found group.
   for (const name of names) {
-    await expect(page.getByRole('checkbox', { name })).toHaveCount(0)
-    await expect(page.getByLabel(name)).toHaveAttribute('data-found', 'true')
+    await expect(page.getByRole('checkbox', { name, exact: true })).toHaveCount(0)
+    await expect(page.getByLabel(name, { exact: true })).toHaveAttribute('data-found', 'true')
   }
   await expect(page.getByRole('checkbox')).toHaveCount(15 - names.length)
   await expect(page.locator('.found__tie')).toHaveCount(names.length)

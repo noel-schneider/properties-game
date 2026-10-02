@@ -1,5 +1,6 @@
 import { recordEvent } from './index'
 import { emptyProgress } from './progress'
+import { allProperties } from '../concepts'
 import type { GameEvent, Progress } from './types'
 
 const AT = new Date('2026-10-02T15:00:00').getTime();
@@ -137,13 +138,12 @@ test('two achievements earned on the same guess are both announced', () => {
 });
 
 test('completionist when every category has been found', () => {
-  const everything = Array.from({ length: 51 }, (_, i) => `p${i}`);
-  const almost = everything.slice(0, 50);
+  const total = allProperties().length;
+  const everything = Array.from({ length: total }, (_, i) => `p${i}`);
 
-  expect(unlockedBy([deal(99), ...wins(50)])).not.toContain('completionist');
-  expect(unlockedBy([deal(99), ...almost.map((p) => win({ property: p })), win({ property: 'p50' })]))
+  expect(unlockedBy([deal(99), ...wins(total - 1)])).not.toContain('completionist');
+  expect(unlockedBy([deal(99), ...everything.map((p) => win({ property: p }))]))
     .toContain('completionist');
-  expect(everything).toHaveLength(51);
 });
 
 test('unlocked ids are remembered in the lifetime record', () => {
