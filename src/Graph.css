@@ -21,8 +21,21 @@
 .bubble circle {
     fill: #e2dcde;
     stroke: #1b1b1b;
-    stroke-width: 1;
+    /* Heavier than it was. A hairline contour reads as a diagram; a thick one
+       reads as something you are meant to poke. */
+    stroke-width: 3;
     transition: fill 0.15s ease;
+}
+
+/*
+ * The light on a raised bubble. Drawn on every bubble whatever the look and
+ * revealed only where it is wanted, so changing look repaints the board
+ * instead of rebuilding it.
+ */
+.bubble__sheen {
+    display: none;
+    stroke: none;
+    pointer-events: none;
 }
 
 .bubble text {
@@ -97,4 +110,32 @@
 
 .bubble--done:hover circle {
     fill: #8f8aa6;
+}
+
+
+/* ---------------------------------------------------------------------------
+ * The looks, while we pick one.
+ *
+ * Temporary: a dev-only picker sets data-look on the board, and once the
+ * choice is made the winner's rules move up into the block above and the rest
+ * of this section goes away. They all share the heavier contour.
+ * ------------------------------------------------------------------------ */
+
+/* Chunky sticker: a hard shadow with no blur, sitting straight underneath. */
+.graph[data-look="drop"] .bubble circle {
+    filter: drop-shadow(0 5px 0 rgba(20, 20, 30, 0.45));
+}
+
+/* Raised bead: the contour plus a light from above. */
+.graph[data-look="bead"] .bubble__sheen {
+    display: block;
+}
+
+/* Lit by the sunrise behind the board. */
+.graph[data-look="glow"] .bubble circle {
+    filter: drop-shadow(0 0 12px rgba(255, 173, 105, 0.55));
+}
+
+.graph[data-look="glow"] .bubble--selected circle {
+    filter: drop-shadow(0 0 18px rgba(255, 173, 105, 0.9));
 }
