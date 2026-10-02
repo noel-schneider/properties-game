@@ -490,8 +490,7 @@
         "form.wrong": "Pas tout à fait — essaie une autre catégorie.",
         "form.enterHint": "Appuie sur « Entrée » pour valider !",
         "form.enterAlt": "Touche Entrée",
-        "score.categories": "Catégories",
-        "score.remaining": "Restantes sur ce plateau",
+        "score.remaining": "Encore trouvables ici",
         "panel.open": "Succès",
         "panel.title": "Succès",
         "panel.close": "Fermer les succès",
@@ -515,7 +514,9 @@
         "language.fr": "Passer en français",
         "language.group": "Langue",
         "panel.testSound": "Écouter le son des succès",
-        "panel.testSoundMuted": "Le son est coupé — rallume-le pour l'entendre"
+        "panel.testSoundMuted": "Le son est coupé — rallume-le pour l'entendre",
+        "score.found": "Groupes trouvés",
+        "score.finished": "Terminés sur ce plateau"
     },
     "achievements": {
         "first-light": {
@@ -524,7 +525,7 @@
         },
         "hat-trick": {
             "name": "Coup du chapeau",
-            "description": "Vide un plateau entier sans une seule erreur."
+            "description": "Terminer un concept : toutes ses propriétés trouvées."
         },
         "in-your-words": {
             "name": "Dans tes mots",
@@ -548,7 +549,7 @@
         },
         "spotless": {
             "name": "Sans accroc",
-            "description": "Vide trois plateaux de suite sans une seule erreur."
+            "description": "Terminer dix concepts."
         },
         "completionist": {
             "name": "Complétiste",
@@ -560,7 +561,7 @@
         },
         "scattershot": {
             "name": "Au pif",
-            "description": "Donne cinq mauvaises réponses sur le même plateau."
+            "description": "Donner cinq mauvaises réponses dans une même session."
         },
         "big-net": {
             "name": "Gros filet",

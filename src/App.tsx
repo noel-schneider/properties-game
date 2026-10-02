@@ -10,18 +10,28 @@ import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
 import { playUnlockChime } from "./achievements/chime";
-import { emptyRunStats, loadLifetime, loadMuted, loadRunStats, saveLifetime, saveMuted, saveRunStats } from "./achievements/storage";
+import {
+    emptyRunStats, loadFound, loadLifetime, loadMuted, loadRunStats,
+    saveFound, saveLifetime, saveMuted, saveRunStats,
+} from "./achievements/storage";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
-import { allProperties, dealRound } from "./concepts";
+import { formableGroups, openingBoard, refill } from "./board";
+import { getAllConcepts } from "./concepts";
+import { isFinished, isSpent } from "./game";
 import { isExactLabel } from "./guess";
 import { resolveGuess } from "./round";
 import { useTranslator } from "./i18n";
 import type { Achievement, GameEvent, Progress } from "./achievements";
+import type { Solution } from "./hand";
 
 export type Feedback = 'none' | 'correct' | 'wrong';
 
-const TOTAL_CATEGORIES = allProperties().length;
+/** How many concepts with something left to find are kept on the board. */
+export const ACTIVE_CONCEPTS = 15;
+
+const pool = getAllConcepts();
+const byName = new Map(pool.map((concept) => [concept.name, concept]));
 
 interface AppProps {
     /** Injected so tests can watch the unlock sound without making noise. */
@@ -32,10 +42,21 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
     const { wordings } = useTranslator();
     const [lifetimeAtStart] = useState(loadLifetime);
-    const [hand, setHand] = useState(() => dealRound(lifetimeAtStart.propertiesFound));
+    const [found, setFound] = useState<Solution[]>(loadFound);
+
+    // The board is rebuilt from what was found: which concepts are on screen is
+    // presentation, what has been found is the game.
+    const [board, setBoard] = useState<string[]>(() => {
+        const stored = loadFound();
+        return stored.length > 0
+            ? refill([...new Set(stored.flatMap((g) => g.concepts))], pool, stored, ACTIVE_CONCEPTS)
+            : openingBoard(pool, ACTIVE_CONCEPTS);
+    });
+
     const [selected, setSelected] = useState<string[]>([]);
     const [feedback, setFeedback] = useState<Feedback>('none');
     const [announcing, setAnnouncing] = useState<Achievement[]>([]);
+    const [dismissedEnd, setDismissedEnd] = useState(false);
 
     // Progress is read when an event arrives rather than rendered, so it lives
     // in a ref: a state update per toggle would re-render the board for
@@ -45,16 +66,13 @@ function App({ playChime = playUnlockChime }: AppProps) {
         progress.current = recordEvent(emptyProgress(lifetimeAtStart), {
             type: 'board-dealt',
             at: Date.now(),
-            groups: hand.solutions.length,
+            groups: formableGroups(board, pool, found).length,
         }).progress;
     }
 
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
-    const [found, setFound] = useState<string[]>(() => progress.current!.lifetime.propertiesFound);
-    const [finished, setFinished] = useState(false);
-    const [dismissedEnd, setDismissedEnd] = useState(false);
-    // The run spans sessions, so its tally is persisted too. A summary reading
-    // "51 categories" next to "1 board" would be counting two different things.
+    const [muted, setMuted] = useState(loadMuted);
+
     const tally = useRef<RunTally>(loadRunStats());
     if (tally.current.boards === 0) {
         tally.current = { ...tally.current, boards: 1 };
@@ -65,7 +83,6 @@ function App({ playChime = playUnlockChime }: AppProps) {
         tally.current = { ...tally.current, ...change };
         saveRunStats(tally.current);
     };
-    const [muted, setMuted] = useState(loadMuted);
 
     const toggleMute = () => {
         setMuted((current) => {
@@ -78,12 +95,9 @@ function App({ playChime = playUnlockChime }: AppProps) {
         const { progress: next, unlocked: earned } = recordEvent(progress.current!, event);
         progress.current = next;
 
-        setFound(next.lifetime.propertiesFound);
         if (next.session.streak > tally.current.bestStreak) {
             bumpTally({ bestStreak: next.session.streak });
         }
-        if (next.lifetime.propertiesFound.length >= TOTAL_CATEGORIES) setFinished(true);
-
         if (earned.length === 0) return;
 
         saveLifetime(next.lifetime);
@@ -107,7 +121,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
     };
 
     const submitGuess = (guess: string): boolean => {
-        const outcome = resolveGuess(hand, selected, guess, { wordings });
+        const outcome = resolveGuess(selected, guess, { wordings, pool, found });
 
         record({
             type: 'guess',
@@ -126,51 +140,63 @@ function App({ playChime = playUnlockChime }: AppProps) {
         }
 
         bumpTally({ correct: tally.current.correct + outcome.points });
+
+        // Each concept that has just run out of properties is announced, so the
+        // achievements can count them.
+        const wasFinished = board.filter((name) => {
+            const concept = byName.get(name);
+            return concept && isFinished(concept, found);
+        }).length;
+        const nowFinished = board.filter((name) => {
+            const concept = byName.get(name);
+            return concept && isFinished(concept, outcome.found);
+        }).length;
+        for (let i = wasFinished; i < nowFinished; i++) {
+            record({ type: 'concept-finished', at: Date.now() });
+        }
+
         setSelected([]);
         setFeedback('correct');
+        setFound(outcome.found);
+        saveFound(outcome.found);
 
-        // A hand with nothing left to find is a dead board, so the next round
-        // is dealt straight away.
-        const next =
-            outcome.hand.solutions.length > 0
-                ? outcome.hand
-                : dealRound(progress.current!.lifetime.propertiesFound);
-        setHand(next);
-        if (next !== outcome.hand) {
-            bumpTally({ boards: tally.current.boards + 1 });
-            record({ type: 'board-dealt', at: Date.now(), groups: next.solutions.length });
-        }
+        // Finished concepts stay on the board, small and faded; fresh ones come
+        // in beside them so there is always something left to work on.
+        setBoard((current) => refill(current, pool, outcome.found, ACTIVE_CONCEPTS));
         return true;
     };
 
-    // Playing again clears the categories only. Achievements are never taken
-    // back, so the lifetime counters that feed them survive the reset.
     const playAgain = () => {
         const kept = { ...emptyLifetime(), unlocked: progress.current!.lifetime.unlocked };
         saveLifetime(kept);
+        saveFound([]);
 
-        const fresh = dealRound([]);
+        const fresh = openingBoard(pool, ACTIVE_CONCEPTS);
         progress.current = recordEvent(emptyProgress(kept), {
             type: 'board-dealt',
             at: Date.now(),
-            groups: fresh.solutions.length,
+            groups: formableGroups(fresh, pool, []).length,
         }).progress;
 
         tally.current = { ...emptyRunStats(), boards: 1 };
         saveRunStats(tally.current);
-        setHand(fresh);
+        setFound([]);
+        setBoard(fresh);
         setSelected([]);
         setFeedback('none');
-        setFound([]);
-        setFinished(false);
         setDismissedEnd(false);
     };
+
+    const concepts = board.map((name) => byName.get(name)).filter((c): c is NonNullable<typeof c> => !!c);
+    const finishedCount = concepts.filter((concept) => isSpent(concept, found, pool)).length;
+    const left = formableGroups(board, pool, found).length;
+    const exhausted = formableGroups(pool.map((c) => c.name), pool, found).length === 0;
 
   return (
       <>
           {/* Debugging aid. Folded away in a built game, import and all. */}
-          {import.meta.env.DEV && <Answers hand={hand} enabled />}
-          <Scoreboard found={found.length} total={TOTAL_CATEGORIES} remaining={hand.solutions.length} />
+          {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
+          <Scoreboard found={found.length} finished={finishedCount} onBoard={concepts.length} remaining={left} />
           <div className="top-right">
               <LanguageToggle />
               <Panel
@@ -180,15 +206,10 @@ function App({ playChime = playUnlockChime }: AppProps) {
                   onTestSound={playChime}
               />
           </div>
-          <Graph
-              concepts={hand.concepts}
-              selected={selected}
-              solved={hand.solved}
-              onToggle={toggleConcept}
-          />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <Toast unlocked={announcing} onDismiss={dismissAnnouncement} />
-          {finished && !dismissedEnd && (
+          {exhausted && !dismissedEnd && (
               <Summary
                   stats={{
                       categories: found.length,

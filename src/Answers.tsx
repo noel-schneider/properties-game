@@ -1,9 +1,13 @@
 import { useTranslator } from './i18n'
 import type { CSSProperties } from 'react'
-import type { Hand } from './hand'
+import { openProperties } from './game'
+import type { Solution } from './hand'
+import type { Concept } from './types'
 
 interface AnswersProps {
-    hand: Hand;
+    board: string[];
+    pool: Concept[];
+    found: Solution[];
     /**
      * Whether to show anything. App gates the whole component behind
      * import.meta.env.DEV so a built game drops it, import and all: this gives
@@ -45,15 +49,24 @@ const styles: Record<string, CSSProperties> = {
 };
 
 /** Temporary: shows the board's answers while the game is being worked on. */
-function Answers({ hand, enabled }: AnswersProps) {
+function Answers({ board, pool, found, enabled }: AnswersProps) {
     const { concept, property } = useTranslator();
 
     if (!enabled) return null;
 
-    const groups = [
-        ...hand.solved.map((group) => ({ ...group, found: true })),
-        ...hand.solutions.map((group) => ({ ...group, found: false })),
-    ];
+    const byName = new Map(pool.map((c) => [c.name, c]));
+    const open = new Map<string, string[]>();
+    for (const name of board) {
+        const concept = byName.get(name);
+        if (!concept) continue;
+        for (const property of openProperties(concept, found)) {
+            open.set(property, [...(open.get(property) ?? []), name]);
+        }
+    }
+
+    const groups = [...open.entries()]
+        .filter(([, names]) => names.length >= 3)
+        .map(([property, names]) => ({ property, concepts: names.slice(0, 3), found: false }));
 
     return (
         <div style={styles.panel} data-testid="answers">

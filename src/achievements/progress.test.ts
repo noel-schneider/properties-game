@@ -61,19 +61,10 @@ test('toggles are counted per concept and cleared once an answer is given', () =
   expect(play([deal, ...toggles, miss()]).session.toggleCounts).toEqual({});
 });
 
-test('clearing every group on a board is flagged once, then cleared', () => {
-  const cleared = play([{ type: 'board-dealt', at: 0, groups: 2 }, win(), win({ property: 'cold' })]);
+test('concepts that run out of properties are counted for good', () => {
+  const p = play([deal, { type: 'concept-finished', at: 1 }, { type: 'concept-finished', at: 2 }]);
 
-  expect(cleared.session.boardJustCleared).toBe(true);
-  expect(cleared.session.cleanBoardsInARow).toBe(1);
-  expect(advance(cleared, { type: 'board-dealt', at: 9_000, groups: 2 }).session.boardJustCleared).toBe(false);
-});
-
-test('a board cleared with a mistake breaks the clean run', () => {
-  const p = play([{ type: 'board-dealt', at: 0, groups: 1 }, miss(), win()]);
-
-  expect(p.session.boardJustCleared).toBe(true);
-  expect(p.session.cleanBoardsInARow).toBe(0);
+  expect(p.lifetime.conceptsFinished).toBe(2);
 });
 
 test('answering right on the selection just refused is flagged, and only then', () => {

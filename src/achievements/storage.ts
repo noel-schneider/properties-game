@@ -40,7 +40,8 @@ export function loadLifetime(): Lifetime {
 
     if (stored === null || typeof stored !== 'object') return emptyLifetime();
 
-    const { unlocked, propertiesFound, aliasAnswers, exactAnswers } = stored as Record<string, unknown>;
+    const { unlocked, propertiesFound, aliasAnswers, exactAnswers, conceptsFinished } =
+        stored as Record<string, unknown>;
 
     if (
         !isStringArray(unlocked) ||
@@ -55,6 +56,8 @@ export function loadLifetime(): Lifetime {
 
     return {
         unlocked: unlocked.filter((id) => known.has(id)),
+        // Added after the first records were written, so missing means none.
+        conceptsFinished: isNumber(conceptsFinished) ? conceptsFinished : 0,
         propertiesFound,
         aliasAnswers,
         exactAnswers,
@@ -143,5 +146,49 @@ export function saveRunStats(tally: RunTally): void {
         localStorage.setItem(RUN_KEY, JSON.stringify(tally));
     } catch {
         // As above: a tally is not worth a crash.
+    }
+}
+
+/**
+ * The groups found so far. The board is rebuilt from these on load: which
+ * concepts are on screen is presentation, what was found is the game.
+ */
+export const FOUND_KEY = 'properties-game:found';
+
+export interface FoundGroup {
+    property: string;
+    concepts: string[];
+}
+
+export function loadFound(): FoundGroup[] {
+    let raw: string | null = null;
+    try {
+        raw = localStorage.getItem(FOUND_KEY);
+    } catch {
+        return [];
+    }
+    if (raw === null) return [];
+
+    try {
+        const stored: unknown = JSON.parse(raw);
+        if (!Array.isArray(stored)) return [];
+
+        return stored.filter(
+            (group): group is FoundGroup =>
+                group !== null &&
+                typeof group === 'object' &&
+                typeof (group as FoundGroup).property === 'string' &&
+                isStringArray((group as FoundGroup).concepts),
+        );
+    } catch {
+        return [];
+    }
+}
+
+export function saveFound(found: FoundGroup[]): void {
+    try {
+        localStorage.setItem(FOUND_KEY, JSON.stringify(found));
+    } catch {
+        // As elsewhere: losing a record is a lost reward, not a crash.
     }
 }

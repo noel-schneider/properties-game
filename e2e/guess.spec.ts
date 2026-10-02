@@ -2,7 +2,6 @@ import { expect, test } from '@playwright/test'
 import { boardSettled } from './board'
 import data from '../src/concepts.json' with { type: 'json' }
 
-const TOTAL_CATEGORIES = new Set(Object.values(data as Record<string, string[]>).flat()).size
 
 const properties = data as Record<string, string[]>
 
@@ -76,14 +75,14 @@ test('pressing Enter submits the guess', async ({ page }) => {
   await expect(page.getByRole('status')).toHaveText(/correct/i)
 })
 
-test('a solved group stays on the board, tied and named, and play continues', async ({ page }) => {
+test('a found group stays on the board, tied and named, and its concepts carry on', async ({ page }) => {
   // Start from a clean record, then read the board that comes with it.
   await page.goto('/')
   await boardSettled(page)
   await page.evaluate(() => localStorage.clear())
   await page.reload()
   await boardSettled(page)
-  await expect(page.getByTestId('categories')).toHaveText(`0 / ${TOTAL_CATEGORIES}`)
+  await expect(page.getByTestId('found')).toHaveText('0')
 
   const dealt = await page.getByRole('checkbox').evaluateAll((nodes) =>
     nodes.map((n) => n.getAttribute('aria-label')!),
@@ -97,14 +96,13 @@ test('a solved group stays on the board, tied and named, and play continues', as
   await page.getByRole('button', { name: 'Submit' }).click()
 
   await expect(page.getByRole('status')).toHaveText(/correct/i)
-  await expect(page.getByTestId('categories')).toHaveText(`1 / ${TOTAL_CATEGORIES}`)
+  await expect(page.getByTestId('found')).toHaveText('1')
 
-  // The three stay on the board, no longer selectable, drawn as a found group.
+  // The three stay on the board, tied together, and keep whatever properties
+  // they have not spent yet.
   for (const name of names) {
-    await expect(page.getByRole('checkbox', { name, exact: true })).toHaveCount(0)
-    await expect(page.getByLabel(name, { exact: true })).toHaveAttribute('data-found', 'true')
+    await expect(page.getByLabel(name, { exact: true })).toBeVisible()
   }
-  await expect(page.getByRole('checkbox')).toHaveCount(15 - names.length)
   await expect(page.locator('.found__tie')).toHaveCount(names.length)
   await expect(page.locator('.found__label')).toHaveText(property)
   await expect(page.getByPlaceholder('Type a category here!')).toHaveValue('')

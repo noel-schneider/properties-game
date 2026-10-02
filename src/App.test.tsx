@@ -1,8 +1,8 @@
 import { screen } from '@testing-library/react'
-import { renderApp } from './test-utils';
+import { formableGroupsOnScreen, renderApp } from './test-utils';
 import userEvent from '@testing-library/user-event';
 import App from './App';
-import { allProperties, getAllConcepts } from './concepts';
+import { getAllConcepts } from './concepts';
 import { sharedProperties } from './guess';
 import type { Concept } from './types';
 
@@ -45,7 +45,9 @@ test('clicking three bubbles selects them and enables submit', async () => {
   renderApp(<App />);
 
   const bubbles = screen.getAllByRole('checkbox');
-  expect(bubbles).toHaveLength(15);
+  // Fifteen unfinished concepts, or a few more when that many were needed to
+  // make the board playable at all.
+  expect(bubbles.length).toBeGreaterThanOrEqual(15);
 
   const submit = screen.getByRole('button', { name: /submit/i });
   await user.type(screen.getByPlaceholderText(/type a category here/i), 'biome');
@@ -118,15 +120,11 @@ test('a correct answer keeps the found concepts on the board and scores a point'
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
-  // The board counter now tracks categories collected, not raw finds.
-  expect(screen.getByTestId('categories')).toHaveTextContent(`1 / ${allProperties().length}`);
+  expect(screen.getByTestId('found')).toHaveTextContent('1');
 
-  // They stay, shown as a found group rather than cleared away.
-  const stillDealt = screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'));
-  expect(stillDealt).toHaveLength(15 - concepts.length);
-
+  // They stay on the board and can still be used for their other properties.
   for (const concept of concepts) {
-    expect(screen.getByLabelText(concept.name)).toHaveAttribute('data-found', 'true');
+    expect(screen.getByLabelText(concept.name)).toBeInTheDocument();
   }
 });
 
@@ -141,7 +139,7 @@ test('a wrong answer leaves the board and the score alone', async () => {
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
-  expect(screen.getByTestId('categories')).toHaveTextContent(`0 / ${allProperties().length}`);
+  expect(screen.getByTestId('found')).toHaveTextContent('0');
   expect(screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'))).toEqual(before);
 });
 
@@ -219,8 +217,10 @@ test('an achievement earned before is not announced again on a later run', async
   unmount();
 
   renderApp(<App playChime={() => {}} />);
-  const again = findSolvableTriple();
-  await select(user, again.concepts);
+  const again = formableGroupsOnScreen()[0];
+  for (const name of again.concepts) {
+    await user.click(screen.getByRole('checkbox', { name }));
+  }
   await user.type(screen.getByPlaceholderText(/type a category here/i), again.property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -264,110 +264,10 @@ test('muting the sound silences the next unlock, and is remembered', async () =>
   expect(screen.getByRole('button', { name: /unmute achievement sound/i })).toBeInTheDocument();
 });
 
-test('the scoreboard shows how far the run has got', () => {
-  renderApp(<App playChime={() => {}} />);
 
-  expect(screen.getByTestId('categories')).toHaveTextContent(`0 / ${allProperties().length}`);
-});
 
-test('no summary while categories are still missing', () => {
-  localStorage.setItem(
-    'properties-game:achievements',
-    JSON.stringify({ unlocked: [], propertiesFound: allProperties().slice(0, -1), aliasAnswers: 0, exactAnswers: 0 }),
-  );
-  renderApp(<App playChime={() => {}} />);
 
-  expect(screen.queryByRole('dialog', { name: /run complete/i })).toBeNull();
-});
 
-test('finding the last category ends the run with a summary', async () => {
-  const user = userEvent.setup();
-  const all = allProperties();
-  const missing = all[0];
-
-  // One category short of the end. The deal is bound to offer what is missing,
-  // which is exactly what makes the end reachable at all.
-  localStorage.setItem(
-    'properties-game:achievements',
-    JSON.stringify({
-      unlocked: [],
-      propertiesFound: all.filter((p) => p !== missing),
-      aliasAnswers: 0,
-      exactAnswers: 0,
-    }),
-  );
-  renderApp(<App playChime={() => {}} />);
-
-  const dealt = screen.getAllByRole('checkbox').map((b) => byName.get(b.getAttribute('aria-label')!)!);
-  const group = dealt.filter((c) => c.properties.includes(missing)).slice(0, 3);
-  expect(group).toHaveLength(3);
-
-  await select(user, group);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), missing);
-  await user.click(screen.getByRole('button', { name: /submit/i }));
-
-  const summary = await screen.findByRole('dialog', { name: /run complete/i });
-  expect(summary).toHaveTextContent(String(all.length));
-});
-
-test('playing again clears the categories but keeps the achievements', async () => {
-  const user = userEvent.setup();
-  const all = allProperties();
-  const missing = all[0];
-
-  localStorage.setItem(
-    'properties-game:achievements',
-    JSON.stringify({
-      unlocked: ['first-light'],
-      propertiesFound: all.filter((p) => p !== missing),
-      aliasAnswers: 0,
-      exactAnswers: 0,
-    }),
-  );
-  renderApp(<App playChime={() => {}} />);
-
-  const dealt = screen.getAllByRole('checkbox').map((b) => byName.get(b.getAttribute('aria-label')!)!);
-  const group = dealt.filter((c) => c.properties.includes(missing)).slice(0, 3);
-  await select(user, group);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), missing);
-  await user.click(screen.getByRole('button', { name: /submit/i }));
-
-  await screen.findByRole('dialog', { name: /run complete/i });
-  await user.click(screen.getByRole('button', { name: /play again/i }));
-
-  expect(screen.queryByRole('dialog', { name: /run complete/i })).toBeNull();
-  expect(screen.getByTestId('categories')).toHaveTextContent(`0 / ${all.length}`);
-  expect(screen.getByRole('button', { name: /achievements/i })).not.toHaveTextContent('0 / 15');
-});
-
-test('keeping on playing dismisses the summary and leaves the run alone', async () => {
-  const user = userEvent.setup();
-  const all = allProperties();
-  const missing = all[0];
-
-  localStorage.setItem(
-    'properties-game:achievements',
-    JSON.stringify({
-      unlocked: [],
-      propertiesFound: all.filter((p) => p !== missing),
-      aliasAnswers: 0,
-      exactAnswers: 0,
-    }),
-  );
-  renderApp(<App playChime={() => {}} />);
-
-  const dealt = screen.getAllByRole('checkbox').map((b) => byName.get(b.getAttribute('aria-label')!)!);
-  const group = dealt.filter((c) => c.properties.includes(missing)).slice(0, 3);
-  await select(user, group);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), missing);
-  await user.click(screen.getByRole('button', { name: /submit/i }));
-
-  await screen.findByRole('dialog', { name: /run complete/i });
-  await user.click(screen.getByRole('button', { name: /keep playing/i }));
-
-  expect(screen.queryByRole('dialog', { name: /run complete/i })).toBeNull();
-  expect(screen.getByTestId('categories')).toHaveTextContent(`${all.length} / ${all.length}`);
-});
 
 test('the sound button plays the very chime an achievement would', async () => {
   const chime = vi.fn();

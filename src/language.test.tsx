@@ -1,8 +1,8 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
-import { renderIn, words } from './test-utils'
-import { allProperties, getAllConcepts } from './concepts'
+import { formableGroupsOnScreen, renderIn, words } from './test-utils'
+import { getAllConcepts } from './concepts'
 import { sharedProperties } from './guess'
 import type { Concept } from './types'
 
@@ -48,7 +48,7 @@ test('the interface speaks French too', () => {
 
   expect(screen.getByPlaceholderText(words.fr.ui['form.placeholder'])).toBeInTheDocument();
   expect(screen.getByRole('button', { name: words.fr.ui['form.submit'] })).toBeInTheDocument();
-  expect(screen.getByText(words.fr.ui['score.categories'], { exact: false })).toBeInTheDocument();
+  expect(screen.getByText(words.fr.ui['score.found'], { exact: false })).toBeInTheDocument();
 });
 
 test('a category answered in French is accepted', async () => {
@@ -113,13 +113,13 @@ test('switching language mid-run keeps what has been found', async () => {
   await user.click(screen.getByRole('button', { name: words.en.ui['form.submit'] }));
   await screen.findByRole('status');
 
-  const scoreBefore = screen.getByTestId('categories').textContent;
+  const scoreBefore = screen.getByTestId('found').textContent;
   const earnedBefore = screen.getByRole('button', { name: /Achievements/ }).textContent;
 
   await user.click(screen.getByRole('button', { name: words.fr.ui['language.fr'] }));
 
   // Same progress, told in French.
-  expect(screen.getByTestId('categories')).toHaveTextContent(scoreBefore!);
+  expect(screen.getByTestId('found')).toHaveTextContent(scoreBefore!);
   expect(screen.getByRole('button', { name: new RegExp(words.fr.ui['panel.open']) }))
     .toHaveTextContent(earnedBefore!.replace('Achievements', words.fr.ui['panel.open']));
   expect(screen.getByPlaceholderText(words.fr.ui['form.placeholder'])).toBeInTheDocument();
@@ -154,14 +154,18 @@ test('a board started in one language can be finished in the other', async () =>
 
   await user.click(screen.getByRole('button', { name: words.en.ui['language.en'] }));
 
-  // Still found, and the next answer is taken in the new language.
-  const next = solvableTriple('en');
-  for (const concept of next.triple) {
-    await user.click(screen.getByRole('checkbox', { name: concept.name }));
+  // Still found, and the next answer is taken in the new language. The panel
+  // knows which groups are still open; the data alone does not.
+  const next = formableGroupsOnScreen()[0];
+  for (const name of next.concepts) {
+    await user.click(screen.getByRole('checkbox', { name }));
   }
-  await user.type(screen.getByPlaceholderText(words.en.ui['form.placeholder']), next.property);
+  await user.type(
+    screen.getByPlaceholderText(words.en.ui['form.placeholder']),
+    (words.en.properties as Record<string, string>)[next.property],
+  );
   await user.click(screen.getByRole('button', { name: words.en.ui['form.submit'] }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(words.en.ui['form.correct']);
-  expect(screen.getByTestId('categories')).toHaveTextContent(`2 / ${allProperties().length}`);
+  expect(screen.getByTestId('found')).toHaveTextContent('2');
 });
