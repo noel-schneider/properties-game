@@ -4,6 +4,7 @@ import "./controls.css";
 import Answers from "./Answers";
 import Form from "./Form";
 import Graph from "./Graph";
+import Help from "./Help";
 import Scoreboard from "./Scoreboard";
 import Sky from "./Sky";
 import Summary from "./Summary";
@@ -243,6 +244,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
           <Scoreboard found={found.length} finished={finishedCount} onBoard={concepts.length} remaining={left} />
           <div className="corner corner--top-right">
+              <Help />
               <LanguageToggle />
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />
