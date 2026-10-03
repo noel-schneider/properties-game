@@ -55,7 +55,12 @@ function measure(count: number, spent: number) {
   }
 
   const covered = points.reduce((sum, p) => sum + Math.PI * p.r ** 2, 0) / (VIEW_WIDTH * VIEW_HEIGHT);
-  return { covered, atWall, pairs, worst };
+  // How far past its own edge of the frame the worst offender sits.
+  const escaped = Math.max(...points.map((p) => Math.max(
+    Math.abs(p.x) + p.r - VIEW_WIDTH / 2,
+    Math.abs(p.y) + p.r - VIEW_HEIGHT / 2,
+  )));
+  return { covered, atWall, pairs, worst, escaped };
 }
 
 beforeEach(() => vi.useFakeTimers());
@@ -76,9 +81,11 @@ test('a board the size a real game reaches never overlaps itself', () => {
 test('nothing is ever drawn outside the frame', () => {
   // The simulation overshoots hard on the way to a resting place — measured at
   // 577 from the middle against a frame that stops at 400 — so every bubble is
-  // held inside the frame on every tick. This is what that is for.
-  const { atWall } = measure(66, 21);
+  // held inside the frame on every tick. Without that, bubbles leave the board
+  // entirely and the player watches them go.
+  const { escaped, atWall } = measure(66, 21);
 
+  expect(escaped).toBeLessThanOrEqual(0.5);
+  // And the holding is doing real work at this size, not sitting idle.
   expect(atWall).toBeGreaterThan(0);
-  expect(atWall).toBeLessThan(66);
 });
