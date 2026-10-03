@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import "./App.css";
 import "./controls.css";
 import Answers from "./Answers";
@@ -36,6 +36,9 @@ import type { Achievement, GameEvent, Progress } from "./achievements";
 import type { Solution } from "./hand";
 
 export type Feedback = 'none' | 'correct' | 'wrong';
+
+/** How long a newly dealt concept stays marked, in milliseconds. */
+const ARRIVAL_MARK = 2600;
 
 
 const pool = getAllConcepts();
@@ -84,6 +87,30 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     const [muted, setMuted] = useState(loadMuted);
     // Asked once in a player's life, never once per sitting.
     const [askedForSupport, setAskedForSupport] = useState(loadAsked);
+
+    // What the last answer dealt in, marked on the board for a moment. Held
+    // here rather than worked out in the graph: only this knows which board a
+    // concept arrived on, and a concept that was there before an answer must
+    // not light up because the answer moved it.
+    const [arriving, setArriving] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (arriving.length === 0) return;
+        const timer = setTimeout(() => setArriving([]), ARRIVAL_MARK);
+        return () => clearTimeout(timer);
+    }, [arriving]);
+
+    /**
+     * Refills the board and marks what that brought in.
+     *
+     * Worked out here and not inside a setBoard updater: an updater has to be
+     * pure, and React runs it twice in development to prove it.
+     */
+    const deal = (current: string[], groups: Solution[]) => {
+        const next = refill(current, pool, groups, waysWanted());
+        setArriving(next.filter((name) => !current.includes(name)));
+        setBoard(next);
+    };
 
     const tally = useRef<RunTally>(loadRunStats());
     if (tally.current.boards === 0) {
@@ -177,7 +204,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
 
         // Finished concepts stay on the board, small and faded; fresh ones come
         // in beside them so there is always something left to work on.
-        setBoard((current) => refill(current, pool, outcome.found, waysWanted()));
+        deal(board, outcome.found);
         return true;
     };
 
@@ -217,7 +244,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
         setFeedback('correct');
         setFound(next);
         saveFound(next);
-        setBoard((current) => refill(current, pool, next, waysWanted()));
+        deal(board, next);
     };
 
     /**
@@ -289,7 +316,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} onDropInto={dropInto} />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-left">
               <Signature />

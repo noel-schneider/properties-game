@@ -457,3 +457,31 @@ describe('clearing the achievements', () => {
     expect(Number(button.textContent!.match(/(\d+)\s*\//)![1])).toBe(0);
   });
 })
+
+test('the new-concept mark only ever lands on a concept that just arrived', { timeout: 30_000 }, async () => {
+  // The mark is worth nothing if it can land on a bubble that was already
+  // there — a player would learn to ignore it in two answers. That it appears
+  // at all is pinned in Graph.fresh.test.tsx, where a board can be handed an
+  // arrival directly; whether a given answer deals anything in depends on how
+  // many ways the board still has, which is deliberately 2 to 4 and not fixed.
+  const user = userEvent.setup();
+  renderApp(<App playChime={() => {}} />);
+
+  for (let turn = 0; turn < 12; turn++) {
+    const before = new Set(
+        [...document.querySelectorAll('.bubble')].map((b) => b.getAttribute('aria-label')!));
+    const { concepts, property } = findSolvableTriple();
+    await select(user, concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await screen.findByRole('status');
+
+    // A refused answer deals nothing, so whatever arrived on the answer before
+    // is still rightly marked — the mark is on a clock, not on a turn.
+    if (!/correct/i.test(screen.getByRole('status').textContent ?? '')) continue;
+
+    for (const bubble of document.querySelectorAll('.bubble--fresh')) {
+      expect(before.has(bubble.getAttribute('aria-label')!)).toBe(false);
+    }
+  }
+});

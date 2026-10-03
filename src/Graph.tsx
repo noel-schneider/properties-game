@@ -72,6 +72,8 @@ interface GraphProps {
     selected: string[];
     /** Every group found so far, drawn linked. */
     found: Solution[];
+    /** Concepts dealt onto the board by the last answer, marked while new. */
+    arriving?: string[];
     onToggle: (name: string) => void;
     /**
      * Dropping a concept onto a category already found. The index is into
@@ -127,7 +129,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInto }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, arriving = [], onToggle, onDropInto }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -395,6 +397,10 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                 if (isDone) classes.push('bubble--done');
                 else if (isSelected) classes.push('bubble--selected');
                 if (justFound.has(concept.name)) classes.push('bubble--just-found');
+                // Dealt in by the answer just given. A board of twenty bubbles
+                // swallows three more without a word otherwise.
+                const isFresh = arriving.includes(concept.name);
+                if (isFresh) classes.push('bubble--fresh');
                 if (kin.has(concept.name)) classes.push('bubble--kin');
                 else if (kin.size > 0) classes.push('bubble--aside');
                 // Lit while a concept is held over their group, so the offer
@@ -449,6 +455,14 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                               })}
                     >
                         <circle r={radius} />
+                        {/*
+                          * A ring around whatever has just been dealt in. Both
+                          * halves matter: the ring widens and fades, and under
+                          * reduced motion, where it does neither, it is still
+                          * drawn — a mark that only exists while it moves is no
+                          * mark at all for the player who turned motion off.
+                          */}
+                        {isFresh && <circle className="arrival" r={radius + 4} />}
                         {/*
                           * The gauge fills rather than empties: a concept
                           * nobody has used yet shows nothing at all. Drawn the
