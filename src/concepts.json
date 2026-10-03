@@ -1,8 +1,8 @@
 {
     "airplane": [
         "vehicle",
-        "transport",
-        "airborne"
+        "airborne",
+        "machine"
     ],
     "ant": [
         "insect",
@@ -10,21 +10,19 @@
         "underground"
     ],
     "apartment": [
-        "house",
+        "shelter",
         "building",
         "city"
     ],
     "arcade": [
         "location",
-        "entertainment venue",
         "entertainment",
         "game"
     ],
     "avalanche": [
         "danger",
         "cold",
-        "natural phenomenon",
-        "geography"
+        "natural phenomenon"
     ],
     "basketball": [
         "game",
@@ -47,41 +45,27 @@
         "airborne",
         "insect",
         "animal",
-        "small",
         "sound"
-    ],
-    "beetle": [
-        "insect",
-        "animal",
-        "colors"
     ],
     "bell": [
         "sound",
         "object",
-        "metal"
+        "metal",
+        "music"
     ],
     "bike": [
         "vehicle",
-        "transport"
+        "physical activity",
+        "outdoor activity",
+        "sport"
     ],
     "boat": [
         "vehicle",
-        "transport",
         "water"
     ],
     "book": [
         "reading",
         "object"
-    ],
-    "bow": [
-        "game",
-        "sport"
-    ],
-    "bowling": [
-        "ball",
-        "sport",
-        "game",
-        "entertainment"
     ],
     "bread": [
         "food",
@@ -92,11 +76,6 @@
         "city",
         "geography"
     ],
-    "bus": [
-        "vehicle",
-        "transport",
-        "city"
-    ],
     "butterfly": [
         "airborne",
         "insect",
@@ -105,26 +84,19 @@
     ],
     "button": [
         "small",
-        "object",
-        "colors"
+        "object"
     ],
     "cabin": [
-        "house",
         "shelter",
         "building"
     ],
     "cake": [
         "food",
-        "dish",
         "sweet"
     ],
     "calendar": [
         "time",
         "object"
-    ],
-    "camera": [
-        "electronic device",
-        "technology"
     ],
     "campfire": [
         "heat",
@@ -142,15 +114,14 @@
     ],
     "car": [
         "vehicle",
-        "transport",
         "machine"
     ],
     "cave": [
         "shelter",
         "underground",
         "geography",
-        "night",
-        "biome"
+        "biome",
+        "location"
     ],
     "chameleon": [
         "reptile",
@@ -166,15 +137,15 @@
         "sweet"
     ],
     "circus": [
-        "entertainment venue",
+        "location",
         "entertainment",
-        "artistic expression",
-        "location"
+        "artistic expression"
     ],
     "climbing": [
         "outdoor activity",
         "physical activity",
-        "sport"
+        "sport",
+        "exploration"
     ],
     "cloud": [
         "white",
@@ -187,19 +158,12 @@
         "small",
         "city"
     ],
-    "comet": [
-        "celestial object",
-        "astronomy",
-        "space"
-    ],
     "compass": [
         "exploration",
-        "object",
-        "time"
+        "object"
     ],
     "computer": [
         "machine",
-        "electronic device",
         "technology"
     ],
     "crocodile": [
@@ -218,13 +182,9 @@
         "geography"
     ],
     "drum": [
-        "musical instrument",
-        "music"
-    ],
-    "dune": [
-        "sand",
-        "geography",
-        "biome"
+        "music",
+        "sound",
+        "artistic expression"
     ],
     "fishing": [
         "outdoor activity",
@@ -244,21 +204,17 @@
     "glacier": [
         "water",
         "cold",
-        "geography",
         "white",
         "biome"
     ],
     "guitar": [
-        "musical instrument",
-        "music"
+        "music",
+        "sound",
+        "artistic expression"
     ],
     "hat": [
         "accessory",
         "object"
-    ],
-    "hiking": [
-        "physical activity",
-        "outdoor activity"
     ],
     "honey": [
         "food",
@@ -282,8 +238,8 @@
     ],
     "igloo": [
         "cold",
-        "house",
-        "shelter"
+        "shelter",
+        "white"
     ],
     "jungle": [
         "biome",
@@ -304,7 +260,8 @@
         "insect",
         "animal",
         "colors",
-        "small"
+        "small",
+        "airborne"
     ],
     "lantern": [
         "night",
@@ -323,18 +280,13 @@
     ],
     "library": [
         "building",
-        "location",
-        "reading"
+        "location"
     ],
     "lightning": [
         "light",
         "natural phenomenon",
         "weather",
         "danger"
-    ],
-    "lizard": [
-        "animal",
-        "reptile"
     ],
     "map": [
         "exploration",
@@ -354,9 +306,9 @@
     ],
     "moon": [
         "night",
-        "celestial object",
         "astronomy",
-        "white"
+        "white",
+        "light"
     ],
     "mountain": [
         "cold",
@@ -366,7 +318,7 @@
     "museum": [
         "building",
         "location",
-        "entertainment venue"
+        "entertainment"
     ],
     "necklace": [
         "accessory",
@@ -376,24 +328,18 @@
     ],
     "nest": [
         "shelter",
-        "animal",
         "trees"
-    ],
-    "newspaper": [
-        "reading",
-        "communication",
-        "object"
     ],
     "orchard": [
         "trees",
         "vegetation",
-        "food",
         "location"
     ],
     "owl": [
         "animal",
         "night",
-        "sound"
+        "sound",
+        "airborne"
     ],
     "painting": [
         "artistic expression",
@@ -405,31 +351,26 @@
         "outdoor activity",
         "city"
     ],
-    "pasta": [
-        "food",
-        "dish"
-    ],
     "penguin": [
         "water",
         "cold",
         "animal"
     ],
     "phone": [
-        "electronic device",
         "technology",
-        "communication"
+        "communication",
+        "sound"
     ],
     "piano": [
-        "musical instrument",
         "music",
-        "sound"
+        "sound",
+        "artistic expression"
     ],
     "pizza": [
         "food",
         "dish"
     ],
     "planet": [
-        "celestial object",
         "astronomy",
         "space"
     ],
@@ -439,8 +380,9 @@
     ],
     "radio": [
         "communication",
-        "electronic device",
-        "sound"
+        "technology",
+        "sound",
+        "music"
     ],
     "rain": [
         "water",
@@ -452,51 +394,23 @@
         "natural phenomenon",
         "weather"
     ],
-    "ring": [
-        "accessory",
-        "object",
-        "white"
-    ],
     "river": [
         "liquid",
         "water",
         "geography",
         "biome"
     ],
-    "robot": [
-        "machine",
-        "technology"
-    ],
     "rocket": [
         "airborne",
         "space",
-        "exploration"
-    ],
-    "sailboat": [
-        "wind",
-        "vehicle",
-        "transport",
-        "water"
+        "exploration",
+        "machine",
+        "technology"
     ],
     "satellite": [
         "technology",
         "space",
         "exploration"
-    ],
-    "savanna": [
-        "biome",
-        "vegetation",
-        "geography"
-    ],
-    "scarf": [
-        "accessory",
-        "cold",
-        "object"
-    ],
-    "skyscraper": [
-        "building",
-        "city",
-        "location"
     ],
     "snake": [
         "animal",
@@ -506,43 +420,30 @@
     "snow": [
         "cold",
         "white",
-        "weather"
+        "weather",
+        "natural phenomenon"
     ],
     "soup": [
         "food",
         "dish",
-        "heat",
         "liquid"
-    ],
-    "stamp": [
-        "communication",
-        "object",
-        "small"
     ],
     "star": [
         "night",
-        "celestial object",
         "astronomy",
         "light"
     ],
     "submarine": [
         "exploration",
         "vehicle",
-        "transport",
         "water",
         "underground"
     ],
     "subway": [
         "vehicle",
-        "transport",
         "machine",
         "city",
         "underground"
-    ],
-    "sundial": [
-        "time",
-        "sand",
-        "astronomy"
     ],
     "surfing": [
         "water",
@@ -550,39 +451,27 @@
         "physical activity",
         "outdoor activity"
     ],
-    "swamp": [
-        "water",
-        "biome",
-        "vegetation",
-        "trees"
-    ],
     "sword": [
         "metal",
         "object",
         "danger"
     ],
-    "telescope": [
-        "astronomy",
-        "exploration"
-    ],
     "television": [
         "entertainment",
-        "electronic device",
         "technology"
     ],
     "tennis": [
         "sport",
         "ball",
-        "physical activity"
-    ],
-    "tent": [
-        "house",
-        "shelter"
+        "physical activity",
+        "game"
     ],
     "theater": [
         "location",
-        "entertainment venue",
-        "artistic expression"
+        "artistic expression",
+        "entertainment",
+        "building",
+        "city"
     ],
     "thunder": [
         "sound",
@@ -593,16 +482,13 @@
     "tornado": [
         "natural phenomenon",
         "weather",
-        "wind"
+        "wind",
+        "danger"
     ],
     "train": [
         "vehicle",
-        "transport",
-        "machine"
-    ],
-    "tundra": [
-        "biome",
-        "cold"
+        "machine",
+        "sound"
     ],
     "turtle": [
         "water",
@@ -610,32 +496,21 @@
         "reptile"
     ],
     "violin": [
-        "musical instrument",
-        "music"
-    ],
-    "volleyball": [
-        "ball",
-        "sport",
-        "game"
+        "music",
+        "sound",
+        "artistic expression"
     ],
     "watch": [
         "time",
         "accessory",
         "small",
-        "metal"
+        "metal",
+        "object"
     ],
     "waterfall": [
         "water",
         "natural phenomenon",
         "liquid",
         "sound"
-    ],
-    "whale": [
-        "water",
-        "animal"
-    ],
-    "windmill": [
-        "machine",
-        "wind"
     ]
 }

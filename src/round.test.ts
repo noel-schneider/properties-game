@@ -21,7 +21,7 @@ test('a group whose property is open for all three is accepted', () => {
 
 test('a concept serves again, for another of its properties', () => {
     const first: Solution[] = [{ property: 'biome', concepts: forest }];
-    const outcome = resolveGuess(['jungle', 'forest', 'swamp'], 'trees', { wordings, pool, found: first });
+    const outcome = resolveGuess(['jungle', 'forest', 'orchard'], 'trees', { wordings, pool, found: first });
 
     expect(outcome.correct).toBe(true);
     expect(outcome.property).toBe('trees');
@@ -29,14 +29,14 @@ test('a concept serves again, for another of its properties', () => {
 
 test('a property already spent by a member is refused', () => {
     const first: Solution[] = [{ property: 'biome', concepts: forest }];
-    const outcome = resolveGuess(['jungle', 'desert', 'swamp'], 'biome', { wordings, pool, found: first });
+    const outcome = resolveGuess(['jungle', 'desert', 'river'], 'biome', { wordings, pool, found: first });
 
     expect(outcome.correct).toBe(false);
 });
 
 test('the same property can be found again by three untouched concepts', () => {
     const first: Solution[] = [{ property: 'biome', concepts: forest }];
-    const outcome = resolveGuess(['swamp', 'tundra', 'savanna'], 'biome', { wordings, pool, found: first });
+    const outcome = resolveGuess(['beach', 'glacier', 'mountain'], 'biome', { wordings, pool, found: first });
 
     expect(outcome.correct).toBe(true);
     expect(outcome.property).toBe('biome');
