@@ -337,3 +337,49 @@ test('the sound test button is gone', () => {
 
   expect(screen.queryByRole('button', { name: /hear the achievement sound/i })).toBeNull();
 });
+
+describe('the sound a right answer makes', () => {
+  test('it plays on a find, and climbs with the run', async () => {
+    const notes: number[] = [];
+    const user = userEvent.setup();
+    renderApp(<App playChime={() => {}} playFound={(step) => notes.push(step)} />);
+
+    const first = findSolvableTriple();
+    await select(user, first.concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    // The step given is where the player is in their run, so a run can be
+    // heard climbing without looking at the board.
+    expect(notes).toEqual([1]);
+  });
+
+  test('a wrong answer makes none', async () => {
+    const notes: number[] = [];
+    const user = userEvent.setup();
+    renderApp(<App playChime={() => {}} playFound={(step) => notes.push(step)} />);
+
+    const { concepts } = findSolvableTriple();
+    await select(user, concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+    expect(notes).toEqual([]);
+  });
+
+  test('muted means muted, for this as well as for the unlocks', async () => {
+    const notes: number[] = [];
+    const user = userEvent.setup();
+    renderApp(<App playChime={() => {}} playFound={(step) => notes.push(step)} />);
+
+    await user.click(screen.getByRole('button', { name: /mute achievement sound/i }));
+
+    const first = findSolvableTriple();
+    await select(user, first.concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    expect(notes).toEqual([]);
+  });
+})

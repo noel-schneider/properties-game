@@ -14,7 +14,7 @@ import SoundToggle from "./SoundToggle";
 import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
-import { playUnlockChime } from "./achievements/chime";
+import { playFoundNote, playUnlockChime } from "./achievements/chime";
 import {
     emptyRunStats, loadFound, loadLifetime, loadMuted, loadRunStats,
     saveFound, saveLifetime, saveMuted, saveRunStats,
@@ -40,9 +40,11 @@ const byName = new Map(pool.map((concept) => [concept.name, concept]));
 interface AppProps {
     /** Injected so tests can watch the unlock sound without making noise. */
     playChime?: () => void;
+    /** Injected too, so the tests can listen without making a sound. */
+    playFound?: (step: number) => void;
 }
 
-function App({ playChime = playUnlockChime }: AppProps) {
+function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProps) {
 
     const { wordings } = useTranslator();
     const [lifetimeAtStart] = useState(loadLifetime);
@@ -145,6 +147,8 @@ function App({ playChime = playUnlockChime }: AppProps) {
         }
 
         bumpTally({ correct: tally.current.correct + outcome.points });
+        // After the event, so the note is the one for where the run now stands.
+        if (!muted) playFound(progress.current!.session.streak);
 
         // Each concept that has just run out of properties is announced, so the
         // achievements can count them.
@@ -200,6 +204,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
             type: 'guess', at: Date.now(), correct: true, property: group.property,
             exactName: false, selection: [name], groupSize: next[index].concepts.length,
         });
+        if (!muted) playFound(progress.current!.session.streak);
         if (isFinished(concept, next)) record({ type: 'concept-finished', at: Date.now() });
 
         setSelected([]);

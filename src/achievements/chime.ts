@@ -65,3 +65,65 @@ export function playUnlockChime(): void {
         // Audio is a garnish. Never let it interrupt play.
     }
 }
+
+/**
+ * The notes a run of right answers climbs through.
+ *
+ * A pentatonic scale, chosen because no two of its notes clash: a player can
+ * arrive at any point of a run from any other and it still sounds like music
+ * rather than like a machine. A major scale would have a note in it that
+ * grates against the one three steps down, and this is heard a hundred times
+ * in a game.
+ *
+ * A4 up to C#6, which is high enough to feel like lift and low enough to stay
+ * out of the part of the range that gets shrill.
+ */
+export const SCALE = [440, 493.88, 554.37, 659.25, 739.99, 880, 987.77, 1108.73];
+
+/** The note for the nth right answer in a row, holding at the top. */
+export function noteFor(step: number): number {
+    return SCALE[Math.min(Math.max(step, 1), SCALE.length) - 1];
+}
+
+/** Quieter than the unlock chime, which is a reward rather than a reply. */
+const FOUND_GAIN = 0.09;
+const FOUND_DECAY = 0.32;
+
+/**
+ * The reply to a right answer.
+ *
+ * Short and soft on purpose. This plays on every find — a hundred times in a
+ * full game — so anything with a tail or a bite to it would wear through long
+ * before the game did. What makes it bearable, and then pleasant, is that it
+ * climbs: a run you are building can be heard without looking.
+ */
+export function playFoundNote(step: number): void {
+    const ctx = audioContext();
+    if (!ctx) return;
+
+    try {
+        if (ctx.state === 'suspended') void ctx.resume();
+
+        const at = ctx.currentTime;
+        const frequency = noteFor(step);
+
+        // The note, and a whisper of the octave above it for a little light.
+        for (const [tone, share] of [[frequency, 1], [frequency * 2, 0.22]] as const) {
+            const oscillator = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(tone, at);
+
+            gain.gain.setValueAtTime(0, at);
+            gain.gain.linearRampToValueAtTime(FOUND_GAIN * share, at + 0.008);
+            gain.gain.exponentialRampToValueAtTime(0.0001, at + FOUND_DECAY);
+
+            oscillator.connect(gain).connect(ctx.destination);
+            oscillator.start(at);
+            oscillator.stop(at + FOUND_DECAY);
+        }
+    } catch {
+        // Audio is a garnish. Never let it interrupt play.
+    }
+}
