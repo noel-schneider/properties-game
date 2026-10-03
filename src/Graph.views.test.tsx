@@ -1,6 +1,7 @@
 import { fireEvent } from '@testing-library/react'
+import { act } from 'react'
 import { renderApp } from './test-utils'
-import Graph from './Graph'
+import Graph, { LONG_PRESS } from './Graph'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -72,3 +73,49 @@ test('the board comes back when the pointer leaves', () => {
 // :focus-visible as false for every element, so it cannot tell a focus the
 // browser would draw a ring around from one left behind by a mouse click —
 // which is the whole distinction.
+
+describe('reaching the reveal without a pointer that hovers', () => {
+  // A finger never hovers: on a touchscreen a tap selects and nothing is ever
+  // revealed, which left this the one thing on the board a phone could not do.
+  const press = (name: string, at = { clientX: 400, clientY: 300 }) =>
+    fireEvent.pointerDown(bubble(name), { button: 0, ...at });
+
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  test('holding a concept still reveals its kin', () => {
+    board();
+    press('ant');
+    act(() => { vi.advanceTimersByTime(LONG_PRESS); });
+
+    expect(lit('bee')).toBe(true);
+  });
+
+  test('a quick tap reveals nothing, because a tap is how you select', () => {
+    board();
+    press('ant');
+    act(() => { vi.advanceTimersByTime(LONG_PRESS / 4); });
+    fireEvent.pointerUp(bubble('ant'), { clientX: 400, clientY: 300 });
+
+    expect(lit('bee')).toBe(false);
+  });
+
+  test('dragging a concept reveals its kin too', () => {
+    // Free, and it answers the same question while the concept is in the air:
+    // which groups is this one already part of.
+    board();
+    press('ant');
+    fireEvent.pointerMove(bubble('ant'), { clientX: 460, clientY: 340 });
+
+    expect(lit('bee')).toBe(true);
+  });
+
+  test('letting go with a finger puts the board back', () => {
+    board();
+    press('ant');
+    act(() => { vi.advanceTimersByTime(LONG_PRESS); });
+    fireEvent.pointerUp(bubble('ant'), { pointerType: 'touch', clientX: 400, clientY: 300 });
+
+    expect(lit('bee')).toBe(false);
+  });
+})

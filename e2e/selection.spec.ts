@@ -380,4 +380,50 @@ test.describe('on a touchscreen', () => {
 
     await expect(bubble).toHaveAttribute('aria-checked', 'true')
   })
+
+  test('holding a concept with a finger reveals what it shares', async ({ page }) => {
+    await page.goto('/')
+    await page.evaluate(() => localStorage.clear())
+    await page.reload()
+    await boardSettled(page)
+
+    // Play one group, so there is kinship to reveal at all.
+    const solved = await page.evaluate(() => {
+      const panel = [...document.querySelectorAll('div')]
+        .find((d) => /answers \(dev only\)/i.test(d.textContent ?? '') && d.children.length < 30)
+      const lines = (panel as HTMLElement).innerText.split('\n').map((l) => l.trim()).filter(Boolean)
+      const i = lines.findIndex((l) => l.includes('·'))
+      return { property: lines[i - 1], concepts: lines[i].split('·').map((c) => c.trim()) }
+    })
+    for (const name of solved.concepts) {
+      await page.locator(`.bubble[aria-label="${name}"]`)
+        .evaluate((bubble) => bubble.dispatchEvent(new MouseEvent('click', { bubbles: true })))
+    }
+    await page.getByPlaceholder(/type a category here/i).fill(solved.property)
+    await page.keyboard.press('Enter')
+    await boardSettled(page)
+
+    // A finger, held still. The board must light its kin without the gesture
+    // ever becoming a drag.
+    const held = page.locator(`.bubble[aria-label="${solved.concepts[0]}"]`)
+    await held.evaluate((node) => {
+      const box = node.getBoundingClientRect()
+      node.dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true, pointerId: 3, pointerType: 'touch', isPrimary: true, button: 0,
+        clientX: box.x + box.width / 2, clientY: box.y + box.height / 2,
+      }))
+    })
+
+    await expect(page.locator('.bubble--kin')).toHaveCount(solved.concepts.length)
+    await expect(page.locator('.bubble--aside').first()).toBeVisible()
+
+    await held.evaluate((node) => {
+      const box = node.getBoundingClientRect()
+      node.dispatchEvent(new PointerEvent('pointerup', {
+        bubbles: true, pointerId: 3, pointerType: 'touch', isPrimary: true,
+        clientX: box.x + box.width / 2, clientY: box.y + box.height / 2,
+      }))
+    })
+    await expect(page.locator('.bubble--kin')).toHaveCount(0)
+  })
 })
