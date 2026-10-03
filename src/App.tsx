@@ -214,6 +214,24 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
         setBoard((current) => refill(current, pool, next, waysWanted()));
     };
 
+    /**
+     * Throws away every achievement earned.
+     *
+     * The counts behind them go with the list. Clearing only the earned ids
+     * would leave the twenty categories still counted as found, and the
+     * achievement for finding twenty would announce itself again the moment
+     * anything else happened.
+     *
+     * No event is recorded on the way out, so nothing is earned by the act of
+     * clearing — one of them is given simply for playing at a certain hour.
+     */
+    const forgetAchievements = () => {
+        const blank = emptyLifetime();
+        saveLifetime(blank);
+        progress.current = emptyProgress(blank);
+        setUnlocked([]);
+    };
+
     const playAgain = () => {
         const kept = { ...emptyLifetime(), unlocked: progress.current!.lifetime.unlocked };
         saveLifetime(kept);
@@ -267,7 +285,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
           <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-right">
-              <Panel unlocked={unlocked} />
+              <Panel unlocked={unlocked} onForget={forgetAchievements} />
           </div>
           <Toast unlocked={announcing} onDismiss={dismissAnnouncement} />
           {exhausted && !dismissedEnd && (

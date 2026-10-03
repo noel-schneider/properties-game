@@ -5,6 +5,8 @@ import { useTranslator } from '../i18n'
 import type { Achievement } from './types'
 
 interface PanelProps {
+    /** Throws away every achievement earned, and the counts behind them. */
+    onForget?: () => void;
     unlocked: string[];
 }
 
@@ -39,15 +41,18 @@ function Entry({ achievement, earned }: { achievement: Achievement; earned: bool
     );
 }
 
-function Panel({ unlocked }: PanelProps) {
+function Panel({ unlocked, onForget}: PanelProps) {
     const { t } = useTranslator();
     const [open, setOpen] = useState(false);
+    // Clearing cannot be undone, so it is asked for twice and never on a stray
+    // click. Shut again whenever the sheet is.
+    const [asking, setAsking] = useState(false);
     const earned = new Set(unlocked);
 
     useEffect(() => {
         if (!open) return;
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setOpen(false);
+            if (e.key === 'Escape') { setOpen(false); setAsking(false); }
         };
         document.addEventListener('keydown', onKeyDown);
         return () => document.removeEventListener('keydown', onKeyDown);
@@ -77,6 +82,41 @@ function Panel({ unlocked }: PanelProps) {
                             ✕
                         </button>
                     </div>
+                    {onForget && (
+                        <div className="panel__clearing">
+                            {asking ? (
+                                <>
+                                    <span className="panel__warning">{t('panel.forgetSure')}</span>
+                                    <button
+                                        type="button"
+                                        className="control"
+                                        onClick={() => setAsking(false)}
+                                    >
+                                        {t('panel.forgetKeep')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="control control--danger"
+                                        onClick={() => {
+                                            setAsking(false);
+                                            onForget();
+                                        }}
+                                    >
+                                        {t('panel.forgetYes')}
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="control"
+                                    disabled={earned.size === 0}
+                                    onClick={() => setAsking(true)}
+                                >
+                                    {t('panel.forget')}
+                                </button>
+                            )}
+                        </div>
+                    )}
                     <ul className="panel__list">
                         {CATALOGUE.map((achievement) => (
                             <Entry

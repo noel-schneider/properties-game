@@ -462,7 +462,11 @@
         "help.group": "Choisis trois concepts qui partagent une catégorie, puis nomme-la.",
         "help.enter": "Appuie sur Entrée n’importe où pour écrire dans le champ.",
         "help.reveal": "Pointe un concept — ou maintiens-le — pour voir ce qu’il partage déjà.",
-        "help.join": "Fais glisser un concept sur une catégorie trouvée pour l’y ajouter."
+        "help.join": "Fais glisser un concept sur une catégorie trouvée pour l’y ajouter.",
+        "panel.forget": "Effacer les succès",
+        "panel.forgetSure": "Ils ne reviendront qu’en les méritant de nouveau.",
+        "panel.forgetKeep": "Les garder",
+        "panel.forgetYes": "Oui, les effacer"
     },
     "achievements": {
         "first-light": {

@@ -383,3 +383,77 @@ describe('the sound a right answer makes', () => {
     expect(notes).toEqual([]);
   });
 })
+
+describe('clearing the achievements', () => {
+  test('they go, and they do not come straight back', async () => {
+    // The counts behind them have to go too. Clearing only the list of earned
+    // ids would leave twenty categories still counted as found, and the
+    // achievement for finding twenty would announce itself again at once.
+    const user = userEvent.setup();
+    renderApp(<App playChime={() => {}} playFound={() => {}} />);
+
+    const first = findSolvableTriple();
+    await select(user, first.concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await screen.findAllByRole('alert');
+
+    const button = screen.getByRole('button', { name: /achievements/i });
+    const earned = () => Number(button.textContent!.match(/(\d+)\s*\//)![1]);
+    expect(earned()).toBeGreaterThan(0);
+
+    await user.click(button);
+    await user.click(screen.getByRole('button', { name: /clear the achievements/i }));
+    await user.click(screen.getByRole('button', { name: /yes, clear them/i }));
+
+    expect(earned()).toBe(0);
+  });
+
+  test('they stay gone on the next answer, not only on the screen', async () => {
+    // The danger is not the moment of clearing, it is the move after it. The
+    // counts behind an achievement live as long as the list does, so clearing
+    // the list alone leaves twenty categories still counted as found — and the
+    // one given for finding twenty announces itself again on the next answer.
+    const user = userEvent.setup();
+    localStorage.setItem('properties-game:achievements', JSON.stringify({
+      unlocked: ['collector'],
+      propertiesFound: Array.from({ length: 25 }, (_, i) => `category-${i}`),
+      conceptsFinished: 0, repeats: 0, aliasAnswers: 0, exactAnswers: 0,
+    }));
+    renderApp(<App playChime={() => {}} playFound={() => {}} />);
+
+    await user.click(screen.getByRole('button', { name: /achievements/i }));
+    await user.click(screen.getByRole('button', { name: /clear the achievements/i }));
+    await user.click(screen.getByRole('button', { name: /yes, clear them/i }));
+    await user.keyboard('{Escape}');
+
+    const first = findSolvableTriple();
+    await select(user, first.concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await screen.findAllByRole('alert');
+
+    const announced = screen.getAllByRole('alert').map((a) => a.textContent).join(' ');
+    expect(announced).not.toContain('Collector');
+  });
+
+  test('what was cleared stays cleared after a reload', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderApp(<App playChime={() => {}} playFound={() => {}} />);
+
+    const first = findSolvableTriple();
+    await select(user, first.concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await screen.findAllByRole('alert');
+
+    await user.click(screen.getByRole('button', { name: /achievements/i }));
+    await user.click(screen.getByRole('button', { name: /clear the achievements/i }));
+    await user.click(screen.getByRole('button', { name: /yes, clear them/i }));
+    unmount();
+
+    renderApp(<App playChime={() => {}} playFound={() => {}} />);
+    const button = screen.getByRole('button', { name: /achievements/i });
+    expect(Number(button.textContent!.match(/(\d+)\s*\//)![1])).toBe(0);
+  });
+})
