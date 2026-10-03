@@ -40,14 +40,14 @@ test('nothing plays until the music is asked for', async ({ page }) => {
 
 test('asking for the music starts a chord', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Play music' }).click();
+  await page.getByRole('button', { name: 'Turn music on' }).click();
 
   await expect.poll(() => voices(page)).toBeGreaterThanOrEqual(4);
 });
 
 test('the chord is low and wide, which is what makes it a bed', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Play music' }).click();
+  await page.getByRole('button', { name: 'Turn music on' }).click();
   await expect.poll(() => voices(page)).toBeGreaterThanOrEqual(4);
 
   const pitches = await page.evaluate(() => (window as unknown as { started: number[] }).started);
@@ -60,21 +60,21 @@ test('the chord is low and wide, which is what makes it a bed', async ({ page })
 
 test('stopping it starts nothing more, and the choice is remembered', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Play music' }).click();
+  await page.getByRole('button', { name: 'Turn music on' }).click();
   await expect.poll(() => voices(page)).toBeGreaterThanOrEqual(4);
 
-  await page.getByRole('button', { name: 'Stop music' }).click();
+  await page.getByRole('button', { name: 'Turn music off' }).click();
   const after = await voices(page);
   await page.waitForTimeout(1200);
   expect(await voices(page)).toBe(after);
 
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Play music' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Turn music on' })).toBeVisible();
 })
 
 test('an instrument that joins is heard joining, not nine seconds later', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Play music' }).click();
+  await page.getByRole('button', { name: 'Turn music on' }).click();
   await page.waitForTimeout(1500);
   const before = await count(page);
 

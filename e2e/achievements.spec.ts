@@ -134,11 +134,11 @@ test('the sound can be muted and the choice is remembered', async ({ page }) => 
   await page.reload()
   await boardSettled(page)
 
-  await page.getByRole('button', { name: 'Mute achievement sound' }).click()
+  await page.getByRole('button', { name: 'Turn sound effects off' }).click()
   await page.reload()
   await boardSettled(page)
 
-  await expect(page.getByRole('button', { name: 'Unmute achievement sound' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Turn sound effects on' })).toBeVisible()
 })
 
 
@@ -149,10 +149,10 @@ test('the sound can be muted from the corner, and the choice sticks', async ({ p
   await page.reload()
   await boardSettled(page)
 
-  await page.getByRole('button', { name: 'Mute achievement sound' }).click()
+  await page.getByRole('button', { name: 'Turn sound effects off' }).click()
   await page.reload()
   await boardSettled(page)
 
-  await expect(page.getByRole('button', { name: 'Unmute achievement sound' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Turn sound effects on' })).toBeVisible()
 })
 

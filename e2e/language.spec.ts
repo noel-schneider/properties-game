@@ -31,6 +31,8 @@ test('the flags switch the whole game over, and the choice sticks', async ({ pag
 
   await expect(page.getByPlaceholder(en.ui['form.placeholder'])).toBeVisible()
 
+  // The flags live behind the one flying now, and a hover is what opens them.
+  await page.getByRole('button', { name: en.ui['language.group'] }).hover()
   await page.getByRole('button', { name: fr.ui['language.fr'] }).click()
 
   await expect(page.getByPlaceholder(fr.ui['form.placeholder'])).toBeVisible()

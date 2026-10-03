@@ -17,12 +17,17 @@ function MusicToggle({ playing, onToggle }: MusicToggleProps) {
     return (
         <button
             type="button"
-            className={playing ? 'control control--icon control--on' : 'control control--icon'}
+            className={playing ? 'control control--icon' : 'control control--icon control--off'}
             onClick={onToggle}
             aria-label={label}
             title={label}
+            aria-pressed={playing}
         >
-            <span aria-hidden="true">♪</span>
+            <svg className="control__glyph" viewBox="0 0 16 16" aria-hidden="true">
+                <path className="control__wave" d="M6 11.5 V3.4 L13 2 v8.1" />
+                <circle cx="4.2" cy="11.8" r="1.9" />
+                <circle cx="11.2" cy="10.4" r="1.9" />
+            </svg>
         </button>
     );
 }

@@ -258,7 +258,7 @@ test('muting the sound silences the next unlock, and is remembered', async () =>
   const user = userEvent.setup();
   const { unmount } = renderApp(<App playChime={chime} />);
 
-  await user.click(screen.getByRole('button', { name: /mute achievement sound/i }));
+  await user.click(screen.getByRole('button', { name: /turn sound effects off/i }));
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
@@ -270,7 +270,7 @@ test('muting the sound silences the next unlock, and is remembered', async () =>
 
   unmount();
   renderApp(<App playChime={() => {}} />);
-  expect(screen.getByRole('button', { name: /unmute achievement sound/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /turn sound effects on/i })).toBeInTheDocument();
 });
 
 
@@ -327,7 +327,7 @@ test('the controls sit where they belong: achievements low, the rest high', () =
   const bottom = document.querySelector('.corner--bottom-right')!;
 
   expect(bottom).toContainElement(screen.getByRole('button', { name: /achievements/i }));
-  for (const name of [/switch to english/i, /start over/i, /mute achievement sound/i]) {
+  for (const name of [/^language$/i, /start over/i, /turn sound effects off/i, /turn music on/i]) {
     expect(top).toContainElement(screen.getByRole('button', { name }));
   }
 });
@@ -373,7 +373,7 @@ describe('the sound a right answer makes', () => {
     const user = userEvent.setup();
     renderApp(<App playChime={() => {}} playFound={(step) => notes.push(step)} />);
 
-    await user.click(screen.getByRole('button', { name: /mute achievement sound/i }));
+    await user.click(screen.getByRole('button', { name: /turn sound effects off/i }));
 
     const first = findSolvableTriple();
     await select(user, first.concepts);

@@ -24,9 +24,9 @@ test('the button says which way it will go', async () => {
   const calls: boolean[] = [];
   const { rerender } = renderApp(<MusicToggle playing={false} onToggle={() => calls.push(true)} />);
 
-  await user.click(screen.getByRole('button', { name: /play music/i }));
+  await user.click(screen.getByRole('button', { name: /turn music on/i }));
   expect(calls).toEqual([true]);
 
   rerender(<MusicToggle playing onToggle={() => {}} />);
-  expect(screen.getByRole('button', { name: /stop music/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /turn music off/i })).toBeInTheDocument();
 });
