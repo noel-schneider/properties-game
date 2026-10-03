@@ -73,48 +73,61 @@ function Panel({ unlocked, onForget}: PanelProps) {
                 <div className="panel__sheet" role="dialog" aria-modal="true" aria-label={t('panel.title')}>
                     <div className="panel__header">
                         <h2 className="panel__title">{t('panel.title')}</h2>
+                        {/*
+                          * Clearing sits in the header beside closing, as an
+                          * icon the size of every other icon in the game. On a
+                          * row of its own it was a wide button with nothing
+                          * beside it, which read as a mistake.
+                          */}
+                        {onForget && (
+                            <button
+                                type="button"
+                                className={asking ? 'control control--icon control--on' : 'control control--icon'}
+                                disabled={earned.size === 0}
+                                onClick={() => setAsking((current) => !current)}
+                                aria-label={t('panel.forget')}
+                                title={t('panel.forget')}
+                                aria-expanded={asking}
+                            >
+                                <svg className="control__glyph" viewBox="0 0 16 16" aria-hidden="true">
+                                    <path className="control__wave" d="M3 4.3 h10" />
+                                    <path className="control__wave" d="M6.2 4.3 V2.9 h3.6 v1.4" />
+                                    <path className="control__wave" d="M4.4 4.3 l0.7 8.8 h5.8 l0.7 -8.8" />
+                                </svg>
+                            </button>
+                        )}
                         <button
                             type="button"
                             className="control control--icon"
                             onClick={() => setOpen(false)}
                             aria-label={t('panel.close')}
+                            title={t('panel.close')}
                         >
                             ✕
                         </button>
                     </div>
-                    {onForget && (
+                    {onForget && asking && (
                         <div className="panel__clearing">
-                            {asking ? (
-                                <>
-                                    <span className="panel__warning">{t('panel.forgetSure')}</span>
-                                    <button
-                                        type="button"
-                                        className="control"
-                                        onClick={() => setAsking(false)}
-                                    >
-                                        {t('panel.forgetKeep')}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="control control--danger"
-                                        onClick={() => {
-                                            setAsking(false);
-                                            onForget();
-                                        }}
-                                    >
-                                        {t('panel.forgetYes')}
-                                    </button>
-                                </>
-                            ) : (
+                            <p className="panel__warning">{t('panel.forgetSure')}</p>
+                            <div className="panel__choices">
                                 <button
                                     type="button"
                                     className="control"
-                                    disabled={earned.size === 0}
-                                    onClick={() => setAsking(true)}
+                                    onClick={() => setAsking(false)}
                                 >
-                                    {t('panel.forget')}
+                                    {t('panel.forgetKeep')}
                                 </button>
-                            )}
+                                <button
+                                    type="button"
+                                    className="control control--danger"
+                                    onClick={() => {
+                                        setAsking(false);
+                                        onForget();
+                                    }}
+                                >
+                                    {t('panel.forgetYes')}
+                                </button>
+                            </div>
                         </div>
                     )}
                     <ul className="panel__list">

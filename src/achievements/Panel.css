@@ -22,11 +22,13 @@
 .panel__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.4rem;
   margin-bottom: 0.7rem;
 }
 
+/* The title takes the room; the tools sit at the end of the row. */
 .panel__title {
+  flex: 1 1 auto;
   margin: 0;
   font-size: 0.95rem;
   color: #f0ecee;
@@ -87,26 +89,29 @@
 }
 
 /*
- * Clearing what has been earned. Kept at the top of the sheet rather than
- * buried under the list: a player who wants it should not have to scroll past
- * everything they are about to throw away to find it.
+ * The question, when clearing has been asked for. A block of its own under the
+ * header: the warning on one line and the two answers under it, rather than
+ * three things of three different widths wrapping against each other.
  */
 .panel__clearing {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0 0 0.75rem;
-    border-bottom: 1px solid #2f3048;
+    padding: 0.7rem 0.75rem 0.75rem;
+    border-radius: 0.6rem;
+    border: 1px solid #4a3040;
+    background: #2a1f2c;
     margin-bottom: 0.75rem;
 }
 
 .panel__warning {
-    flex: 1 1 12rem;
-    color: #c9a0a0;
+    margin: 0 0 0.6rem;
+    color: #e0b8b8;
     font-size: 0.76rem;
-    line-height: 1.3;
+    line-height: 1.35;
+}
+
+.panel__choices {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
 }
 
 .control--danger {
