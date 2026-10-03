@@ -29,11 +29,14 @@ export function hintPair(groups: Solution[], step: number): [string, string] | n
     if (groups.length === 0) return null;
 
     const group = groups[step % groups.length];
-    // Which two of the three, rolled on once the groups have been round once.
-    const turn = Math.floor(step / groups.length);
     const members = group.concepts;
-    const first = members[turn % members.length];
-    const second = members[(turn + 1) % members.length];
+    // Which two of the three, rolled on by the step rather than by how many
+    // times the groups have been round. Two groups on a board often share two
+    // members — "drum, radio, bell" and "drum, radio, phone" — and taking the
+    // first two of each would then point at the same pair twice running, which
+    // reads as the board being stuck rather than the player.
+    const first = members[step % members.length];
+    const second = members[(step + 1) % members.length];
 
     return [first, second];
 }

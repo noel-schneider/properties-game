@@ -83,19 +83,25 @@ const PLUCK_SHAPES: number[][] = [
 const PLUCK_RHYTHM = [0.3, 0.95, 1.6, 2.5, 5.4, 6.0];
 
 /**
- * The violin: three bowed gestures in a chord.
+ * The strings: an ensemble swelling through the chord, with one voice moving
+ * over the top of it.
  *
- * Half a second between strokes inside a gesture — close enough to belong
- * together, far enough apart to be a bow changing direction rather than the
- * tremolo the first attempt turned into — and seconds of silence between the
- * gestures, where a player is left alone with the pad.
+ * Short bowed strokes were tried first and came out as a buzz however they
+ * were shaped — a sawtooth cut up into half-second pieces is a thing raw
+ * oscillators are bad at, and no amount of filter sweeping rescued it. A slow
+ * swell is what simple synthesis is actually good at: several voices a few
+ * cents apart, arriving over four seconds, is a string section. The top note
+ * is what keeps it from being another pad.
  */
-const BOW_SHAPES: number[][] = [
-    [1, 2, 3, 2, 1, 0, 1],
-    [2, 3, 4, 3, 2, 1, 2],
-];
+const STRING_TOPS = [4, 5, 6, 5];
 
-const BOW_RHYTHM = [0, 0.55, 1.1, 4.2, 4.75, 8.0, 8.55];
+/** How long the ensemble takes to arrive, in seconds. */
+export const STRING_SWELL = 4.5;
+
+/** Which note of the chord the top voice takes, this time round. */
+export function stringTop(step: number): number {
+    return STRING_TOPS[((step % STRING_TOPS.length) + STRING_TOPS.length) % STRING_TOPS.length];
+}
 
 function phrase(shapes: number[][], rhythm: number[], step: number): Note[] {
     const shape = shapes[((step % shapes.length) + shapes.length) % shapes.length];
@@ -105,11 +111,6 @@ function phrase(shapes: number[][], rhythm: number[], step: number): Note[] {
 /** The plucked phrase for a chord. */
 export function pluckPhrase(step: number): Note[] {
     return phrase(PLUCK_SHAPES, PLUCK_RHYTHM, step);
-}
-
-/** The bowed phrase for a chord. */
-export function bowPhrase(step: number): Note[] {
-    return phrase(BOW_SHAPES, BOW_RHYTHM, step);
 }
 
 /**
@@ -155,40 +156,38 @@ function voice(
 }
 
 /**
- * One bowed stroke.
+ * A bowed voice: slow in, slow out, and handed back so a vibrato can reach it.
  *
- * A sawtooth through a filter that opens as the bow bites and closes as it
- * leaves, which is most of what separates a violin from a buzz; a fixed filter
- * gave the blip the last version sounded like. The attack is slow enough to
- * hear the note start — an instant attack is a pluck, whatever waveform is
- * under it — and the tail outlasts the next stroke, so a gesture is joined up
- * rather than chopped.
+ * Sawtooth, because that is what has the harmonics a string has — but swelled
+ * rather than struck. The same waveform cut into half-second strokes was the
+ * buzz this replaced.
  */
-function bow(ctx: AudioContext, into: AudioNode, at: number, hz: number, vibrato: GainNode): void {
+function sustained(
+    ctx: AudioContext,
+    into: AudioNode,
+    at: number,
+    hz: number,
+    peak: number,
+    attack: number,
+    cents = 0,
+    length = CHORD_SECONDS,
+): OscillatorNode {
     const oscillator = ctx.createOscillator();
-    const colour = ctx.createBiquadFilter();
     const gain = ctx.createGain();
 
     oscillator.type = 'sawtooth';
     oscillator.frequency.setValueAtTime(hz, at);
-    oscillator.detune.setValueAtTime(-4, at);
-    // The vibrato arrives after the note has spoken, the way a player's hand does.
-    vibrato.connect(oscillator.detune);
-
-    colour.type = 'lowpass';
-    colour.Q.setValueAtTime(1.6, at);
-    colour.frequency.setValueAtTime(hz * 1.6, at);
-    colour.frequency.linearRampToValueAtTime(hz * 6, at + 0.14);
-    colour.frequency.linearRampToValueAtTime(hz * 2.2, at + 0.95);
+    oscillator.detune.setValueAtTime(cents, at);
 
     gain.gain.setValueAtTime(0, at);
-    gain.gain.linearRampToValueAtTime(VOICE_GAIN * 0.95, at + 0.12);
-    gain.gain.linearRampToValueAtTime(VOICE_GAIN * 0.75, at + 0.45);
-    gain.gain.linearRampToValueAtTime(0, at + 0.95);
+    gain.gain.linearRampToValueAtTime(peak, at + attack);
+    gain.gain.linearRampToValueAtTime(peak * 0.75, at + length * 0.75);
+    gain.gain.linearRampToValueAtTime(0, at + length);
 
-    oscillator.connect(colour).connect(gain).connect(into);
+    oscillator.connect(gain).connect(into);
     oscillator.start(at);
-    oscillator.stop(at + 1);
+    oscillator.stop(at + length + 0.05);
+    return oscillator;
 }
 
 /** A part's own colour: one filter per chord, not one per note. */
@@ -255,21 +254,42 @@ export const LAYERS: Layer[] = [
         // would be a synthesiser pad with a different name.
         id: 'strings',
         play: (ctx, into, at, chord, step) => {
-            // One vibrato for the whole gesture rather than one per note: a
-            // single oscillator feeding every stroke's detune costs two nodes
-            // a chord and is what the ear actually reads as a string player.
+            // One vibrato for the whole section rather than one per voice: a
+            // single oscillator feeding every detune costs two nodes a chord
+            // and is what the ear reads as players rather than as a machine.
             const wobble = ctx.createOscillator();
             const depth = ctx.createGain();
             wobble.type = 'sine';
-            wobble.frequency.setValueAtTime(5.4, at);
-            depth.gain.setValueAtTime(8, at);
+            wobble.frequency.setValueAtTime(4.6, at);
+            // Shallow, and arriving after the note has spoken, the way a
+            // player's hand does.
+            depth.gain.setValueAtTime(0, at);
+            depth.gain.linearRampToValueAtTime(5, at + STRING_SWELL);
             wobble.connect(depth);
             wobble.start(at);
             wobble.stop(at + CHORD_SECONDS);
 
-            for (const note of bowPhrase(step)) {
-                bow(ctx, into, at + note.at, ROOT * 2 ** ((chordTone(chord, note.tone) + 12) / 12), depth);
+            const tone = toned(ctx, into, 1300);
+
+            // Each note doubled a few cents apart. Two voices beating slowly
+            // against one another is the whole of what makes a section sound
+            // like more than one player.
+            for (const semitones of chord.slice(0, 3)) {
+                for (const cents of [-7, 7]) {
+                    const hz = ROOT * 2 ** (semitones / 12);
+                    const part = sustained(ctx, tone, at, hz, VOICE_GAIN * 0.5, STRING_SWELL, cents);
+                    depth.connect(part.detune);
+                }
             }
+
+            // And one voice over the top, which is what keeps this from being
+            // a second pad.
+            const lead = sustained(
+                ctx, tone, at + 1.2,
+                ROOT * 2 ** ((chordTone(chord, stringTop(step)) + 12) / 12),
+                VOICE_GAIN * 0.55, STRING_SWELL, 0, CHORD_SECONDS - 2,
+            );
+            depth.connect(lead.detune);
         },
     },
 ];

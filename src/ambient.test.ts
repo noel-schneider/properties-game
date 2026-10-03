@@ -1,6 +1,6 @@
 import {
-    bowPhrase, CHORD_SECONDS, CHORDS, chordAt, chordTone, LAYER_EVERY, LAYERS,
-    layersFor, pluckPhrase, voicesOf,
+    CHORD_SECONDS, CHORDS, chordAt, chordTone, LAYER_EVERY, LAYERS, layersFor,
+    pluckPhrase, STRING_SWELL, stringTop, voicesOf,
 } from './ambient'
 
 test('the progression comes back round, so a long game never runs out', () => {
@@ -66,7 +66,7 @@ test('every melody note is a note of the chord underneath it', () => {
     const chord = chordAt(step);
     const inChord = new Set(chord.map((semitones) => ((semitones % 12) + 12) % 12));
 
-    for (const note of [...pluckPhrase(step), ...bowPhrase(step)]) {
+    for (const note of pluckPhrase(step)) {
       const pitch = chordTone(chord, note.tone);
       expect(inChord.has(((pitch % 12) + 12) % 12)).toBe(true);
     }
@@ -93,23 +93,37 @@ test('the line is not the same notes twice running', () => {
 
 test('every phrase fits inside the chord it is played over', () => {
   for (let step = 0; step < 8; step++) {
-    for (const note of [...pluckPhrase(step), ...bowPhrase(step)]) {
+    for (const note of pluckPhrase(step)) {
       expect(note.at).toBeGreaterThanOrEqual(0);
       expect(note.at).toBeLessThan(CHORD_SECONDS - 1);
     }
   }
 });
 
-test('the violin bows in groups, at a speed a bow could manage', () => {
-  for (let step = 0; step < 4; step++) {
-    const phrase = bowPhrase(step);
-    const gaps = phrase.slice(1).map((note, i) => note.at - phrase[i].at);
+test('the strings hold the chord and move one voice over it', () => {
+  // Short bowed strokes out of raw oscillators came out as a buzz however they
+  // were shaped. An ensemble swelling through the chord is the thing simple
+  // synthesis is actually good at, and it is pleasant rather than clever.
+  for (let step = 0; step < 8; step++) {
+    const chord = chordAt(step);
+    const inChord = new Set(chord.map((semitones) => ((semitones % 12) + 12) % 12));
+    const top = chordTone(chord, stringTop(step));
 
-    // Close enough to belong to one gesture, far enough apart to be strokes
-    // rather than a tremolo — which is what the last version sounded like.
-    expect(Math.min(...gaps)).toBeGreaterThanOrEqual(0.4);
-    expect(gaps.some((gap) => gap < 1)).toBe(true);
+    expect(inChord.has(((top % 12) + 12) % 12)).toBe(true);
   }
+});
+
+test('the voice on top goes somewhere, chord to chord', () => {
+  const sung = [0, 1, 2, 3].map((step) => chordTone(chordAt(step), stringTop(step)));
+
+  expect(new Set(sung).size).toBeGreaterThan(2);
+});
+
+test('the swell is slow enough to be a swell', () => {
+  // Anything under a second or two reads as an attack, which is where the last
+  // version went wrong.
+  expect(STRING_SWELL).toBeGreaterThanOrEqual(3);
+  expect(STRING_SWELL).toBeLessThan(CHORD_SECONDS / 2);
 });
 
 test('neither part floods the chord, however sophisticated it gets', () => {
@@ -117,6 +131,5 @@ test('neither part floods the chord, however sophisticated it gets', () => {
   // expensive without anyone noticing.
   for (let step = 0; step < 8; step++) {
     expect(pluckPhrase(step).length).toBeLessThanOrEqual(9);
-    expect(bowPhrase(step).length).toBeLessThanOrEqual(10);
   }
 });

@@ -22,6 +22,18 @@ test('the next hint is a different pair, or it reads as the same nudge twice', (
   expect(seen.size).toBe(4);
 });
 
+test('two groups sharing two members are still nudged at differently', () => {
+  // Boards are full of these: "drum, radio, bell" for sound and "drum, radio,
+  // phone" for machine. Taking the first two of each pointed at drum and radio
+  // twice running, which looks like the board repeating itself.
+  const overlapping: Solution[] = [
+    { property: 'sound', concepts: ['drum', 'radio', 'bell'] },
+    { property: 'machine', concepts: ['drum', 'radio', 'phone'] },
+  ];
+
+  expect(hintPair(overlapping, 0)).not.toEqual(hintPair(overlapping, 1));
+});
+
 test('a board with nothing left to find is nudged about nothing', () => {
   expect(hintPair([], 3)).toBeNull();
 });
