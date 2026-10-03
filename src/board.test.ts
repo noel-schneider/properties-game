@@ -1,22 +1,22 @@
-import { formableGroups, openingBoard, refill } from './board'
+import { formableGroups, openingBoard, refill, WAYS_ON } from './board'
 import { getAllConcepts } from './concepts'
-import { isFinished } from './game'
 import type { Solution } from './hand'
 
 const pool = getAllConcepts();
-const byName = new Map(pool.map((c) => [c.name, c]));
-const ACTIVE = 15;
 
-function activeCount(board: string[], found: Solution[]): number {
-  return board.filter((name) => !isFinished(byName.get(name)!, found)).length;
+/** What the board is now topped up by: moves available, not concepts present. */
+const ACTIVE = WAYS_ON;
+
+function waysOn(board: string[], found: Solution[]): number {
+  return formableGroups(board, pool, found).length;
 }
 
-test('an opening board holds the asked-for number of concepts, or a few more', () => {
+test('an opening board offers the asked-for number of ways on, or a few more', () => {
   const board = openingBoard(pool, ACTIVE);
 
-  // A few over when fifteen taken at random could not form a single group.
-  expect(board.length).toBeGreaterThanOrEqual(ACTIVE);
-  expect(board.length).toBeLessThanOrEqual(ACTIVE + 6);
+  // A few over because one concept dealt in can open several groups at once,
+  // and stopping short of that would mean taking it back out again.
+  expect(waysOn(board, [])).toBeGreaterThanOrEqual(ACTIVE);
   expect(new Set(board).size).toBe(board.length);
 });
 
@@ -35,15 +35,11 @@ test('a group is only formable while its property is open for all three', () => 
   expect(formableGroups(board, pool, spent).map((g) => g.property)).not.toContain('biome');
 });
 
-test('refilling brings the board back to the asked-for number of unfinished concepts', () => {
+test('refilling brings the board back to the asked-for number of ways on', () => {
   const found: Solution[] = [{ property: 'biome', concepts: ['jungle', 'desert', 'forest'] }];
   const thin = refill(['jungle', 'desert'], pool, found, ACTIVE);
 
-  // At least the target, and a few over when more were needed to make the
-  // board playable at all — which is the better failure of the two.
-  expect(activeCount(thin, found)).toBeGreaterThanOrEqual(ACTIVE);
-  expect(activeCount(thin, found)).toBeLessThanOrEqual(ACTIVE + 6);
-  expect(formableGroups(thin, pool, found).length).toBeGreaterThan(0);
+  expect(waysOn(thin, found)).toBeGreaterThanOrEqual(ACTIVE);
 });
 
 test('refilling never drops a concept already on the board', () => {

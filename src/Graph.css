@@ -2,10 +2,24 @@
     width: 100%;
     height: 80vh;
     display: block;
+
+    /*
+     * A spark rather than an arrow, for a board that is a night sky. Cream
+     * with a dark outline so it stays visible on both — the sky is nearly
+     * black and the bubbles are nearly white, and a cursor in either colour
+     * disappears on one of them.
+     *
+     * The hotspot is the middle of the spark, which is also the dot at its
+     * centre: what the player aims with is the thing they can see.
+     */
+    --spark: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2726%27%20height%3D%2726%27%20viewBox%3D%270%200%2026%2026%27%3E%3Cpath%20d%3D%27M13%201.5%20C14.2%208.6%2017.4%2011.8%2024.5%2013%20C17.4%2014.2%2014.2%2017.4%2013%2024.5%20C11.8%2017.4%208.6%2014.2%201.5%2013%20C8.6%2011.8%2011.8%208.6%2013%201.5%20Z%27%20fill%3D%27%2523f4efe6%27%20stroke%3D%27%25231b1b1b%27%20stroke-width%3D%271.6%27%20stroke-linejoin%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2713%27%20cy%3D%2713%27%20r%3D%271.6%27%20fill%3D%27%2523ffad69%27%2F%3E%3C%2Fsvg%3E") 13 13, crosshair;
+    --spark-held: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2726%27%20height%3D%2726%27%20viewBox%3D%270%200%2026%2026%27%3E%3Cpath%20d%3D%27M13%201.5%20C14.2%208.6%2017.4%2011.8%2024.5%2013%20C17.4%2014.2%2014.2%2017.4%2013%2024.5%20C11.8%2017.4%208.6%2014.2%201.5%2013%20C8.6%2011.8%2011.8%208.6%2013%201.5%20Z%27%20fill%3D%27%2523ffad69%27%20stroke%3D%27%25231b1b1b%27%20stroke-width%3D%271.6%27%20stroke-linejoin%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2713%27%20cy%3D%2713%27%20r%3D%271.6%27%20fill%3D%27%2523fff6ec%27%2F%3E%3C%2Fsvg%3E") 13 13, grabbing;
+
+    cursor: var(--spark);
 }
 
 .bubble {
-    cursor: grab;
+    cursor: var(--spark);
     /* The browser's own focus ring lands as a blue rectangle around the whole
        group, which reads as a selection the player did not make. Removed here
        and replaced below for keyboard users, who would otherwise be left with
@@ -15,13 +29,20 @@
 }
 
 .bubble:active {
-    cursor: grabbing;
+    cursor: var(--spark-held);
 }
 
 .bubble circle {
     fill: #e2dcde;
     stroke: #1b1b1b;
-    stroke-width: 1;
+    /* Heavier than it was. A hairline contour reads as a diagram; a thick one
+       reads as something you are meant to poke. */
+    stroke-width: 3;
+    /* Thrown down and to the side and blurred, so the bubble sits above the
+       board rather than on it. Offset rather than straight down on purpose: a
+       shadow directly under a round thing says the light is overhead and
+       nowhere in particular, which reads as flat. */
+    filter: drop-shadow(5px 9px 7px rgba(12, 12, 22, 0.5));
     transition: fill 0.15s ease;
 }
 
@@ -53,11 +74,31 @@
     stroke-width: 4;
 }
 
-/* A group that has been found: gathered, tied together and named. */
-.found__tie {
-    stroke: #ffad69;
-    stroke-width: 2;
-    opacity: 0.5;
+/*
+ * A group that has been found: lassoed by one closed curve and named.
+ *
+ * Drawn before the bubbles, so the loop runs behind them and only its sides
+ * show — which is what makes it read as holding the three together rather than
+ * as a triangle drawn over the board.
+ */
+.found__loop {
+    /* Heavy sides, mitred, no fill. Faint by default: thirty outlines drawn to
+       be read is a thicket, and reading which concepts share a category is the
+       pointer's job now — these are texture, a record of work done. */
+    fill: none;
+    stroke: url(#found-loop);
+    stroke-width: 7;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    opacity: 0.32;
+    transition: opacity 0.5s ease;
+}
+
+/* Except the one just found, which is the answer the player is waiting on.
+   The same rule the group names already follow. */
+.found__loop--latest {
+    stroke-width: 9;
+    opacity: 0.8;
 }
 
 .found__label {
@@ -66,6 +107,12 @@
     font-size: 19px;
     font-weight: 600;
     letter-spacing: 0.04em;
+    /* Sat in the middle of the group, so it lands on the bubbles as often as
+       not. The dark outline is what keeps it readable on cream. */
+    paint-order: stroke;
+    stroke: #16141f;
+    stroke-width: 5;
+    stroke-linejoin: round;
     pointer-events: none;
     user-select: none;
 }
@@ -86,15 +133,115 @@
 /* A concept with nothing left to find: small, faded, out of the way. */
 .bubble--done {
     cursor: default;
-    opacity: 0.35;
 }
 
+/* Faded on the dot rather than on the whole group, so the name beside it can
+   be legible while the dot stays quiet. */
 .bubble--done circle {
     fill: #8f8aa6;
     stroke: #5a5a7d;
+    stroke-width: 2;
+    opacity: 0.35;
     transition: opacity 0.4s ease;
+}
+
+/*
+ * The name of a spent concept, set beside its dot.
+ *
+ * Kept readable but plainly secondary: nothing shrunken can join another
+ * group, whatever its progress says, so a name that looked like a target
+ * would send the player after it for nothing. It is there to remind them
+ * which categories are in play.
+ */
+/* Stepped back with the rest of the board during a reveal. */
+.bubble__name--muted {
+    opacity: 0.25;
+}
+
+.bubble text.bubble__name--aside,
+.graph > text.bubble__name--aside {
+    /* Written long-hand deliberately. `.bubble text` is the more specific
+       selector, so a plain `.bubble__name--aside` rule loses to it and the
+       name comes out in the contour's near-black, on a near-black board. */
+    fill: #a9a3bd;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    pointer-events: none;
+    user-select: none;
 }
 
 .bubble--done:hover circle {
     fill: #8f8aa6;
+}
+
+/*
+ * The reveal: what shares a found category with the concept under the pointer
+ * stays lit, and the rest steps back rather than disappearing.
+ *
+ * Only found categories are ever drawn on. A concept's other properties are
+ * the answers the player is still working out, and the board must not hand
+ * those over.
+ */
+.bubble--kin circle {
+    stroke: #ffad69;
+    stroke-width: 5;
+}
+
+.bubble--aside {
+    opacity: 0.25;
+}
+
+/* Only the stepping back is eased. Fading the lit ones in as well leaves the
+   board smeared while the pointer crosses it. */
+.bubble {
+    transition: opacity 0.18s ease;
+}
+
+/*
+ * The offer made while a concept is held over a category already found.
+ *
+ * Shown for any group the pointer reaches, not only the ones that would
+ * accept — offering the target only where the answer is right would give the
+ * answer away with the gesture.
+ */
+.drop-hint {
+    fill: #ffd9b0;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    paint-order: stroke;
+    stroke: #16141f;
+    stroke-width: 5;
+    stroke-linejoin: round;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* The members of the group a held concept is being offered to. */
+.bubble--target circle {
+    stroke: #ffd9b0;
+    stroke-width: 6;
+}
+
+/*
+ * What a concept has left to find, as an arc on its rim.
+ *
+ * It fills rather than empties: a concept nobody has used yet shows nothing at
+ * all. Drawn the other way round, a fresh board wore a full ring on every
+ * bubble, which says nothing at the moment the player most wants to pick out
+ * which concepts are rich.
+ */
+.bubble circle.gauge {
+    fill: none;
+    stroke: #6f6a85;
+    stroke-width: 4;
+    stroke-linecap: round;
+    /* The bubbles' own shadow under one of these per bubble buys nothing. */
+    filter: none;
+    /* The dash starts at three o'clock; from the top reads as a dial.
+       fill-box, or the rotation pivots on the viewBox origin. */
+    transform: rotate(-90deg);
+    transform-box: fill-box;
+    transform-origin: center;
 }

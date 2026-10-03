@@ -20,19 +20,18 @@ import {
 } from "./achievements/storage";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
-import { formableGroups, openingBoard, refill } from "./board";
+import { formableGroups, openingBoard, refill, waysWanted } from "./board";
 import { getAllConcepts } from "./concepts";
 import { isFinished, isSpent } from "./game";
 import { isExactLabel } from "./guess";
 import { resolveGuess } from "./round";
+import { canJoin, joinGroup } from "./join";
 import { useTranslator } from "./i18n";
 import type { Achievement, GameEvent, Progress } from "./achievements";
 import type { Solution } from "./hand";
 
 export type Feedback = 'none' | 'correct' | 'wrong';
 
-/** How many concepts with something left to find are kept on the board. */
-export const ACTIVE_CONCEPTS = 15;
 
 const pool = getAllConcepts();
 const byName = new Map(pool.map((concept) => [concept.name, concept]));
@@ -53,8 +52,8 @@ function App({ playChime = playUnlockChime }: AppProps) {
     const [board, setBoard] = useState<string[]>(() => {
         const stored = loadFound();
         return stored.length > 0
-            ? refill([...new Set(stored.flatMap((g) => g.concepts))], pool, stored, ACTIVE_CONCEPTS)
-            : openingBoard(pool, ACTIVE_CONCEPTS);
+            ? refill([...new Set(stored.flatMap((g) => g.concepts))], pool, stored, waysWanted())
+            : openingBoard(pool, waysWanted());
     });
 
     const [selected, setSelected] = useState<string[]>([]);
@@ -166,8 +165,46 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
         // Finished concepts stay on the board, small and faded; fresh ones come
         // in beside them so there is always something left to work on.
-        setBoard((current) => refill(current, pool, outcome.found, ACTIVE_CONCEPTS));
+        setBoard((current) => refill(current, pool, outcome.found, waysWanted()));
         return true;
+    };
+
+    /**
+     * A concept dropped onto a category already found.
+     *
+     * Settled here rather than in the board, because it is a guess like any
+     * other: it can be wrong, and a wrong one costs what a wrong typed answer
+     * costs. Offering the target only where the answer is right would hand the
+     * player the answer with the gesture.
+     */
+    const dropInto = (index: number, name: string) => {
+        const group = found[index];
+        const concept = byName.get(name);
+        if (!group || !concept) return;
+
+        if (!canJoin(concept, group, found)) {
+            bumpTally({ wrong: tally.current.wrong + 1 });
+            record({
+                type: 'guess', at: Date.now(), correct: false,
+                exactName: false, selection: [name],
+            });
+            setFeedback('wrong');
+            return;
+        }
+
+        const next = joinGroup(found, index, name);
+        bumpTally({ correct: tally.current.correct + 1 });
+        record({
+            type: 'guess', at: Date.now(), correct: true, property: group.property,
+            exactName: false, selection: [name],
+        });
+        if (isFinished(concept, next)) record({ type: 'concept-finished', at: Date.now() });
+
+        setSelected([]);
+        setFeedback('correct');
+        setFound(next);
+        saveFound(next);
+        setBoard((current) => refill(current, pool, next, waysWanted()));
     };
 
     const playAgain = () => {
@@ -175,7 +212,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
         saveLifetime(kept);
         saveFound([]);
 
-        const fresh = openingBoard(pool, ACTIVE_CONCEPTS);
+        const fresh = openingBoard(pool, waysWanted());
         progress.current = recordEvent(emptyProgress(kept), {
             type: 'board-dealt',
             at: Date.now(),
@@ -207,7 +244,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-right">
               <Panel unlocked={unlocked} />

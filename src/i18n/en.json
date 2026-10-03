@@ -539,7 +539,8 @@
         "reset.title": "Start over?",
         "reset.what": "The groups you have found will be cleared and a fresh board dealt. Your achievements stay.",
         "reset.cancel": "Cancel",
-        "reset.confirm": "Clear and start over"
+        "reset.confirm": "Clear and start over",
+        "drop.add": "Add to"
     },
     "achievements": {
         "first-light": {

@@ -45,9 +45,10 @@ test('clicking three bubbles selects them and enables submit', async () => {
   renderApp(<App />);
 
   const bubbles = screen.getAllByRole('checkbox');
-  // Fifteen unfinished concepts, or a few more when that many were needed to
-  // make the board playable at all.
-  expect(bubbles.length).toBeGreaterThanOrEqual(15);
+  // The board is dealt to a number of moves available rather than a number of
+  // concepts, so how many bubbles that takes is not fixed. What must hold is
+  // that there is enough on it to make a guess with.
+  expect(bubbles.length).toBeGreaterThanOrEqual(3);
 
   const submit = screen.getByRole('button', { name: /submit/i });
   await user.type(screen.getByPlaceholderText(/type a category here/i), 'biome');
@@ -237,7 +238,11 @@ test('the achievements button counts what has been earned', async () => {
   renderApp(<App playChime={() => {}} />);
 
   const button = screen.getByRole('button', { name: /achievements/i });
-  expect(button).toHaveTextContent('0 / 15');
+  // Read rather than assumed to be zero: one achievement is earned simply by
+  // playing between two and four in the morning, so a suite that expects none
+  // at the start fails for two hours every night.
+  const earned = () => Number(button.textContent!.match(/(\d+)\s*\//)![1]);
+  const before = earned();
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
@@ -245,7 +250,7 @@ test('the achievements button counts what has been earned', async () => {
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   await screen.findAllByRole('alert');
-  expect(button).not.toHaveTextContent('0 / 15');
+  expect(earned()).toBeGreaterThan(before);
 });
 
 test('muting the sound silences the next unlock, and is remembered', async () => {

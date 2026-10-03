@@ -40,7 +40,8 @@
     "beach": [
         "water",
         "sand",
-        "location"
+        "location",
+        "biome"
     ],
     "bee": [
         "airborne",
@@ -148,7 +149,8 @@
         "shelter",
         "underground",
         "geography",
-        "night"
+        "night",
+        "biome"
     ],
     "chameleon": [
         "reptile",
@@ -166,7 +168,8 @@
     "circus": [
         "entertainment venue",
         "entertainment",
-        "artistic expression"
+        "artistic expression",
+        "location"
     ],
     "climbing": [
         "outdoor activity",
@@ -242,7 +245,8 @@
         "water",
         "cold",
         "geography",
-        "white"
+        "white",
+        "biome"
     ],
     "guitar": [
         "musical instrument",
@@ -356,7 +360,8 @@
     ],
     "mountain": [
         "cold",
-        "geography"
+        "geography",
+        "biome"
     ],
     "museum": [
         "building",
@@ -382,7 +387,8 @@
     "orchard": [
         "trees",
         "vegetation",
-        "food"
+        "food",
+        "location"
     ],
     "owl": [
         "animal",
@@ -489,7 +495,8 @@
     ],
     "skyscraper": [
         "building",
-        "city"
+        "city",
+        "location"
     ],
     "snake": [
         "animal",

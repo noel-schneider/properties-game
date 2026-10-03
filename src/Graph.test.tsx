@@ -1,7 +1,7 @@
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import { renderApp } from './test-utils'
 import { act } from 'react'
-import Graph from './Graph'
+import Graph, { groupOutline } from './Graph'
 import { BUBBLE_GAP, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Concept } from './types'
 
@@ -145,13 +145,21 @@ test('the bubbles are spread, not packed on a regular lattice', () => {
 
 const foundGroup = { property: 'thing', concepts: ['concept-0', 'concept-1', 'concept-2'] };
 
-test('a found group is drawn tied together', () => {
+test('a found group is drawn as one outline around its members', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
   runFrames(600);
 
-  const ties = document.querySelectorAll('.found__tie');
-  expect(ties).toHaveLength(foundGroup.concepts.length);
+  // One closed curve rather than three spokes meeting at a bare point, which
+  // read as a wiring diagram.
+  const loops = document.querySelectorAll('.found__loop');
+  expect(loops).toHaveLength(1);
+
+  const path = loops[0].getAttribute('d')!;
+  expect(path.endsWith('Z')).toBe(true);
+  // A closed shape: one move to a corner, then a side to each of the rest.
+  expect(path.match(/L/g)).toHaveLength(foundGroup.concepts.length - 1);
 });
+
 
 test('the group just found says what it was', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
@@ -166,10 +174,10 @@ test('older groups keep their ties but drop their name', () => {
   );
 
   // Twenty groups of labels pile into an unreadable heap, so only the latest
-  // is named; every tie is still drawn.
+  // is named; every loop is still drawn.
   expect(screen.queryByText('pair-3')).toBeNull();
   expect(screen.getByText('thing')).toBeInTheDocument();
-  expect(document.querySelectorAll('.found__tie')).toHaveLength(6);
+  expect(document.querySelectorAll('.found__loop')).toHaveLength(2);
 });
 
 test('a found group draws closer together than the rest of the board', () => {
@@ -261,3 +269,139 @@ test('finished concepts take less room, not just a smaller picture', () => {
 
   expect(spread(everything)).toBeLessThan(spread([]) * 0.75);
 });
+
+test('a bubble is drawn as something to poke, not as a diagram', () => {
+  renderApp(<Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} />);
+
+  // Chosen by eye against the alternatives, and pinned here so a later
+  // refactor cannot quietly flatten the board back to a hairline. The shadow
+  // that goes with it is pinned in the browser instead: jsdom does not
+  // implement `filter` at all, and drops it from the rule as well as from the
+  // computed style.
+  const style = getComputedStyle(document.querySelector('g.bubble circle')!);
+  expect(Number(style.strokeWidth)).toBeGreaterThanOrEqual(3);
+});
+
+test('a board redrawn with the same concepts stays exactly where it was', () => {
+  // App rebuilds its concepts array on every render, so every click hands the
+  // board a new array holding the same things. That must change nothing: a
+  // board that re-scatters when you select a bubble reads as a refresh.
+  const props = { selected: [] as string[], found: [], onToggle: () => {} };
+  const { rerender } = renderApp(<Graph concepts={concepts} {...props} />);
+  runFrames(400);
+  const before = positions();
+
+  rerender(<Graph concepts={[...concepts]} {...props} selected={[concepts[0].name]} />);
+  runFrames(1);
+
+  expect(positions()).toEqual(before);
+});
+
+test('a concept dealt in arrives beside the others, without moving them', () => {
+  // The board is meant to persist: finding a group adds concepts beside the
+  // ones already there. Re-scattering everything would throw away the shape
+  // the player has been reading.
+  const props = { selected: [], found: [], onToggle: () => {} };
+  const { rerender } = renderApp(<Graph concepts={concepts} {...props} />);
+  runFrames(400);
+  const before = positions();
+
+  const newcomer: Concept = { name: 'newcomer', properties: ['thing'] };
+  rerender(<Graph concepts={[...concepts, newcomer]} {...props} />);
+  runFrames(1);
+
+  // Near where they were, not identical: the newcomer pushes in and the
+  // others give it room, which is the point. What must not happen is being
+  // dealt again from scratch, which throws them the width of the frame.
+  const moved = positions().slice(0, concepts.length).map((now, i) => {
+    const [nx, ny] = now.match(/-?\d+\.?\d*/g)!.map(Number);
+    const [bx, by] = before[i].match(/-?\d+\.?\d*/g)!.map(Number);
+    return Math.hypot(nx - bx, ny - by);
+  });
+
+  expect(Math.max(...moved)).toBeLessThan(30);
+  expect(positions()).toHaveLength(concepts.length + 1);
+});
+
+test('the group just found keeps a bright loop, and the older ones step back', () => {
+  const older = { property: 'pair-3', concepts: ['concept-3', 'concept-8', 'concept-13'] };
+  renderApp(
+    <Graph concepts={concepts} selected={[]} found={[older, foundGroup]} onToggle={() => {}} />,
+  );
+
+  // The same rule the names already follow: at twenty groups everything drawn
+  // at full strength is a thicket, and the one just found is the one the
+  // player is looking for.
+  const loops = [...document.querySelectorAll('.found__loop')];
+  const bright = loops.filter((loop) => loop.classList.contains('found__loop--latest'));
+  expect(bright).toHaveLength(1);
+  expect(loops).toHaveLength(2);
+});
+
+
+test('the outline takes its corners in the order they sit around the middle', () => {
+  // Fed in any other order the shape crosses itself, which is what happens
+  // every time the simulation moves one member past another.
+  const corners = [{ x: 0, y: -100 }, { x: -87, y: 50 }, { x: 87, y: 50 }];
+  const centre = { x: 0, y: 0 };
+
+  const path = groupOutline(corners, centre);
+  const n = path.match(/-?\d+\.?\d*/g)!.map(Number);
+  const angles = [];
+  for (let i = 0; i < n.length; i += 2) angles.push(Math.atan2(n[i + 1], n[i]));
+
+  expect([...angles].sort((a, b) => a - b)).toEqual(angles);
+});
+
+test('a found group is named in its middle, over the bubbles', () => {
+  renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
+  runFrames(600);
+
+  const places = foundGroup.concepts.map((name) => {
+    const [x, y] = screen.getByLabelText(name).getAttribute('transform')!
+      .match(/-?\d+\.?\d*/g)!.map(Number);
+    return { x, y };
+  });
+  const middle = {
+    x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
+    y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
+  };
+
+  const label = document.querySelector('.found__label')!;
+  expect(Number(label.getAttribute('x'))).toBeCloseTo(middle.x, 0);
+  expect(Number(label.getAttribute('y'))).toBeCloseTo(middle.y, 0);
+
+  // Drawn after every bubble, or a tight group hides its own name.
+  const drawn = [...document.querySelectorAll('.bubble, .found__label')];
+  expect(drawn.indexOf(label)).toBeGreaterThan(
+    drawn.map((el) => el.classList.contains('bubble')).lastIndexOf(true),
+  );
+});
+
+describe('telling a click from a drag', () => {
+  function gesture(travel: number) {
+    const picked: string[] = [];
+    renderApp(
+      <Graph concepts={concepts} selected={[]} found={[]} onToggle={(n) => picked.push(n)} />,
+    );
+    runFrames(600);
+
+    const bubble = screen.getByLabelText('concept-0');
+    fireEvent.pointerDown(bubble, { button: 0, clientX: 500, clientY: 300 });
+    fireEvent.pointerMove(bubble, { clientX: 500 + travel, clientY: 300 });
+    fireEvent.pointerUp(bubble, { clientX: 500 + travel, clientY: 300 });
+    fireEvent.click(bubble);
+    return picked;
+  }
+
+  test('a click that slips a few pixels still selects', () => {
+    // A hand that does not move at all is not what a mouse click is, and a
+    // bubble that silently refuses to be picked gives the player no clue why
+    // their answer was then refused.
+    expect(gesture(8)).toEqual(['concept-0']);
+  });
+
+  test('a real drag still selects nothing', () => {
+    expect(gesture(60)).toEqual([]);
+  });
+})
