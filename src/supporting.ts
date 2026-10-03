@@ -5,7 +5,7 @@
  * nothing here touches a payment, a card or a bank: the player leaves for a
  * page Ko-fi hosts, and comes back if they feel like it.
  */
-export const SUPPORT_URL = 'https://ko-fi.com/REPLACE-WITH-YOUR-KO-FI-HANDLE';
+export const SUPPORT_URL = 'https://ko-fi.com/noeldesv';
 
 /**
  * How many right answers before the game mentions it, once.
