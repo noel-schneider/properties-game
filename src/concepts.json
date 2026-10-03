@@ -21,8 +21,7 @@
     ],
     "avalanche": [
         "danger",
-        "cold",
-        "natural phenomenon"
+        "cold"
     ],
     "basketball": [
         "game",
@@ -228,7 +227,6 @@
     "hurricane": [
         "wind",
         "weather",
-        "natural phenomenon",
         "danger"
     ],
     "ice cream": [
@@ -270,7 +268,6 @@
     ],
     "lava": [
         "heat",
-        "natural phenomenon",
         "danger",
         "liquid"
     ],
@@ -284,7 +281,6 @@
     ],
     "lightning": [
         "light",
-        "natural phenomenon",
         "weather",
         "danger"
     ],
@@ -391,7 +387,6 @@
     ],
     "rainbow": [
         "colors",
-        "natural phenomenon",
         "weather"
     ],
     "river": [
@@ -420,8 +415,7 @@
     "snow": [
         "cold",
         "white",
-        "weather",
-        "natural phenomenon"
+        "weather"
     ],
     "soup": [
         "food",
@@ -432,6 +426,11 @@
         "night",
         "astronomy",
         "light"
+    ],
+    "storm": [
+        "sound",
+        "weather",
+        "danger"
     ],
     "submarine": [
         "exploration",
@@ -473,14 +472,7 @@
         "building",
         "city"
     ],
-    "thunder": [
-        "sound",
-        "weather",
-        "natural phenomenon",
-        "danger"
-    ],
     "tornado": [
-        "natural phenomenon",
         "weather",
         "wind",
         "danger"
@@ -509,7 +501,6 @@
     ],
     "waterfall": [
         "water",
-        "natural phenomenon",
         "liquid",
         "sound"
     ]

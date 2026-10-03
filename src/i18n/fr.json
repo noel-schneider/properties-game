@@ -86,6 +86,7 @@
         "snow": "neige",
         "soup": "soupe",
         "star": "étoile",
+        "storm": "orage",
         "submarine": "sous-marin",
         "subway": "métro",
         "surfing": "surf",
@@ -93,7 +94,6 @@
         "television": "télévision",
         "tennis": "tennis",
         "theater": "théâtre",
-        "thunder": "tonnerre",
         "tornado": "tornade",
         "train": "train",
         "turtle": "tortue",
@@ -129,7 +129,6 @@
         "machine": "machine",
         "metal": "métal",
         "music": "musique",
-        "natural phenomenon": "phénomène naturel",
         "night": "nuit",
         "object": "objet",
         "outdoor activity": "activité de plein air",
@@ -296,11 +295,6 @@
         "music": [
             "musical",
             "mélodie"
-        ],
-        "natural phenomenon": [
-            "phénomène",
-            "force de la nature",
-            "événement naturel"
         ],
         "night": [
             "nocturne",
