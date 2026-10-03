@@ -17,7 +17,12 @@ function Entry({ achievement, earned }: { achievement: Achievement; earned: bool
     const concealed = achievement.secret && !earned;
 
     return (
-        <li className="panel__entry" data-testid={`entry-${achievement.id}`} data-earned={String(earned)}>
+        <li
+            className="panel__entry"
+            data-testid={`entry-${achievement.id}`}
+            data-earned={String(earned)}
+            data-secret={String(achievement.secret ?? false)}
+        >
             <span className="panel__icon" aria-hidden="true">{concealed ? '🔒' : achievement.icon}</span>
             {concealed ? (
                 <span className="panel__text">

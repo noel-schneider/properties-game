@@ -84,9 +84,18 @@ test('the panel names the public achievements and conceals the secret ones', asy
   await expect(sheet).toContainText('Find your first category.')
   await expect(sheet).toContainText('Collector')
 
-  // Six secrets, all still concealed.
-  await expect(sheet.getByText('???')).toHaveCount(6)
-  await expect(sheet).not.toContainText('Night Owl')
+  // Every secret still unearned is concealed. Counted rather than fixed at
+  // six: one of them is earned simply by playing between two and four in the
+  // morning, and naming it here made this fail for two hours every night.
+  const hidden = await sheet.getByText('???').count()
+  const unearned = await sheet.locator('[data-earned="false"]').count()
+  expect(hidden).toBeGreaterThan(0)
+  expect(hidden).toBeLessThanOrEqual(unearned)
+
+  // A secret the player has not earned never gives its name away.
+  for (const secret of await sheet.locator('[data-secret="true"][data-earned="false"]').all()) {
+    await expect(secret).toContainText('???')
+  }
 
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toHaveCount(0)
@@ -99,7 +108,12 @@ test('an earned achievement shows up in the panel after a reload', async ({ page
   await page.reload()
   await boardSettled(page)
 
-  await expect(page.getByRole('button', { name: /achievements/i })).toContainText('0 / 15')
+  // Read rather than assumed to be zero: one achievement is earned simply by
+  // playing between two and four in the morning, so a suite that expects none
+  // at the start fails for two hours every night.
+  const button = page.getByRole('button', { name: /achievements/i })
+  const earned = async () => Number((await button.textContent())!.match(/(\d+)\s*\//)![1])
+  const before = await earned()
 
   await solveOnce(page)
   await expect(page.getByRole('alert').first()).toBeVisible()
@@ -107,8 +121,7 @@ test('an earned achievement shows up in the panel after a reload', async ({ page
   await page.reload()
 
   await boardSettled(page)
-  const button = page.getByRole('button', { name: /achievements/i })
-  await expect(button).not.toContainText('0 / 15')
+  await expect.poll(earned).toBeGreaterThan(before)
 
   await button.click()
   await expect(page.getByTestId('entry-first-light')).toHaveAttribute('data-earned', 'true')
