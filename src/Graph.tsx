@@ -74,6 +74,8 @@ interface GraphProps {
     found: Solution[];
     /** Concepts dealt onto the board by the last answer, marked while new. */
     arriving?: string[];
+    /** Two concepts the board is nudging a stalled player towards. */
+    hinted?: string[];
     onToggle: (name: string) => void;
     /**
      * Dropping a concept onto a category already found. The index is into
@@ -129,7 +131,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, arriving = [], onToggle, onDropInto }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, arriving = [], hinted = [], onToggle, onDropInto }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -401,6 +403,8 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], onTo
                 // swallows three more without a word otherwise.
                 const isFresh = arriving.includes(concept.name);
                 if (isFresh) classes.push('bubble--fresh');
+                // Lit for a few seconds when nothing has been found in a while.
+                if (hinted.includes(concept.name)) classes.push('bubble--hinted');
                 if (kin.has(concept.name)) classes.push('bubble--kin');
                 else if (kin.size > 0) classes.push('bubble--aside');
                 // Lit while a concept is held over their group, so the offer

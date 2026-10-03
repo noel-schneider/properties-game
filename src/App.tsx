@@ -24,6 +24,7 @@ import {
     saveFound, saveLifetime, saveMuted, saveMusic, saveRunStats,
 } from "./achievements/storage";
 import { ambientPlaying, startAmbient, stopAmbient } from "./ambient";
+import { HINT_AGAIN, HINT_FIRST, HINT_SHOWN, hintPair } from "./hints";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
 import { formableGroups, isExhausted, openingBoard, refill, waysWanted } from "./board";
@@ -125,6 +126,12 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     };
     // Asked once in a player's life, never once per sitting.
     const [askedForSupport, setAskedForSupport] = useState(loadAsked);
+
+    // The two concepts the board is nudging towards, and how many nudges have
+    // been given since the last find — the count is what makes the next one
+    // point somewhere else.
+    const [hinted, setHinted] = useState<string[]>([]);
+    const nudges = useRef(0);
 
     // What the last answer dealt in, marked on the board for a moment. Held
     // here rather than worked out in the graph: only this knows which board a
@@ -335,6 +342,35 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
         () => pool.filter((concept) => isSpent(concept, found, pool)).length,
         [found],
     );
+    /**
+     * The nudge for a player who has stalled.
+     *
+     * The clock restarts whenever the board changes — a right answer, or a
+     * concept dropped into a group — and runs on through a wrong one, which is
+     * the whole point: a player guessing and missing is exactly who this is
+     * for. Each nudge lights two concepts for a few seconds and the next one
+     * points somewhere else.
+     */
+    useEffect(() => {
+        let next: ReturnType<typeof setTimeout>;
+        let clear: ReturnType<typeof setTimeout>;
+        nudges.current = 0;
+        setHinted([]);
+
+        const nudge = () => {
+            const pair = hintPair(formableGroups(board, pool, found), nudges.current++);
+            if (pair) setHinted(pair);
+            clear = setTimeout(() => setHinted([]), HINT_SHOWN);
+            next = setTimeout(nudge, HINT_AGAIN);
+        };
+
+        next = setTimeout(nudge, HINT_FIRST);
+        return () => {
+            clearTimeout(next);
+            clearTimeout(clear);
+        };
+    }, [found, board]);
+
     const left = formableGroups(board, pool, found).length;
     // Not merely "no trio can be formed": a concept can still be dropped into
     // a category already found, and there are fourteen such moves waiting at
@@ -355,7 +391,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
               <SoundToggle muted={muted} onToggle={toggleMute} />
               <MusicToggle playing={music} onToggle={toggleMusic} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} onToggle={toggleConcept} onDropInto={dropInto} />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-left">
               <Signature />

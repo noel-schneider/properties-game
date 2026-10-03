@@ -359,3 +359,29 @@
         opacity: 0.6;
     }
 }
+
+/* ---------------------------------------------------------------------------
+ * The nudge
+ *
+ * Two bubbles lit for a few seconds when nothing has been found in a while.
+ * Cool and slow, where an arrival is warm and quick: the two can happen at the
+ * same moment, and a player has to be able to tell them apart without being
+ * told which is which.
+ * ------------------------------------------------------------------------ */
+.bubble--hinted > circle:first-of-type {
+    animation: nudge 1.75s ease-in-out infinite;
+}
+
+@keyframes nudge {
+    0%, 100% { stroke: #1b1b1b; stroke-width: 3; }
+    50%      { stroke: #8ecae6; stroke-width: 6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Still marked, just not breathing. */
+    .bubble--hinted > circle:first-of-type {
+        animation: none;
+        stroke: #8ecae6;
+        stroke-width: 5;
+    }
+}

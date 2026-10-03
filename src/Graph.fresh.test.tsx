@@ -40,3 +40,16 @@ test('nothing is marked when nothing has arrived', () => {
 
   expect(document.querySelectorAll('.bubble--fresh')).toHaveLength(0);
 });
+
+test('a nudged concept is marked, and is not confused with an arrival', () => {
+  renderApp(
+      <Graph concepts={concepts} selected={[]} found={[]} arriving={['coin']} hinted={['ant', 'bee']}
+             onToggle={() => {}} />);
+
+  expect(bubble('ant').classList.contains('bubble--hinted')).toBe(true);
+  expect(bubble('bee').classList.contains('bubble--hinted')).toBe(true);
+  expect(bubble('moth').classList.contains('bubble--hinted')).toBe(false);
+  // Two different things happening at once must stay two different things.
+  expect(bubble('coin').classList.contains('bubble--hinted')).toBe(false);
+  expect(bubble('ant').classList.contains('bubble--fresh')).toBe(false);
+});
