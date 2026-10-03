@@ -45,6 +45,123 @@ const OVERLAP_SECONDS = 4;
 /** Quiet enough to think over. The chimes sit a good deal above this. */
 const VOICE_GAIN = 0.035;
 
+/**
+ * The orchestra, in the order it arrives.
+ *
+ * Every instrument is scheduled inside the chord that is already being played,
+ * at offsets from that one moment — not on timers of its own. One setTimeout
+ * drives the whole piece however many voices are in it, which is what keeps a
+ * five-part bed as cheap as a one-part one.
+ */
+export interface Layer {
+    id: string;
+    /** What this part plays over one chord. */
+    play: (ctx: AudioContext, into: GainNode, at: number, chord: number[]) => void;
+}
+
+/** A plain voice: one oscillator, one envelope, gone when it is done. */
+function voice(
+    ctx: AudioContext,
+    into: GainNode,
+    at: number,
+    hz: number,
+    shape: OscillatorType,
+    peak: number,
+    attack: number,
+    length: number,
+    detune = 0,
+): void {
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    oscillator.type = shape;
+    oscillator.frequency.setValueAtTime(hz, at);
+    oscillator.detune.setValueAtTime(detune, at);
+
+    gain.gain.setValueAtTime(0, at);
+    gain.gain.linearRampToValueAtTime(peak, at + attack);
+    gain.gain.linearRampToValueAtTime(0, at + length);
+
+    oscillator.connect(gain).connect(into);
+    oscillator.start(at);
+    oscillator.stop(at + length + 0.05);
+}
+
+export const LAYERS: Layer[] = [
+    {
+        // The bed itself: the chord, held.
+        id: 'pad',
+        play: (ctx, into, at, chord) => {
+            for (const hz of voicesOf(chord)) {
+                voice(ctx, into, at, hz, 'triangle', VOICE_GAIN,
+                      CHORD_SECONDS * 0.35, CHORD_SECONDS, (Math.random() - 0.5) * 9);
+            }
+        },
+    },
+    {
+        // A floor under it. One note, an octave down, slower in than the pad so
+        // it is felt arriving rather than heard.
+        id: 'bass',
+        play: (ctx, into, at, chord) => {
+            const root = ROOT * 2 ** ((chord[0] - 12) / 12);
+            voice(ctx, into, at, root, 'sine', VOICE_GAIN * 1.6,
+                  CHORD_SECONDS * 0.5, CHORD_SECONDS);
+        },
+    },
+    {
+        // Something moving at last: four plucked notes walking up the chord,
+        // an octave above it, each gone in a second.
+        id: 'pluck',
+        play: (ctx, into, at, chord) => {
+            chord.forEach((semitones, i) => {
+                voice(ctx, into, at + 1.5 + i * 2.2, ROOT * 2 ** ((semitones + 12) / 12),
+                      'triangle', VOICE_GAIN * 0.7, 0.02, 1.1);
+            });
+        },
+    },
+    {
+        // Air over the top. An octave and a fifth up rather than two octaves:
+        // the lowpass sits at 900 Hz, and two octaves would have put this part
+        // on the wrong side of it, where it would have cost voices and been
+        // all but inaudible.
+        id: 'shimmer',
+        play: (ctx, into, at, chord) => {
+            for (const semitones of chord.slice(-2)) {
+                voice(ctx, into, at, ROOT * 2 ** ((semitones + 19) / 12), 'sine',
+                      VOICE_GAIN * 0.25, CHORD_SECONDS * 0.6, CHORD_SECONDS, 6);
+            }
+        },
+    },
+    {
+        // The last to arrive and the slowest: a sawtooth swell under the
+        // lowpass, which is where a string section lives.
+        id: 'strings',
+        play: (ctx, into, at, chord) => {
+            // In the pad's own register, where a sawtooth under this lowpass
+            // stops being a buzz and turns into bowed strings.
+            for (const semitones of chord.slice(0, 3)) {
+                voice(ctx, into, at, ROOT * 2 ** (semitones / 12), 'sawtooth',
+                      VOICE_GAIN * 0.22, CHORD_SECONDS * 0.75, CHORD_SECONDS, -5);
+            }
+        },
+    },
+];
+
+/** How many concepts a player finishes before the next instrument joins. */
+export const LAYER_EVERY = 20;
+
+/** How big the orchestra is at a given point in a game. */
+export function layersFor(finished: number): number {
+    return Math.max(1, Math.min(LAYERS.length, 1 + Math.floor(finished / LAYER_EVERY)));
+}
+
+/** How many parts are playing. Changed as a game goes on. */
+let playing = 1;
+
+export function setAmbientLayers(count: number): void {
+    playing = Math.max(1, Math.min(LAYERS.length, Math.floor(count)));
+}
+
 let bus: GainNode | null = null;
 let timer: ReturnType<typeof setTimeout> | null = null;
 let step = 0;
@@ -54,30 +171,13 @@ export function ambientPlaying(): boolean {
     return bus !== null;
 }
 
-function sound(ctx: AudioContext, into: GainNode, at: number, hz: number): void {
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    // Triangle rather than sine: a little more to hold on to under the lowpass,
-    // without the edge a sawtooth would bring.
-    oscillator.type = 'triangle';
-    oscillator.frequency.setValueAtTime(hz, at);
-    // A couple of cents off true, so two voices beat against each other slowly
-    // instead of sitting dead still.
-    oscillator.detune.setValueAtTime((Math.random() - 0.5) * 9, at);
-
-    gain.gain.setValueAtTime(0, at);
-    gain.gain.linearRampToValueAtTime(VOICE_GAIN, at + CHORD_SECONDS * 0.35);
-    gain.gain.linearRampToValueAtTime(VOICE_GAIN * 0.7, at + CHORD_SECONDS * 0.6);
-    gain.gain.linearRampToValueAtTime(0, at + CHORD_SECONDS);
-
-    oscillator.connect(gain).connect(into);
-    oscillator.start(at);
-    oscillator.stop(at + CHORD_SECONDS + 0.1);
-}
-
 function playChord(ctx: AudioContext, into: GainNode): void {
-    for (const hz of voicesOf(chordAt(step))) sound(ctx, into, ctx.currentTime, hz);
+    const chord = chordAt(step);
+    const at = ctx.currentTime;
+
+    // Everything this chord will do is scheduled now, at offsets from this one
+    // moment. However many parts are playing, the cost in timers is the same.
+    for (const layer of LAYERS.slice(0, playing)) layer.play(ctx, into, at, chord);
     step++;
 
     // The next one starts before this one has finished, so nothing ever lands

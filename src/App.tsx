@@ -23,7 +23,8 @@ import {
     emptyRunStats, loadFound, loadLifetime, loadMuted, loadMusic, loadRunStats,
     saveFound, saveLifetime, saveMuted, saveMusic, saveRunStats,
 } from "./achievements/storage";
-import { ambientPlaying, startAmbient, stopAmbient } from "./ambient";
+import { ambientPlaying, layersFor, setAmbientLayers, startAmbient, stopAmbient } from "./ambient";
+import MusicBench from "./MusicBench";
 import { HINT_AGAIN, HINT_FIRST, HINT_SHOWN, hintPair } from "./hints";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
@@ -89,6 +90,9 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
     const [muted, setMuted] = useState(loadMuted);
     const [music, setMusic] = useState(loadMusic);
+    // Dev only: the orchestra forced to a size, so a part can be listened to
+    // without playing twenty concepts to reach it.
+    const [forcedLayers, setForcedLayers] = useState<number | null>(null);
 
     /**
      * The bed follows the switch, and nothing else touches it.
@@ -371,6 +375,13 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
         };
     }, [found, board]);
 
+    // The orchestra grows with the game: one more part every twenty concepts
+    // finished, up to five. Set here rather than inside the player, which has
+    // no idea what a concept is.
+    useEffect(() => {
+        setAmbientLayers(forcedLayers ?? layersFor(finishedCount));
+    }, [finishedCount, forcedLayers]);
+
     const left = formableGroups(board, pool, found).length;
     // Not merely "no trio can be formed": a concept can still be dropped into
     // a category already found, and there are fourteen such moves waiting at
@@ -382,6 +393,15 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
           <Sky />
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
+          {import.meta.env.DEV && (
+              <MusicBench
+                  forced={forcedLayers}
+                  onPick={(count) => {
+                      setForcedLayers(count);
+                      if (!music) toggleMusic();
+                  }}
+              />
+          )}
           <SoundNote muted={muted} />
           <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} />
           <div className="corner corner--top-right">

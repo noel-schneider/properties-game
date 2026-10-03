@@ -1,4 +1,4 @@
-import { CHORDS, chordAt, voicesOf } from './ambient'
+import { CHORDS, chordAt, LAYER_EVERY, LAYERS, layersFor, voicesOf } from './ambient'
 
 test('the progression comes back round, so a long game never runs out', () => {
   expect(chordAt(0)).toEqual(chordAt(CHORDS.length));
@@ -30,5 +30,27 @@ test('consecutive chords share a note, which is what makes it drift', () => {
     const here = new Set(voicesOf(chordAt(step)).map(Math.round));
     const next = voicesOf(chordAt(step + 1)).map(Math.round);
     expect(next.some((hz) => here.has(hz))).toBe(true);
+  }
+});
+
+test('a lone pad at the start, one more instrument every twenty concepts', () => {
+  expect(layersFor(0)).toBe(1);
+  expect(layersFor(LAYER_EVERY - 1)).toBe(1);
+  expect(layersFor(LAYER_EVERY)).toBe(2);
+  expect(layersFor(LAYER_EVERY * 2)).toBe(3);
+});
+
+test('the orchestra is full by the end of a game, and never grows past it', () => {
+  // A hundred concepts is the whole game, and the last instrument should
+  // arrive before a player runs out of board rather than after.
+  expect(layersFor(100)).toBe(LAYERS.length);
+  expect(layersFor(10_000)).toBe(LAYERS.length);
+});
+
+test('nothing is ever asked of a voice that is not there', () => {
+  for (const count of [0, 1, 20, 60, 100]) {
+    const layers = LAYERS.slice(0, layersFor(count));
+    expect(layers.length).toBeGreaterThan(0);
+    for (const layer of layers) expect(typeof layer.play).toBe('function');
   }
 });
