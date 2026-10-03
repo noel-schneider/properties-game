@@ -225,7 +225,11 @@ test('an achievement earned before is not announced again on a later run', async
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
-  expect(screen.queryByRole('alert')).toBeNull();
+  // Not "no announcement at all": the second group may finish a concept on its
+  // way past and earn Hat-trick, which is a different achievement being earned
+  // for the first time. What must not come back is the one already earned.
+  const announced = screen.queryAllByRole('alert').map((a) => a.textContent).join(' ');
+  expect(announced).not.toContain('First Light');
 });
 
 test('the achievements button counts what has been earned', async () => {
