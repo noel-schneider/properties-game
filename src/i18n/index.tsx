@@ -10,7 +10,7 @@ export const LANGUAGES: Language[] = ['en', 'fr'];
 const CATALOGUE = { en, fr } as const;
 
 type Locale = typeof en;
-type UiKey = keyof Locale['ui'];
+export type UiKey = keyof Locale['ui'];
 
 const STORAGE_KEY = 'properties-game:language';
 

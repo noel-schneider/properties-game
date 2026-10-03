@@ -1,0 +1,129 @@
+import { useEffect, useState } from 'react'
+import './Help.css'
+import { useTranslator } from './i18n'
+import type { UiKey } from './i18n'
+
+/**
+ * The gestures the board does not announce.
+ *
+ * Each is drawn as well as written: "drag a concept onto a group already
+ * found" is a sentence nobody reads and a picture everybody does.
+ */
+export const LESSONS: { id: string; wording: UiKey; draw: () => React.ReactNode }[] = [
+    {
+        id: 'group',
+        wording: 'help.group',
+        draw: () => (
+            <>
+                <circle className="help__bubble help__bubble--picked" cx="14" cy="16" r="9" />
+                <circle className="help__bubble help__bubble--picked" cx="32" cy="12" r="9" />
+                <circle className="help__bubble help__bubble--picked" cx="26" cy="31" r="9" />
+                <circle className="help__bubble" cx="50" cy="26" r="9" />
+            </>
+        ),
+    },
+    {
+        id: 'enter',
+        wording: 'help.enter',
+        draw: () => (
+            <>
+                <rect className="help__box" x="6" y="12" width="40" height="18" rx="5" />
+                <path className="help__stroke" d="M50 16 v7 a3 3 0 0 1 -3 3 h-9" />
+                <path className="help__stroke" d="M41 23 l-3 3 l3 3" />
+            </>
+        ),
+    },
+    {
+        id: 'reveal',
+        wording: 'help.reveal',
+        draw: () => (
+            <>
+                <circle className="help__bubble help__bubble--lit" cx="20" cy="21" r="10" />
+                <circle className="help__bubble help__bubble--lit" cx="46" cy="14" r="8" />
+                <circle className="help__bubble help__bubble--faint" cx="48" cy="33" r="8" />
+                {/* The board's own cursor, so the picture points with the
+                    thing the player is holding. */}
+                <path
+                    className="help__spark"
+                    d="M30 26 C31.1 31.2 33.4 33.5 38.6 34.6 C33.4 35.7 31.1 38 30 43.2
+                       C28.9 38 26.6 35.7 21.4 34.6 C26.6 33.5 28.9 31.2 30 26 Z"
+                />
+            </>
+        ),
+    },
+    {
+        id: 'join',
+        wording: 'help.join',
+        draw: () => (
+            <>
+                <path className="help__tie" d="M34 10 L52 20 L38 32 Z" />
+                <circle className="help__bubble" cx="34" cy="10" r="6" />
+                <circle className="help__bubble" cx="52" cy="20" r="6" />
+                <circle className="help__bubble" cx="38" cy="32" r="6" />
+                <circle className="help__bubble help__bubble--picked" cx="12" cy="22" r="8" />
+                <path className="help__stroke help__stroke--dashed" d="M20 22 h12" />
+                <path className="help__stroke" d="M28 18 l5 4 l-5 4" />
+            </>
+        ),
+    },
+];
+
+/**
+ * How to play, behind a question mark.
+ *
+ * Opens on a pointer and on a click both. Hover alone would put it out of
+ * reach of a finger, which is the hole the board's own reveal had until it was
+ * measured and fixed.
+ */
+function Help() {
+    const { t } = useTranslator();
+    const [open, setOpen] = useState(false);
+
+    // On the document, not on the sheet: the pointer opens this without ever
+    // giving it focus, so a key pressed afterwards lands nowhere near it.
+    useEffect(() => {
+        if (!open) return;
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') setOpen(false);
+        };
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, [open]);
+
+    return (
+        <div
+            className="help"
+            onPointerEnter={() => setOpen(true)}
+            onPointerLeave={() => setOpen(false)}
+        >
+            <button
+                type="button"
+                className={open ? 'control control--icon control--on' : 'control control--icon'}
+                aria-label={t('help.open')}
+                aria-expanded={open}
+                onClick={() => setOpen((shown) => !shown)}
+                onFocus={() => setOpen(true)}
+            >
+                <span aria-hidden="true">?</span>
+            </button>
+
+            {open && (
+                <div className="help__sheet" role="dialog" aria-label={t('help.open')}>
+                    <ul className="help__lessons">
+                        {LESSONS.map((lesson) => (
+                            <li key={lesson.id} className="help__lesson">
+                                <svg className="help__drawing" viewBox="0 0 62 48" aria-hidden="true">
+                                    {lesson.draw()}
+                                </svg>
+                                <span className="help__words">{t(lesson.wording)}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default Help;

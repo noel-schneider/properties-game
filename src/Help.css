@@ -1,0 +1,115 @@
+.help {
+    position: relative;
+    display: inline-flex;
+}
+
+/*
+ * The sheet hangs below the question mark, and is pinned to its right edge so
+ * it opens inward: against the right wall of the window there is nowhere else
+ * for it to go.
+ */
+.help__sheet {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    width: 20.5rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.7rem;
+    border: 1px solid #40405c;
+    background: rgba(28, 30, 48, 0.96);
+    box-shadow: 0 14px 30px rgba(8, 8, 16, 0.45);
+    animation: help-in 0.18s ease-out;
+}
+
+/* Barely a movement: it should feel like the sheet was already there. */
+@keyframes help-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .help__sheet { animation: none; }
+}
+
+.help__lessons {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.help__lesson {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.help__drawing {
+    flex: 0 0 auto;
+    width: 72px;
+    height: 56px;
+}
+
+.help__words {
+    color: #c9c9db;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+/* The drawings borrow the board's own colours, so the picture and the thing it
+   describes are plainly the same. */
+.help__bubble {
+    fill: #e2dcde;
+    stroke: #1b1b1b;
+    stroke-width: 2;
+}
+
+.help__bubble--picked {
+    fill: #ffad69;
+}
+
+.help__bubble--lit {
+    stroke: #ffad69;
+    stroke-width: 3;
+}
+
+.help__bubble--faint {
+    opacity: 0.3;
+}
+
+.help__box {
+    fill: none;
+    stroke: #5a5a7d;
+    stroke-width: 2;
+}
+
+.help__tie {
+    fill: none;
+    stroke: #ffad69;
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    opacity: 0.8;
+}
+
+.help__stroke {
+    fill: none;
+    stroke: #8f8aa6;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.help__stroke--dashed {
+    stroke-dasharray: 3 3;
+}
+
+/* The cursor the player is actually holding, drawn at the size of a hint. */
+.help__spark {
+    fill: #f4efe6;
+    stroke: #1b1b1b;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+}

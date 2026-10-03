@@ -43,6 +43,17 @@ const LABEL_MARGIN = 14;
 const DRAG_THRESHOLD = 4;
 
 /**
+ * How long a concept must be held still before the board tells you what it
+ * shares.
+ *
+ * A finger never hovers, so on a touchscreen the reveal was unreachable: a tap
+ * selects and nothing else happens. Holding is the gesture nothing else uses —
+ * a tap is shorter, a drag moves — and it is what a phone already means by
+ * "tell me more about this".
+ */
+export const LONG_PRESS = 400;
+
+/**
  * Past this much travel the gesture was a drag, and must not also select.
  *
  * Deliberately far looser than the distance that starts the drag. Nobody
@@ -87,8 +98,27 @@ export function groupOutline(places: Point[], centre: Point): string {
     return `M ${corners[0].x.toFixed(2)} ${corners[0].y.toFixed(2)} ${steps.slice(1).join(' ')} Z`;
 }
 
+/**
+ * Takes or gives back the pointer, without letting a refusal end the gesture.
+ *
+ * Releasing a pointer the element does not hold throws, and the throw used to
+ * take the rest of the handler with it — the bubble stayed pinned under a
+ * finger that had left, and the board stayed stepped back. Capture is a
+ * convenience here, not something the gesture depends on.
+ */
+function capture(element: Element, pointerId: number, take: boolean): void {
+    try {
+        if (take) element.setPointerCapture?.(pointerId);
+        else element.releasePointerCapture?.(pointerId);
+    } catch {
+        // Nothing to do: the gesture works either way.
+    }
+}
+
 interface Gesture {
     index: number;
+    /** Cancels the reveal if the press ends or turns into a drag first. */
+    holding?: ReturnType<typeof setTimeout>;
     startedAt: Point;
     /** The bubble is following the pointer. */
     dragging: boolean;
@@ -204,8 +234,15 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
     const onPointerDown = (i: number) => (event: React.PointerEvent<SVGGElement>) => {
         if (event.button !== 0) return;
 
-        gesture.current = { index: i, startedAt: { x: event.clientX, y: event.clientY }, dragging: false, moved: false };
-        event.currentTarget.setPointerCapture?.(event.pointerId);
+        const name = concepts[i].name;
+        gesture.current = {
+            index: i,
+            startedAt: { x: event.clientX, y: event.clientY },
+            dragging: false,
+            moved: false,
+            holding: setTimeout(() => setHovered(name), LONG_PRESS),
+        };
+        capture(event.currentTarget, event.pointerId, true);
         grab(i);
     };
 
@@ -217,7 +254,13 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
             event.clientX - held.startedAt.x,
             event.clientY - held.startedAt.y,
         );
-        if (travelled > DRAG_THRESHOLD) held.dragging = true;
+        if (travelled > DRAG_THRESHOLD && !held.dragging) {
+            held.dragging = true;
+            // A concept in the air answers the same question a held one does:
+            // which groups it already belongs to. The wait is over either way.
+            clearTimeout(held.holding);
+            setHovered(concepts[held.index].name);
+        }
         if (travelled > DRAG_INTENT) held.moved = true;
 
         // Below the threshold this is a click, not a drag. Dragging stirs the
@@ -249,8 +292,15 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
         const held = gesture.current;
         if (!held) return;
 
-        event.currentTarget.releasePointerCapture?.(event.pointerId);
+        clearTimeout(held.holding);
+        capture(event.currentTarget, event.pointerId, false);
         release(held.index);
+
+        // A finger that lifts has left the board; a mouse that lifts is still
+        // sitting on the bubble, and clearing there would fight the hover.
+        if (event.pointerType === 'touch') {
+            setHovered((current) => (current === concepts[held.index].name ? null : current));
+        }
 
         const target = over;
         setOver(null);

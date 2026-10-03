@@ -476,7 +476,12 @@
         "reset.what": "The groups you have found will be cleared and a fresh board dealt. Your achievements stay.",
         "reset.cancel": "Cancel",
         "reset.confirm": "Clear and start over",
-        "drop.add": "Add to"
+        "drop.add": "Add to",
+        "help.open": "How to play",
+        "help.group": "Pick three concepts that share a category, then name it.",
+        "help.enter": "Press Enter anywhere to put the cursor in the box.",
+        "help.reveal": "Point at a concept — or hold it — to see what it already shares.",
+        "help.join": "Drag a concept onto a category you have found to add it there."
     },
     "achievements": {
         "first-light": {
