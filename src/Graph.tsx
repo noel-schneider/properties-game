@@ -3,7 +3,8 @@ import './Graph.css'
 import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
-import { donePropertiesOf, isSpent, progressOf } from './game'
+import { donePropertiesOf, isSpent, liveProperties, progressOf } from './game'
+import { DEFAULT_COUNT_LOOK } from './countLooks'
 import { groupUnderPointer } from './drop'
 import type { Solution } from './hand'
 import type { Concept } from './types'
@@ -66,6 +67,11 @@ interface GraphProps {
      * `found`; whether it is a right answer is settled by the game, not here.
      */
     onDropInto?: (index: number, name: string) => void;
+    /**
+     * How to show what a concept has left to find, while we pick a way.
+     * Temporary: the winner becomes the only drawing and this goes.
+     */
+    counts?: string;
 }
 
 /**
@@ -96,7 +102,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInto }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInto, counts = DEFAULT_COUNT_LOOK }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -128,6 +134,16 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                     .filter((tie) => tie.from >= 0 && tie.to >= 0),
             ),
         [found, index],
+    );
+
+    /**
+     * How many properties each concept could still be used for. Worked out
+     * once per render rather than per bubble: it walks the whole pool for each
+     * one, and the board redraws every frame while it settles.
+     */
+    const leftToFind = useMemo(
+        () => new Map(concepts.map((c) => [c.name, liveProperties(c, found, pool).length])),
+        [concepts, found, pool],
     );
 
     const radii = useMemo(
@@ -302,6 +318,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                 const { x, y } = points[i] ?? { x: 0, y: 0 };
                 const isDone = done.has(concept.name);
                 const { done: spent, total } = progressOf(concept, found);
+                const left = leftToFind.get(concept.name) ?? 0;
                 const radius = radii[i];
                 const isSelected = selected.includes(concept.name);
 
@@ -362,6 +379,28 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                               })}
                     >
                         <circle r={radius} />
+                        {!isDone && counts === 'gauge' && left > 0 && (
+                            <circle
+                                className="gauge"
+                                r={radius + 7}
+                                strokeDasharray={
+                                    `${(2 * Math.PI * (radius + 7) * left) / Math.max(total, 1)} ` +
+                                    `${2 * Math.PI * (radius + 7)}`
+                                }
+                            />
+                        )}
+                        {!isDone && counts === 'pips' && Array.from({ length: left }, (_, pip) => (
+                            <circle
+                                key={pip}
+                                className="pip"
+                                cx={(pip - (left - 1) / 2) * 11}
+                                cy={radius - 21}
+                                r={3.5}
+                            />
+                        ))}
+                        {!isDone && counts === 'number' && left > 0 && (
+                            <text className="tally" y={radius - 17} textAnchor="middle">{left}</text>
+                        )}
                         {!isDone && (
                             <text textAnchor="middle" dominantBaseline="middle">
                                 {conceptName(concept.name)}
