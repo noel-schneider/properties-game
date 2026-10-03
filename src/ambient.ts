@@ -115,7 +115,7 @@ export const LAYERS: Layer[] = [
         play: (ctx, into, at, chord) => {
             chord.forEach((semitones, i) => {
                 voice(ctx, into, at + 1.5 + i * 2.2, ROOT * 2 ** ((semitones + 12) / 12),
-                      'triangle', VOICE_GAIN * 0.7, 0.02, 1.1);
+                      'triangle', VOICE_GAIN * 1.4, 0.015, 1.9);
             });
         },
     },
@@ -141,7 +141,7 @@ export const LAYERS: Layer[] = [
             // stops being a buzz and turns into bowed strings.
             for (const semitones of chord.slice(0, 3)) {
                 voice(ctx, into, at, ROOT * 2 ** (semitones / 12), 'sawtooth',
-                      VOICE_GAIN * 0.22, CHORD_SECONDS * 0.75, CHORD_SECONDS, -5);
+                      VOICE_GAIN * 0.6, CHORD_SECONDS * 0.4, CHORD_SECONDS, -5);
             }
         },
     },
@@ -158,8 +158,30 @@ export function layersFor(finished: number): number {
 /** How many parts are playing. Changed as a game goes on. */
 let playing = 1;
 
+/** The chord in the air right now, so a part that joins can join it. */
+let sounding: { ctx: AudioContext; into: GainNode; chord: number[] } | null = null;
+
+/**
+ * Sets how big the orchestra is.
+ *
+ * A part that has just been added starts on the chord already sounding rather
+ * than on the next one. Waiting would mean up to nine seconds of silence after
+ * the twentieth concept — long enough that the reward would not be read as a
+ * reward at all, and long enough to make the bench useless for judging a part.
+ */
 export function setAmbientLayers(count: number): void {
-    playing = Math.max(1, Math.min(LAYERS.length, Math.floor(count)));
+    const wanted = Math.max(1, Math.min(LAYERS.length, Math.floor(count)));
+    const joining = LAYERS.slice(playing, wanted);
+    playing = wanted;
+
+    if (!sounding || joining.length === 0) return;
+
+    try {
+        const { ctx, into, chord } = sounding;
+        for (const layer of joining) layer.play(ctx, into, ctx.currentTime, chord);
+    } catch {
+        // Music is a garnish.
+    }
 }
 
 let bus: GainNode | null = null;
@@ -177,6 +199,7 @@ function playChord(ctx: AudioContext, into: GainNode): void {
 
     // Everything this chord will do is scheduled now, at offsets from this one
     // moment. However many parts are playing, the cost in timers is the same.
+    sounding = { ctx, into, chord };
     for (const layer of LAYERS.slice(0, playing)) layer.play(ctx, into, at, chord);
     step++;
 
@@ -229,6 +252,7 @@ export function stopAmbient(): void {
 
     const going = bus;
     bus = null;
+    sounding = null;
 
     try {
         const ctx = audioContext();

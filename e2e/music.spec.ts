@@ -25,6 +25,9 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+const count = (page: import('@playwright/test').Page) =>
+  page.evaluate(() => (window as unknown as { started: number[] }).started.length);
+
 const voices = (page: import('@playwright/test').Page) =>
   page.evaluate(() => (window as unknown as { started: number[] }).started.length);
 
@@ -67,4 +70,20 @@ test('stopping it starts nothing more, and the choice is remembered', async ({ p
 
   await page.reload();
   await expect(page.getByRole('button', { name: 'Play music' })).toBeVisible();
+})
+
+test('an instrument that joins is heard joining, not nine seconds later', async ({ page }) => {
+  // The dev bench is what forces the orchestra to a size without playing
+  // eighty concepts to reach it.
+  await page.goto('/');
+  await page.getByRole('button', { name: /^1 ·/ }).click();
+  await page.waitForTimeout(1500);
+  const before = await count(page);
+
+  await page.getByRole('button', { name: /^3 ·/ }).click();
+  await page.waitForTimeout(800);
+
+  // A chord lasts thirteen seconds and the next starts after nine. A part that
+  // waited for that chord would add nothing at all inside this window.
+  expect(await count(page) - before).toBeGreaterThanOrEqual(5);
 })
