@@ -26,6 +26,16 @@
        no indication of where they are. */
     outline: none;
     -webkit-tap-highlight-color: transparent;
+    /*
+     * The finger's gesture belongs to the board, not to the page.
+     *
+     * Without this a touch that starts on a bubble is claimed by the browser
+     * for scrolling, and the drag never reaches the handlers — which on a
+     * phone means a concept can never be dropped into a category, since
+     * dragging is the only way to do it. Set on the bubbles alone, so the page
+     * still scrolls everywhere else.
+     */
+    touch-action: none;
 }
 
 .bubble:active {

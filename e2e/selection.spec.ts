@@ -331,3 +331,53 @@ test('the board has a cursor of its own, and it actually draws', async ({ page }
 
   expect(drawn).toMatch(/^\d+x\d+$/)
 })
+
+test.describe('on a touchscreen', () => {
+  test.use({ hasTouch: true, isMobile: true, reducedMotion: 'no-preference' })
+
+  test('a bubble can be dragged with a finger', async ({ page }) => {
+    await page.goto('/')
+    await boardSettled(page)
+
+    // Without touch-action, the browser claims the gesture and scrolls the
+    // page instead of handing it to the board — and dragging is how a concept
+    // joins a category, so the whole mechanic is lost on a phone.
+    const action = await page.locator('.bubble').first()
+      .evaluate((bubble) => getComputedStyle(bubble).touchAction)
+    expect(action).toBe('none')
+
+    const bubble = page.getByRole('checkbox').first()
+    const name = await bubble.getAttribute('aria-label')
+    const before = await bubble.getAttribute('transform')
+
+    // Driven as a touch pointer, which is what the handlers will actually see.
+    await bubble.evaluate((node) => {
+      const box = node.getBoundingClientRect()
+      const x = box.x + box.width / 2
+      const y = box.y + box.height / 2
+      const touch = { bubbles: true, pointerId: 2, pointerType: 'touch', isPrimary: true }
+      node.dispatchEvent(new PointerEvent('pointerdown', { ...touch, clientX: x, clientY: y, button: 0 }))
+      for (let step = 1; step <= 10; step++) {
+        node.dispatchEvent(new PointerEvent('pointermove', {
+          ...touch, clientX: x + step * 12, clientY: y + step * 6,
+        }))
+      }
+      node.dispatchEvent(new PointerEvent('pointerup', { ...touch, clientX: x + 120, clientY: y + 60 }))
+    })
+
+    await expect.poll(
+      () => page.locator(`.bubble[aria-label="${name}"]`).getAttribute('transform'),
+    ).not.toBe(before)
+  })
+
+  test('a tap still selects', async ({ page }) => {
+    await page.goto('/')
+    await boardSettled(page)
+
+    const bubble = page.getByRole('checkbox').first()
+    const box = (await bubble.boundingBox())!
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2)
+
+    await expect(bubble).toHaveAttribute('aria-checked', 'true')
+  })
+})
