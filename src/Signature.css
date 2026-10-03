@@ -1,116 +1,45 @@
 /*
  * The footer line. Small, warm, and far enough from the input that nobody
- * reaches it by accident.
+ * reaches it by accident. No box on either half: a corner is not a place to put
+ * a button somebody has to press to keep playing.
  */
 .signature {
+    margin: 0;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.4rem;
     font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 0.75rem;
+    color: #8f8aa6;
 }
 
+/* Underlined, both of them: in a line of small grey text a link that is only
+   a shade different from its neighbours is a link nobody tries. */
 .signature__by {
     color: #8f8aa6;
-    font-size: 0.75rem;
     text-decoration: none;
-    border-bottom: 1px solid transparent;
+    border-bottom: 1px solid #5a5a7d;
     transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .signature__by:hover {
     color: #c9c9db;
-    border-bottom-color: #5a5a7d;
-}
-
-/*
- * Louder than the byline on purpose: this one is an offer, and an offer nobody
- * notices is the same as no offer. Still quieter than anything the player needs
- * to press to keep playing — warm outline, no fill.
- */
-.signature__give {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.34rem 0.7rem;
-    border-radius: 0.5rem;
-    border: 1px solid rgba(255, 173, 105, 0.55);
-    background: rgba(255, 173, 105, 0.09);
-    color: #ffad69;
-    font-size: 0.78rem;
-    text-decoration: none;
-    transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.signature__give:hover {
-    background: rgba(255, 173, 105, 0.18);
-    border-color: #ffad69;
-}
-
-.signature__cup {
-    font-size: 0.9rem;
-    line-height: 1;
-}
-
-/* Bouton puis nom: the offer leads, the byline trails it. */
-.signature--give-first {
-    flex-direction: row;
-}
-
-/* Empilé: the name above, the offer under it, left edges aligned. */
-.signature--stacked {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.4rem;
-}
-
-/*
- * Une phrase: no box anywhere. One line of small text with two links in it,
- * which is the lightest the corner can be and still be clicked.
- */
-.signature--prose {
-    margin: 0;
-    font-size: 0.75rem;
-    color: #8f8aa6;
-    gap: 0.4rem;
+    border-bottom-color: #8f8aa6;
 }
 
 .signature__dot {
     color: #5a5a7d;
 }
 
-.signature__plain {
+/* Warmer than the byline on purpose: it is an offer, and an offer nobody
+   notices is the same as no offer. */
+.signature__give {
     color: #ffad69;
     text-decoration: none;
     border-bottom: 1px solid rgba(255, 173, 105, 0.4);
+    transition: border-color 0.15s ease;
 }
 
-.signature__plain:hover {
+.signature__give:hover {
     border-bottom-color: #ffad69;
-}
-
-/* The bench. Dev only, and it leaves with the chosen layout. */
-.signature__bench {
-    position: fixed;
-    left: 1.25rem;
-    bottom: 4.5rem;
-    z-index: 9000;
-    display: flex;
-    gap: 0.3rem;
-}
-
-.signature__try {
-    padding: 0.2rem 0.45rem;
-    border-radius: 0.35rem;
-    border: 1px dashed #40405c;
-    background: rgba(28, 30, 48, 0.9);
-    color: #8f8aa6;
-    font-family: 'Poppins', system-ui, sans-serif;
-    font-size: 0.68rem;
-    cursor: pointer;
-}
-
-.signature__try--on {
-    border-style: solid;
-    border-color: #ffad69;
-    color: #ffad69;
 }

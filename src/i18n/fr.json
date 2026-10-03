@@ -460,6 +460,7 @@
         "drop.add": "Ajouter à",
         "help.open": "Comment jouer",
         "help.group": "Choisis trois concepts qui partagent une catégorie, puis nomme-la.",
+        "help.gauge": "L’anneau autour d’un concept se remplit à mesure que tu trouves ses catégories.",
         "help.enter": "Appuie sur Entrée n’importe où pour écrire dans le champ.",
         "help.reveal": "Pointe un concept — ou maintiens-le — pour voir ce qu’il partage déjà.",
         "help.join": "Fais glisser un concept sur une catégorie trouvée pour l’y ajouter.",

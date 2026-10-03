@@ -113,3 +113,15 @@
     stroke-width: 1.6;
     stroke-linejoin: round;
 }
+
+/* The ring the board draws around a concept, at the size of a hint. */
+.help__gauge {
+    fill: none;
+    stroke: #6f6a85;
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.help__gauge--full {
+    stroke: #ffad69;
+}

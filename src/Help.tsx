@@ -23,6 +23,36 @@ export const LESSONS: { id: string; wording: UiKey; draw: () => React.ReactNode 
         ),
     },
     {
+        id: 'gauge',
+        wording: 'help.gauge',
+        draw: () => (
+            <>
+                {/* The same concept twice, early and late: the ring is the one
+                    mark on the board that means nothing until it has moved. */}
+                <circle className="help__bubble" cx="16" cy="24" r="9" />
+                <circle
+                    className="help__gauge"
+                    cx="16"
+                    cy="24"
+                    r="12.5"
+                    strokeDasharray="16 78.5"
+                    transform="rotate(-90 16 24)"
+                />
+                <path className="help__stroke help__stroke--dashed" d="M33 24 h7" />
+                <path className="help__stroke" d="M37 20 l4 4 l-4 4" />
+                <circle className="help__bubble" cx="50" cy="24" r="9" />
+                <circle
+                    className="help__gauge help__gauge--full"
+                    cx="50"
+                    cy="24"
+                    r="12.5"
+                    strokeDasharray="66 78.5"
+                    transform="rotate(-90 50 24)"
+                />
+            </>
+        ),
+    },
+    {
         id: 'enter',
         wording: 'help.enter',
         draw: () => (

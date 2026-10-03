@@ -53,3 +53,12 @@ test('every lesson is drawn as well as written', () => {
     expect(entry.textContent?.trim().length).toBeGreaterThan(0);
   }
 });
+
+test('the ring around a concept is explained, since nothing else explains it', () => {
+  // It is the one mark on the board with no words anywhere near it: a player
+  // who never reads this has no way of learning what it counts.
+  renderApp(<Help />);
+  fireEvent.click(screen.getByRole('button', { name: /how to play/i }));
+
+  expect(screen.getByRole('dialog')).toHaveTextContent(/fills|ring/i);
+});
