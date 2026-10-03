@@ -50,3 +50,67 @@
     font-size: 0.9rem;
     line-height: 1;
 }
+
+/* Bouton puis nom: the offer leads, the byline trails it. */
+.signature--give-first {
+    flex-direction: row;
+}
+
+/* Empilé: the name above, the offer under it, left edges aligned. */
+.signature--stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+
+/*
+ * Une phrase: no box anywhere. One line of small text with two links in it,
+ * which is the lightest the corner can be and still be clicked.
+ */
+.signature--prose {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #8f8aa6;
+    gap: 0.4rem;
+}
+
+.signature__dot {
+    color: #5a5a7d;
+}
+
+.signature__plain {
+    color: #ffad69;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 173, 105, 0.4);
+}
+
+.signature__plain:hover {
+    border-bottom-color: #ffad69;
+}
+
+/* The bench. Dev only, and it leaves with the chosen layout. */
+.signature__bench {
+    position: fixed;
+    left: 1.25rem;
+    bottom: 4.5rem;
+    z-index: 9000;
+    display: flex;
+    gap: 0.3rem;
+}
+
+.signature__try {
+    padding: 0.2rem 0.45rem;
+    border-radius: 0.35rem;
+    border: 1px dashed #40405c;
+    background: rgba(28, 30, 48, 0.9);
+    color: #8f8aa6;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 0.68rem;
+    cursor: pointer;
+}
+
+.signature__try--on {
+    border-style: solid;
+    border-color: #ffad69;
+    color: #ffad69;
+}
