@@ -84,6 +84,31 @@ export function saveLifetime(lifetime: Lifetime): void {
  */
 export const MUTED_KEY = 'properties-game:muted';
 
+/**
+ * Whether the player asked for the music bed.
+ *
+ * Off unless it says otherwise, and deliberately so: music nobody asked for,
+ * starting the moment a page opens, is the thing that makes people close a tab.
+ * Browsers will not let it start without a gesture anyway.
+ */
+export const MUSIC_KEY = 'properties-game:music';
+
+export function loadMusic(): boolean {
+    try {
+        return localStorage.getItem(MUSIC_KEY) === 'true';
+    } catch {
+        return false;
+    }
+}
+
+export function saveMusic(playing: boolean): void {
+    try {
+        localStorage.setItem(MUSIC_KEY, String(playing));
+    } catch {
+        // A preference is not worth a crash.
+    }
+}
+
 export function loadMuted(): boolean {
     try {
         return localStorage.getItem(MUTED_KEY) === 'true';

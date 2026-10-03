@@ -14,14 +14,16 @@ import SoundNote from "./SoundNote";
 import LanguageToggle from "./LanguageToggle";
 import Reset from "./Reset";
 import SoundToggle from "./SoundToggle";
+import MusicToggle from "./MusicToggle";
 import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
 import { playFoundNote, playUnlockChime } from "./achievements/chime";
 import {
-    emptyRunStats, loadFound, loadLifetime, loadMuted, loadRunStats,
-    saveFound, saveLifetime, saveMuted, saveRunStats,
+    emptyRunStats, loadFound, loadLifetime, loadMuted, loadMusic, loadRunStats,
+    saveFound, saveLifetime, saveMuted, saveMusic, saveRunStats,
 } from "./achievements/storage";
+import { ambientPlaying, startAmbient, stopAmbient } from "./ambient";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
 import { formableGroups, isExhausted, openingBoard, refill, waysWanted } from "./board";
@@ -85,6 +87,42 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
 
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
     const [muted, setMuted] = useState(loadMuted);
+    const [music, setMusic] = useState(loadMusic);
+
+    /**
+     * The bed follows the switch, and nothing else touches it.
+     *
+     * A browser will not let audio start without a gesture, so a player who
+     * left it on last time gets it back on their first click rather than on
+     * arrival — which is also the polite order.
+     */
+    useEffect(() => {
+        if (!music) {
+            stopAmbient();
+            return;
+        }
+
+        startAmbient();
+        if (ambientPlaying()) return;
+
+        const begin = () => startAmbient();
+        document.addEventListener('pointerdown', begin, { once: true });
+        document.addEventListener('keydown', begin, { once: true });
+        return () => {
+            document.removeEventListener('pointerdown', begin);
+            document.removeEventListener('keydown', begin);
+        };
+    }, [music]);
+
+    // Stopped when the game goes, or it outlives the page it belongs to.
+    useEffect(() => stopAmbient, []);
+
+    const toggleMusic = () => {
+        setMusic((playing) => {
+            saveMusic(!playing);
+            return !playing;
+        });
+    };
     // Asked once in a player's life, never once per sitting.
     const [askedForSupport, setAskedForSupport] = useState(loadAsked);
 
@@ -315,6 +353,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
               <LanguageToggle />
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />
+              <MusicToggle playing={music} onToggle={toggleMusic} />
           </div>
           <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />

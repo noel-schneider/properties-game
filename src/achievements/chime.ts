@@ -19,7 +19,8 @@ type ContextConstructor = typeof AudioContext;
 
 let context: AudioContext | null = null;
 
-function audioContext(): AudioContext | null {
+/** The one context for the whole game: the chimes and the bed share it. */
+export function audioContext(): AudioContext | null {
     if (context) return context;
 
     const Constructor: ContextConstructor | undefined =
