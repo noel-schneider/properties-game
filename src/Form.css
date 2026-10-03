@@ -2,7 +2,9 @@
 
 .input-container {
   position: absolute;
-  width: 15%;
+  /* Wider than it was, and in characters rather than a share of the screen: a
+     category name is as long as it is whatever the monitor measures. */
+  width: clamp(18rem, 26%, 30rem);
   top: 90%;
   right: 50%;
   transform: translate(50%,-50%);
@@ -47,11 +49,15 @@
 .input {
   background-color: #333;
   color: #fff;
-  padding: 10px 10px 10px 10px;
+  flex: 1 1 auto;
+  /* It takes every category name in the game, so it is sized for typing in
+     rather than for fitting under the board. */
+  min-width: 0;
+  padding: 14px 16px;
   outline: 0;
   border: 1px solid rgba(105, 105, 105, 0.397);
   border-radius: 10px;
-  font-size: medium;
+  font-size: 1.05rem;
 }
 
 .input:focus {
@@ -103,4 +109,9 @@
 
 .feedback--wrong {
   color: #ff8f8f;
+}
+
+/* Not a wrong answer — nothing has been answered yet. Warm, not red. */
+.feedback--short {
+  color: #ffad69;
 }

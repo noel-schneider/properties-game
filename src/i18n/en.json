@@ -441,6 +441,7 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Type a category here!",
+        "form.needThree": "Pick at least 3 concepts.",
         "form.submit": "Submit",
         "form.correct": "Correct!",
         "form.wrong": "Not quite — try another category.",
@@ -489,6 +490,8 @@
         "panel.forgetYes": "Yes, clear them",
         "credit.by": "Built by Noël",
         "credit.visit": "Noël's portfolio",
+        "sound.better": "Better with sound on.",
+        "sound.dismiss": "Dismiss",
         "support.open": "Support the game",
         "support.invite": "Enjoying this? It is free and always will be — a coffee keeps it going.",
         "support.yes": "Buy a coffee",

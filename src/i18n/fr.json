@@ -422,6 +422,7 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Tape une catégorie ici !",
+        "form.needThree": "Sélectionne au moins 3 concepts.",
         "form.submit": "Valider",
         "form.correct": "Correct !",
         "form.wrong": "Pas tout à fait — essaie une autre catégorie.",
@@ -470,6 +471,8 @@
         "panel.forgetYes": "Oui, les effacer",
         "credit.by": "Développé par Noël",
         "credit.visit": "Le portfolio de Noël",
+        "sound.better": "C’est mieux avec le son.",
+        "sound.dismiss": "Fermer",
         "support.open": "Soutenir le jeu",
         "support.invite": "Ça te plaît ? C’est gratuit et ça le restera — un café et ça continue.",
         "support.yes": "Offrir un café",

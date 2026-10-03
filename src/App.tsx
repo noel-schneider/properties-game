@@ -10,6 +10,7 @@ import Sky from "./Sky";
 import Summary from "./Summary";
 import { SupportInvite } from "./Support";
 import Signature from "./Signature";
+import SoundNote from "./SoundNote";
 import LanguageToggle from "./LanguageToggle";
 import Reset from "./Reset";
 import SoundToggle from "./SoundToggle";
@@ -280,6 +281,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
           <Sky />
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
+          <SoundNote muted={muted} />
           <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} />
           <div className="corner corner--top-right">
               <Help />
