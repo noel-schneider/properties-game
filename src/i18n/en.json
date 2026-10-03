@@ -435,10 +435,11 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Type a category here!",
-        "form.needThree": "Pick at least 3 concepts.",
+        "form.needThree": "Pick three concepts, then name what they share.",
+        "form.spent": "One of the three has already used that category.",
         "form.submit": "Submit",
         "form.correct": "Correct!",
-        "form.wrong": "Not quite — try another category.",
+        "form.wrong": "Not a category these three share.",
         "form.enterHint": "Press 'Enter' to submit!",
         "form.enterAlt": "Press enter",
         "score.properties": "Categories",

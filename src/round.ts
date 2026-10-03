@@ -13,8 +13,20 @@ export interface RoundOptions {
     found: Solution[];
 }
 
+/** Why a guess was refused, when it was. */
+export type Refusal = 'no-match' | 'spent';
+
 export interface Outcome {
     correct: boolean;
+    /**
+     * Only on a refusal.
+     *
+     * The two are worth telling apart. "Not a category these three share" is a
+     * lie when one of them has simply used it up already — and saying so gives
+     * nothing away, because the group that used it is drawn on the board for
+     * anyone to look at.
+     */
+    reason?: Refusal;
     /** The category that was found, when the guess was right. */
     property?: string;
     points: number;
@@ -42,7 +54,7 @@ export function resolveGuess(
     const chosen = selected.map((name) => byName.get(name)).filter((c): c is Concept => !!c);
 
     if (chosen.length !== selected.length) {
-        return { correct: false, points: 0, found };
+        return { correct: false, reason: 'no-match', points: 0, found };
     }
 
     // Only the properties none of them has spent are on the table.
@@ -53,7 +65,12 @@ export function resolveGuess(
 
     const property = matchedProperty(open, guess, wordings);
     if (property === undefined) {
-        return { correct: false, points: 0, found };
+        // Asked again with nothing held back: if the word matches now, the
+        // three do share it and one of them has spent it.
+        const all = chosen.map((concept) => ({ name: concept.name, properties: concept.properties }));
+        const spent = matchedProperty(all, guess, wordings) !== undefined;
+
+        return { correct: false, reason: spent ? 'spent' : 'no-match', points: 0, found };
     }
 
     return {

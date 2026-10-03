@@ -96,10 +96,24 @@
   background-color: #0077cc;
 }
 
+/*
+ * The answer line.
+ *
+ * A fixed two lines of room, always. The box is centred on a point, so
+ * anything that grows here pushes the input up and the hint under it down —
+ * measured at two pixels for one line of text and far more once a message
+ * wrapped, which is every message at the narrow end of the box. Reserving the
+ * room costs an empty strip and buys a board that never moves while it is
+ * being answered.
+ */
 .feedback {
   margin: 0;
-  min-height: 1.2rem;
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.3rem;
+  font-size: 0.82rem;
+  line-height: 1.25;
   text-align: center;
 }
 
@@ -114,4 +128,9 @@
 /* Not a wrong answer — nothing has been answered yet. Warm, not red. */
 .feedback--short {
   color: #ffad69;
+}
+
+/* Nor is this one: the word is right, and one of the three has spent it. */
+.feedback--spent {
+  color: #ffc9a0;
 }

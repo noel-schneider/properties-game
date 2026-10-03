@@ -68,7 +68,9 @@ test('naming a category one of the three has already spent is refused', async ()
   await user.type(screen.getByPlaceholderText(/type a category here/i), group.property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  // Not "they share nothing" — they share it; one of them has used it up, and
+  // saying which is true is the only honest answer here.
+  expect(await screen.findByRole('status')).toHaveTextContent(/already used/i);
 });
 
 // Twelve whole answers driven through the interface, which takes about two

@@ -108,7 +108,7 @@ test('naming a category the selected concepts do not share is rejected', async (
   );
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
 });
 
 test('a correct answer keeps the found concepts on the board and scores a point', async () => {
@@ -139,7 +139,7 @@ test('a wrong answer leaves the board and the score alone', async () => {
   await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
   expect(screen.getByTestId('found')).toHaveTextContent('0');
   expect(screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'))).toEqual(before);
 });
@@ -171,7 +171,7 @@ test('a wrong answer keeps what you typed so it can be reworded', async () => {
   await user.type(input, 'wrong on purpose');
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
   expect(input).toHaveValue('wrong on purpose');
 });
 
@@ -201,7 +201,7 @@ test('a wrong answer unlocks nothing and stays silent', async () => {
   await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
   expect(screen.queryByRole('alert')).toBeNull();
   expect(chime).not.toHaveBeenCalled();
 });
@@ -364,7 +364,7 @@ describe('the sound a right answer makes', () => {
     await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
-    expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+    expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
     expect(notes).toEqual([]);
   });
 

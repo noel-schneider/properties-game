@@ -22,6 +22,10 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
         none: '',
         correct: t('form.correct'),
         wrong: t('form.wrong'),
+        // Said apart from a plain miss: the three do share this one, and one of
+        // them has used it up. Denying that they share it would be a lie, and
+        // the group that used it is drawn on the board anyway.
+        spent: t('form.spent'),
     };
 
     const enough = selected.length >= MIN_SELECTED_CONCEPTS;

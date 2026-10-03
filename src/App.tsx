@@ -39,7 +39,7 @@ import { useTranslator } from "./i18n";
 import type { Achievement, GameEvent, Progress } from "./achievements";
 import type { Solution } from "./hand";
 
-export type Feedback = 'none' | 'correct' | 'wrong';
+export type Feedback = 'none' | 'correct' | 'wrong' | 'spent';
 
 /** How long a newly dealt concept stays marked, in milliseconds. */
 const ARRIVAL_MARK = 2600;
@@ -221,7 +221,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
 
         if (!outcome.correct) {
             bumpTally({ wrong: tally.current.wrong + 1 });
-            setFeedback('wrong');
+            setFeedback(outcome.reason === 'spent' ? 'spent' : 'wrong');
             return false;
         }
 

@@ -416,10 +416,11 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Tape une catégorie ici !",
-        "form.needThree": "Sélectionne au moins 3 concepts.",
+        "form.needThree": "Choisis trois concepts, puis nomme ce qu’ils partagent.",
+        "form.spent": "L’un des trois a déjà utilisé cette catégorie.",
         "form.submit": "Valider",
         "form.correct": "Correct !",
-        "form.wrong": "Pas tout à fait — essaie une autre catégorie.",
+        "form.wrong": "Pas une catégorie que ces trois-là partagent.",
         "form.enterHint": "Appuie sur « Entrée » pour valider !",
         "form.enterAlt": "Touche Entrée",
         "score.properties": "Catégories",

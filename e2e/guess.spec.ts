@@ -55,7 +55,7 @@ test('a wrong category is rejected', async ({ page }) => {
   await page.getByPlaceholder('Type a category here!').fill('not a real category at all')
   await page.getByRole('button', { name: 'Submit' }).click()
 
-  await expect(page.getByRole('status')).toHaveText(/not quite/i)
+  await expect(page.getByRole('status')).toHaveText(/not a category/i)
 })
 
 test('pressing Enter submits the guess', async ({ page }) => {
