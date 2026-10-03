@@ -1,6 +1,6 @@
 import {
-    bowPhrase, CHORD_SECONDS, CHORDS, chordAt, LAYER_EVERY, LAYERS, layersFor,
-    PENTATONIC, pluckPhrase, voicesOf,
+    bowPhrase, CHORD_SECONDS, CHORDS, chordAt, chordTone, LAYER_EVERY, LAYERS,
+    layersFor, pluckPhrase, voicesOf,
 } from './ambient'
 
 test('the progression comes back round, so a long game never runs out', () => {
@@ -58,16 +58,37 @@ test('nothing is ever asked of a voice that is not there', () => {
   }
 });
 
-test('a melody note is always in the scale, so nothing can clash with a chord', () => {
-  // The four chords are all diatonic to A minor, and the pentatonic has no
-  // note that grates against any of them. That is what lets a phrase be
-  // written once and played over all four.
+test('every melody note is a note of the chord underneath it', () => {
+  // The old phrases were written in a scale and played over whatever chord
+  // came round, which is why they sounded picked at random: the line and the
+  // harmony had nothing to do with each other.
   for (let step = 0; step < 8; step++) {
+    const chord = chordAt(step);
+    const inChord = new Set(chord.map((semitones) => ((semitones % 12) + 12) % 12));
+
     for (const note of [...pluckPhrase(step), ...bowPhrase(step)]) {
-      const degree = ((note.degree % PENTATONIC.length) + PENTATONIC.length) % PENTATONIC.length;
-      expect(PENTATONIC[degree]).toBeDefined();
+      const pitch = chordTone(chord, note.tone);
+      expect(inChord.has(((pitch % 12) + 12) % 12)).toBe(true);
     }
   }
+});
+
+test('the line keeps its rhythm while the harmony moves under it', () => {
+  // Repetition is what makes a listener hear a melody rather than notes. The
+  // shape stays put; the chord it is drawn from does the changing.
+  const rhythm = (step: number) => pluckPhrase(step).map((n) => n.at).join(',');
+
+  expect(rhythm(0)).toBe(rhythm(1));
+  expect(rhythm(1)).toBe(rhythm(2));
+});
+
+test('the line is not the same notes twice running', () => {
+  // Same rhythm, but a phrase repeated note for note four chords deep is a
+  // loop, which is the thing this whole bed exists to avoid.
+  const sung = (step: number) =>
+      pluckPhrase(step).map((n) => chordTone(chordAt(step), n.tone)).join(',');
+
+  expect(sung(0)).not.toBe(sung(1));
 });
 
 test('every phrase fits inside the chord it is played over', () => {
@@ -79,33 +100,15 @@ test('every phrase fits inside the chord it is played over', () => {
   }
 });
 
-test('consecutive phrases differ, or four chords in it is a loop again', () => {
-  const shapes = new Set<string>();
-  for (let step = 0; step < 4; step++) {
-    shapes.add(pluckPhrase(step).map((n) => `${n.at}:${n.degree}`).join(','));
-  }
-  expect(shapes.size).toBe(4);
-});
-
-test('the pluck phrase has a rhythm rather than a step', () => {
-  // A note every N seconds up the chord is a scale exercise, not a melody.
-  const gaps = new Set<number>();
-  for (let step = 0; step < 4; step++) {
-    const phrase = pluckPhrase(step);
-    for (let i = 1; i < phrase.length; i++) {
-      gaps.add(Math.round((phrase[i].at - phrase[i - 1].at) * 10) / 10);
-    }
-  }
-  expect(gaps.size).toBeGreaterThan(2);
-});
-
-test('the violin comes in quick strokes, not in held notes', () => {
+test('the violin bows in groups, at a speed a bow could manage', () => {
   for (let step = 0; step < 4; step++) {
     const phrase = bowPhrase(step);
-    const quick = phrase.filter((note, i) => i > 0 && note.at - phrase[i - 1].at <= 0.3);
+    const gaps = phrase.slice(1).map((note, i) => note.at - phrase[i].at);
 
-    expect(phrase.length).toBeGreaterThanOrEqual(5);
-    expect(quick.length).toBeGreaterThanOrEqual(2);
+    // Close enough to belong to one gesture, far enough apart to be strokes
+    // rather than a tremolo — which is what the last version sounded like.
+    expect(Math.min(...gaps)).toBeGreaterThanOrEqual(0.4);
+    expect(gaps.some((gap) => gap < 1)).toBe(true);
   }
 });
 

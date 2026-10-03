@@ -45,100 +45,71 @@ const OVERLAP_SECONDS = 4;
 /** Quiet enough to think over. The chimes sit a good deal above this. */
 const VOICE_GAIN = 0.035;
 
-/**
- * A minor pentatonic, in semitones from the root.
- *
- * Every chord here is diatonic to A minor and this scale has no note that
- * grates against any of them, which is what lets one phrase be written and
- * played over all four without being transposed to fit.
- */
-export const PENTATONIC = [0, 3, 5, 7, 10];
-
 export interface Note {
     /** Seconds into the chord. */
     at: number;
-    /** A step of the scale; past its length it carries on into the next octave. */
-    degree: number;
-}
-
-/** The pitch of a scale degree, in semitones above the given octave. */
-function pitchOf(degree: number, octaves: number): number {
-    const steps = PENTATONIC.length;
-    const within = ((degree % steps) + steps) % steps;
-    const above = Math.floor(degree / steps);
-    return PENTATONIC[within] + (above + octaves) * 12;
+    /** Which note of the chord, carrying on into the octave above past the last. */
+    tone: number;
 }
 
 /**
- * The plucked line.
+ * A note of the chord, in semitones from the root.
  *
- * Four written phrases rather than a walk up the chord: a note every couple of
- * seconds in pitch order is a scale exercise, and after two chords a player
- * hears the exercise rather than the music. These have uneven gaps, a rest in
- * the middle of each, and none of them ends where it started.
+ * Melody drawn from the harmony rather than from a scale beside it. The first
+ * version wrote phrases in A minor pentatonic and played them over whichever
+ * chord came round; every note was in key and almost none of them belonged to
+ * what was sounding underneath, which is exactly what "picked at random"
+ * sounds like.
  */
-const PLUCK_PHRASES: Note[][] = [
-    [
-        { at: 0.4, degree: 4 }, { at: 1.1, degree: 5 }, { at: 1.7, degree: 3 },
-        { at: 3.2, degree: 4 }, { at: 6.4, degree: 2 }, { at: 7.3, degree: 1 },
-    ],
-    [
-        { at: 0.9, degree: 2 }, { at: 1.4, degree: 4 }, { at: 2.6, degree: 6 },
-        { at: 5.0, degree: 5 }, { at: 5.6, degree: 3 },
-    ],
-    [
-        { at: 0.3, degree: 7 }, { at: 1.5, degree: 5 }, { at: 2.1, degree: 6 },
-        { at: 2.8, degree: 4 }, { at: 6.0, degree: 2 }, { at: 8.2, degree: 3 },
-    ],
-    [
-        { at: 1.2, degree: 3 }, { at: 2.0, degree: 2 }, { at: 2.4, degree: 4 },
-        { at: 4.6, degree: 5 }, { at: 7.8, degree: 7 },
-    ],
-];
+export function chordTone(chord: number[], index: number): number {
+    const size = chord.length;
+    const within = ((index % size) + size) % size;
+    const octave = Math.floor(index / size);
+    return chord[within] + octave * 12;
+}
 
 /**
- * The violin.
+ * The plucked line: one rhythm, two shapes.
  *
- * Short strokes in twos and threes with silence between them, rather than one
- * held note — a bow changes direction, and that is the whole character of the
- * instrument. The groups move, so it reads as a phrase and not as a tremolo.
+ * The rhythm never changes and the chord under it does, which is what makes a
+ * listener hear a melody rather than notes — repetition is the whole of it.
+ * Two shapes alternate so that four chords deep it is not a loop either.
  */
-const BOW_PHRASES: Note[][] = [
-    [
-        { at: 0.0, degree: 2 }, { at: 0.22, degree: 3 }, { at: 0.44, degree: 4 },
-        { at: 3.4, degree: 5 }, { at: 3.62, degree: 4 },
-        { at: 7.1, degree: 2 }, { at: 7.3, degree: 1 }, { at: 7.5, degree: 2 },
-    ],
-    [
-        { at: 0.5, degree: 5 }, { at: 0.72, degree: 4 },
-        { at: 2.9, degree: 3 }, { at: 3.1, degree: 4 }, { at: 3.32, degree: 5 },
-        { at: 6.6, degree: 6 }, { at: 6.82, degree: 5 },
-    ],
-    [
-        { at: 0.2, degree: 4 }, { at: 0.4, degree: 5 }, { at: 0.6, degree: 6 },
-        { at: 4.0, degree: 4 }, { at: 4.2, degree: 3 },
-        { at: 8.0, degree: 2 }, { at: 8.25, degree: 3 },
-    ],
-    [
-        { at: 0.8, degree: 3 }, { at: 1.0, degree: 2 },
-        { at: 3.8, degree: 4 }, { at: 4.0, degree: 5 }, { at: 4.22, degree: 6 },
-        { at: 7.4, degree: 5 }, { at: 7.6, degree: 4 }, { at: 7.8, degree: 3 },
-    ],
+const PLUCK_SHAPES: number[][] = [
+    [3, 2, 4, 3, 1, 2],
+    [3, 4, 2, 5, 3, 1],
 ];
 
-function phraseAt(phrases: Note[][], step: number): Note[] {
-    const index = ((step % phrases.length) + phrases.length) % phrases.length;
-    return phrases[index];
+const PLUCK_RHYTHM = [0.3, 0.95, 1.6, 2.5, 5.4, 6.0];
+
+/**
+ * The violin: three bowed gestures in a chord.
+ *
+ * Half a second between strokes inside a gesture — close enough to belong
+ * together, far enough apart to be a bow changing direction rather than the
+ * tremolo the first attempt turned into — and seconds of silence between the
+ * gestures, where a player is left alone with the pad.
+ */
+const BOW_SHAPES: number[][] = [
+    [1, 2, 3, 2, 1, 0, 1],
+    [2, 3, 4, 3, 2, 1, 2],
+];
+
+const BOW_RHYTHM = [0, 0.55, 1.1, 4.2, 4.75, 8.0, 8.55];
+
+function phrase(shapes: number[][], rhythm: number[], step: number): Note[] {
+    const shape = shapes[((step % shapes.length) + shapes.length) % shapes.length];
+    return rhythm.map((at, i) => ({ at, tone: shape[i] }));
 }
 
 /** The plucked phrase for a chord. */
 export function pluckPhrase(step: number): Note[] {
-    return phraseAt(PLUCK_PHRASES, step);
+    return phrase(PLUCK_SHAPES, PLUCK_RHYTHM, step);
 }
 
 /** The bowed phrase for a chord. */
 export function bowPhrase(step: number): Note[] {
-    return phraseAt(BOW_PHRASES, step);
+    return phrase(BOW_SHAPES, BOW_RHYTHM, step);
 }
 
 /**
@@ -152,13 +123,13 @@ export function bowPhrase(step: number): Note[] {
 export interface Layer {
     id: string;
     /** What this part plays over one chord, told which chord of the cycle it is. */
-    play: (ctx: AudioContext, into: GainNode, at: number, chord: number[], step: number) => void;
+    play: (ctx: AudioContext, into: AudioNode, at: number, chord: number[], step: number) => void;
 }
 
 /** A plain voice: one oscillator, one envelope, gone when it is done. */
 function voice(
     ctx: AudioContext,
-    into: GainNode,
+    into: AudioNode,
     at: number,
     hz: number,
     shape: OscillatorType,
@@ -183,13 +154,61 @@ function voice(
     oscillator.stop(at + length + 0.05);
 }
 
+/**
+ * One bowed stroke.
+ *
+ * A sawtooth through a filter that opens as the bow bites and closes as it
+ * leaves, which is most of what separates a violin from a buzz; a fixed filter
+ * gave the blip the last version sounded like. The attack is slow enough to
+ * hear the note start — an instant attack is a pluck, whatever waveform is
+ * under it — and the tail outlasts the next stroke, so a gesture is joined up
+ * rather than chopped.
+ */
+function bow(ctx: AudioContext, into: AudioNode, at: number, hz: number, vibrato: GainNode): void {
+    const oscillator = ctx.createOscillator();
+    const colour = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(hz, at);
+    oscillator.detune.setValueAtTime(-4, at);
+    // The vibrato arrives after the note has spoken, the way a player's hand does.
+    vibrato.connect(oscillator.detune);
+
+    colour.type = 'lowpass';
+    colour.Q.setValueAtTime(1.6, at);
+    colour.frequency.setValueAtTime(hz * 1.6, at);
+    colour.frequency.linearRampToValueAtTime(hz * 6, at + 0.14);
+    colour.frequency.linearRampToValueAtTime(hz * 2.2, at + 0.95);
+
+    gain.gain.setValueAtTime(0, at);
+    gain.gain.linearRampToValueAtTime(VOICE_GAIN * 0.95, at + 0.12);
+    gain.gain.linearRampToValueAtTime(VOICE_GAIN * 0.75, at + 0.45);
+    gain.gain.linearRampToValueAtTime(0, at + 0.95);
+
+    oscillator.connect(colour).connect(gain).connect(into);
+    oscillator.start(at);
+    oscillator.stop(at + 1);
+}
+
+/** A part's own colour: one filter per chord, not one per note. */
+function toned(ctx: AudioContext, into: AudioNode, hz: number): BiquadFilterNode {
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(hz, ctx.currentTime);
+    filter.Q.setValueAtTime(0.4, ctx.currentTime);
+    filter.connect(into);
+    return filter;
+}
+
 export const LAYERS: Layer[] = [
     {
         // The bed itself: the chord, held.
         id: 'pad',
         play: (ctx, into, at, chord) => {
+            const tone = toned(ctx, into, 900);
             for (const hz of voicesOf(chord)) {
-                voice(ctx, into, at, hz, 'triangle', VOICE_GAIN,
+                voice(ctx, tone, at, hz, 'triangle', VOICE_GAIN,
                       CHORD_SECONDS * 0.35, CHORD_SECONDS, (Math.random() - 0.5) * 9);
             }
         },
@@ -200,7 +219,7 @@ export const LAYERS: Layer[] = [
         id: 'bass',
         play: (ctx, into, at, chord) => {
             const root = ROOT * 2 ** ((chord[0] - 12) / 12);
-            voice(ctx, into, at, root, 'sine', VOICE_GAIN * 1.6,
+            voice(ctx, toned(ctx, into, 300), at, root, 'sine', VOICE_GAIN * 1.6,
                   CHORD_SECONDS * 0.5, CHORD_SECONDS);
         },
     },
@@ -208,9 +227,10 @@ export const LAYERS: Layer[] = [
         // Something moving at last: a written phrase, an octave above the bed,
         // each note gone in under two seconds.
         id: 'pluck',
-        play: (ctx, into, at, _chord, step) => {
+        play: (ctx, into, at, chord, step) => {
+            const tone = toned(ctx, into, 1600);
             for (const note of pluckPhrase(step)) {
-                voice(ctx, into, at + note.at, ROOT * 2 ** (pitchOf(note.degree, 1) / 12),
+                voice(ctx, tone, at + note.at, ROOT * 2 ** ((chordTone(chord, note.tone) + 12) / 12),
                       'triangle', VOICE_GAIN * 1.4, 0.015, 1.9);
             }
         },
@@ -224,7 +244,7 @@ export const LAYERS: Layer[] = [
         play: (ctx, into, at, chord) => {
             for (const semitones of chord.slice(-2)) {
                 voice(ctx, into, at, ROOT * 2 ** ((semitones + 19) / 12), 'sine',
-                      VOICE_GAIN * 0.25, CHORD_SECONDS * 0.6, CHORD_SECONDS, 6);
+                      VOICE_GAIN * 0.3, CHORD_SECONDS * 0.6, CHORD_SECONDS, 6);
             }
         },
     },
@@ -234,10 +254,21 @@ export const LAYERS: Layer[] = [
         // attack and a short tail is a bow changing direction; one held note
         // would be a synthesiser pad with a different name.
         id: 'strings',
-        play: (ctx, into, at, _chord, step) => {
+        play: (ctx, into, at, chord, step) => {
+            // One vibrato for the whole gesture rather than one per note: a
+            // single oscillator feeding every stroke's detune costs two nodes
+            // a chord and is what the ear actually reads as a string player.
+            const wobble = ctx.createOscillator();
+            const depth = ctx.createGain();
+            wobble.type = 'sine';
+            wobble.frequency.setValueAtTime(5.4, at);
+            depth.gain.setValueAtTime(8, at);
+            wobble.connect(depth);
+            wobble.start(at);
+            wobble.stop(at + CHORD_SECONDS);
+
             for (const note of bowPhrase(step)) {
-                voice(ctx, into, at + note.at, ROOT * 2 ** (pitchOf(note.degree, 1) / 12),
-                      'sawtooth', VOICE_GAIN * 0.85, 0.045, 0.42, -5);
+                bow(ctx, into, at + note.at, ROOT * 2 ** ((chordTone(chord, note.tone) + 12) / 12), depth);
             }
         },
     },
@@ -320,18 +351,13 @@ export function startAmbient(): void {
     try {
         if (ctx.state === 'suspended') void ctx.resume();
 
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(900, ctx.currentTime);
-        filter.Q.setValueAtTime(0.4, ctx.currentTime);
-
         const gain = ctx.createGain();
         gain.gain.setValueAtTime(0, ctx.currentTime);
         // Faded in over four seconds: music that arrives at full volume on a
         // click startles, which is the opposite of the point.
         gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 4);
 
-        gain.connect(filter).connect(ctx.destination);
+        gain.connect(ctx.destination);
         bus = gain;
         playChord(ctx, gain);
     } catch {
