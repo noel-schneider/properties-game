@@ -358,6 +358,13 @@ function playChord(ctx: AudioContext, into: GainNode): void {
     }, (CHORD_SECONDS - OVERLAP_SECONDS) * 1000);
 }
 
+// A way in for the end-to-end tests, which cannot play eighty concepts to
+// reach the fifth instrument. Dropped from a built game along with the branch.
+if (import.meta.env.DEV) {
+    (globalThis as { __ambient?: { setAmbientLayers: (count: number) => void } }).__ambient =
+        { setAmbientLayers };
+}
+
 /**
  * Starts the bed. Idempotent, and silent about a browser that has no audio at
  * all — music is a garnish, and never a reason for a game not to run.

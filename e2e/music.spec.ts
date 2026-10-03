@@ -73,14 +73,16 @@ test('stopping it starts nothing more, and the choice is remembered', async ({ p
 })
 
 test('an instrument that joins is heard joining, not nine seconds later', async ({ page }) => {
-  // The dev bench is what forces the orchestra to a size without playing
-  // eighty concepts to reach it.
   await page.goto('/');
-  await page.getByRole('button', { name: /^1 ·/ }).click();
+  await page.getByRole('button', { name: 'Play music' }).click();
   await page.waitForTimeout(1500);
   const before = await count(page);
 
-  await page.getByRole('button', { name: /^3 ·/ }).click();
+  // The orchestra grows one part every twenty concepts finished, which is far
+  // more game than a test can play. This is the same call the game makes.
+  await page.evaluate(() => (window as unknown as {
+    __ambient: { setAmbientLayers: (count: number) => void };
+  }).__ambient.setAmbientLayers(3));
   await page.waitForTimeout(800);
 
   // A chord lasts thirteen seconds and the next starts after nine. A part that

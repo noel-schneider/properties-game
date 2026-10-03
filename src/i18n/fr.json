@@ -422,6 +422,7 @@
         "form.wrong": "Pas tout à fait — essaie une autre catégorie.",
         "form.enterHint": "Appuie sur « Entrée » pour valider !",
         "form.enterAlt": "Touche Entrée",
+        "score.properties": "Catégories",
         "score.remaining": "Encore trouvables ici",
         "panel.open": "Succès",
         "panel.title": "Succès",
