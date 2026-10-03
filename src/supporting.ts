@@ -7,8 +7,14 @@
  */
 export const SUPPORT_URL = 'https://ko-fi.com/noeldesv';
 
-/** Whose game this is. The byline leads here. */
-export const PORTFOLIO_URL = 'https://REPLACE-WITH-YOUR-PORTFOLIO';
+/**
+ * Whose game this is. The byline leads here.
+ *
+ * A stand-in until the real address lands. example.com is reserved for exactly
+ * this by RFC 2606, so it can never turn out to belong to somebody else — a
+ * made-up domain that looks plausible is a link to a stranger's site.
+ */
+export const PORTFOLIO_URL = 'https://example.com/noel';
 
 /**
  * How many right answers before the game mentions it, once.
