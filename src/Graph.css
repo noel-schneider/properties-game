@@ -224,45 +224,24 @@
     stroke-width: 6;
 }
 
-/* ---------------------------------------------------------------------------
- * Showing what a concept still has to find, while we pick a way.
+/*
+ * What a concept has left to find, as an arc on its rim.
  *
- * Temporary: a dev-only bench sets which, and the winner's rules move up once
- * the choice is made. All three count what is still reachable rather than
- * merely unfound — a number the player cannot act on is worse than none.
- * ------------------------------------------------------------------------ */
-
-/* One dot per property left. Counted at a glance, and no colour of its own, so
-   it does not compete with the groups. */
-.bubble circle.pip {
-    fill: #6f6a85;
-    stroke: none;
-    filter: none;
-}
-
-.bubble--selected circle.pip,
-.bubble--found circle.pip {
-    fill: #8a5a2a;
-}
-
-/* The same count as an arc on the rim: read as a proportion, not counted. */
+ * It fills rather than empties: a concept nobody has used yet shows nothing at
+ * all. Drawn the other way round, a fresh board wore a full ring on every
+ * bubble, which says nothing at the moment the player most wants to pick out
+ * which concepts are rich.
+ */
 .bubble circle.gauge {
     fill: none;
     stroke: #6f6a85;
     stroke-width: 4;
     stroke-linecap: round;
+    /* The bubbles' own shadow under one of these per bubble buys nothing. */
     filter: none;
+    /* The dash starts at three o'clock; from the top reads as a dial.
+       fill-box, or the rotation pivots on the viewBox origin. */
     transform: rotate(-90deg);
     transform-box: fill-box;
     transform-origin: center;
-}
-
-/* Blunt and exact. */
-.bubble text.tally {
-    fill: #6f6a85;
-    font-family: 'Poppins', system-ui, sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    pointer-events: none;
-    user-select: none;
 }

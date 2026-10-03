@@ -4,7 +4,6 @@ import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
 import { donePropertiesOf, isSpent, liveProperties, progressOf } from './game'
-import { DEFAULT_COUNT_LOOK } from './countLooks'
 import { groupUnderPointer } from './drop'
 import type { Solution } from './hand'
 import type { Concept } from './types'
@@ -67,11 +66,6 @@ interface GraphProps {
      * `found`; whether it is a right answer is settled by the game, not here.
      */
     onDropInto?: (index: number, name: string) => void;
-    /**
-     * How to show what a concept has left to find, while we pick a way.
-     * Temporary: the winner becomes the only drawing and this goes.
-     */
-    counts?: string;
 }
 
 /**
@@ -102,7 +96,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInto, counts = DEFAULT_COUNT_LOOK }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInto }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -391,7 +385,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                           * property nobody can pair on would otherwise sit
                           * short of full for the rest of the game.
                           */}
-                        {!isDone && counts === 'gauge' && spent > 0 && (
+                        {!isDone && spent > 0 && (
                             <circle
                                 className="gauge"
                                 r={radius + 7}
@@ -400,18 +394,6 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                                     `${2 * Math.PI * (radius + 7)}`
                                 }
                             />
-                        )}
-                        {!isDone && counts === 'pips' && Array.from({ length: left }, (_, pip) => (
-                            <circle
-                                key={pip}
-                                className="pip"
-                                cx={(pip - (left - 1) / 2) * 11}
-                                cy={radius - 21}
-                                r={3.5}
-                            />
-                        ))}
-                        {!isDone && counts === 'number' && left > 0 && (
-                            <text className="tally" y={radius - 17} textAnchor="middle">{left}</text>
                         )}
                         {!isDone && (
                             <text textAnchor="middle" dominantBaseline="middle">

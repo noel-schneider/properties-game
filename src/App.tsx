@@ -3,7 +3,6 @@ import "./App.css";
 import "./controls.css";
 import Answers from "./Answers";
 import Form from "./Form";
-import Counts from "./Counts";
 import Graph from "./Graph";
 import Scoreboard from "./Scoreboard";
 import Sky from "./Sky";
@@ -24,7 +23,6 @@ import { CATALOGUE } from "./achievements";
 import { formableGroups, openingBoard, refill, waysWanted } from "./board";
 import { getAllConcepts } from "./concepts";
 import { isFinished, isSpent } from "./game";
-import { DEFAULT_COUNT_LOOK } from "./countLooks";
 import { isExactLabel } from "./guess";
 import { resolveGuess } from "./round";
 import { canJoin, joinGroup } from "./join";
@@ -77,8 +75,6 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
     const [muted, setMuted] = useState(loadMuted);
-    // Dev-only bench for showing what a concept has left to find.
-    const [counts, setCounts] = useState(DEFAULT_COUNT_LOOK);
 
     const tally = useRef<RunTally>(loadRunStats());
     if (tally.current.boards === 0) {
@@ -242,14 +238,13 @@ function App({ playChime = playUnlockChime }: AppProps) {
           <Sky />
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
-          {import.meta.env.DEV && <Counts chosen={counts} onChoose={setCounts} enabled />}
           <Scoreboard found={found.length} finished={finishedCount} onBoard={concepts.length} remaining={left} />
           <div className="corner corner--top-right">
               <LanguageToggle />
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} onDropInto={dropInto} counts={counts} />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-right">
               <Panel unlocked={unlocked} />
