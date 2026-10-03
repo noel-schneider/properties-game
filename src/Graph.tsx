@@ -379,12 +379,24 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                               })}
                     >
                         <circle r={radius} />
-                        {!isDone && counts === 'gauge' && left > 0 && (
+                        {/*
+                          * The gauge fills rather than empties: a concept
+                          * nobody has used yet shows nothing at all. Drawn the
+                          * other way round, a fresh board wore a full ring on
+                          * every bubble, which says nothing and teaches the
+                          * player to stop looking.
+                          *
+                          * Out of what the concept can actually be used for,
+                          * not out of everything it holds — a concept with a
+                          * property nobody can pair on would otherwise sit
+                          * short of full for the rest of the game.
+                          */}
+                        {!isDone && counts === 'gauge' && spent > 0 && (
                             <circle
                                 className="gauge"
                                 r={radius + 7}
                                 strokeDasharray={
-                                    `${(2 * Math.PI * (radius + 7) * left) / Math.max(total, 1)} ` +
+                                    `${(2 * Math.PI * (radius + 7) * spent) / (spent + left)} ` +
                                     `${2 * Math.PI * (radius + 7)}`
                                 }
                             />

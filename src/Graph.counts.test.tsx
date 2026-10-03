@@ -73,3 +73,48 @@ test('a concept with nothing left to find shows no count at all', () => {
 
   expect(bubble('bee').querySelectorAll('.pip')).toHaveLength(0);
 });
+
+describe('the gauge fills as a concept is worked out', () => {
+  function arc(name: string) {
+    const gauge = bubble(name).querySelector('.gauge');
+    if (!gauge) return null;
+    const [drawn, round] = gauge.getAttribute('stroke-dasharray')!.split(' ').map(Number);
+    return drawn / round;
+  }
+
+  test('a concept nobody has used yet shows nothing', () => {
+    // Empty at the start is the point: eighteen full rings on a fresh board
+    // say nothing, and a mark that is always there stops being read.
+    renderApp(
+      <Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} counts="gauge" />,
+    );
+
+    expect(arc('ant')).toBeNull();
+  });
+
+  test('one property found of three fills a third of the rim', () => {
+    board('gauge');
+
+    // ant has spent `insect`, and `small` and `underground` are both still
+    // reachable: one of three.
+    expect(arc('ant')).toBeCloseTo(1 / 3, 2);
+  });
+
+  test('a property nobody can pair on is left out of the reckoning', () => {
+    // Otherwise a concept holding a stranded property could never fill its
+    // gauge, and would sit short of full for the rest of the game.
+    const lonely: Concept[] = [
+      // `rare` is ant's alone: nothing else in this pool has it, ever.
+      { name: 'ant', properties: ['insect', 'small', 'rare'] },
+      { name: 'bee', properties: ['insect', 'small'] },
+      { name: 'moth', properties: ['insect', 'small'] },
+    ];
+    const spent: Solution[] = [{ property: 'insect', concepts: ['ant', 'bee', 'moth'] }];
+    renderApp(
+      <Graph concepts={lonely} selected={[]} found={spent} onToggle={() => {}} counts="gauge" />,
+    );
+
+    // One of the two it can ever be used for — not one of the three it holds.
+    expect(arc('ant')).toBeCloseTo(1 / 2, 2);
+  });
+})
