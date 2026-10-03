@@ -27,6 +27,15 @@ test('a concept that has just arrived is marked', () => {
   expect(bubble('ant').classList.contains('bubble--fresh')).toBe(false);
 });
 
+test('a nudged concept wears a ring, so it reads at a glance across the board', () => {
+  renderApp(
+      <Graph concepts={concepts} selected={[]} found={[]} hinted={['ant', 'bee']}
+             onToggle={() => {}} />);
+
+  expect(bubble('ant').querySelector('.nudge')).not.toBeNull();
+  expect(bubble('moth').querySelector('.nudge')).toBeNull();
+});
+
 test('it carries a ring of its own, so the mark survives a still board', () => {
   // Reduced motion turns the animation off; the ring is what is left.
   board(['moth']);
@@ -52,4 +61,13 @@ test('a nudged concept is marked, and is not confused with an arrival', () => {
   // Two different things happening at once must stay two different things.
   expect(bubble('coin').classList.contains('bubble--hinted')).toBe(false);
   expect(bubble('ant').classList.contains('bubble--fresh')).toBe(false);
+});
+
+test('a nudged concept wears a ring, so it reads at a glance across the board', () => {
+  renderApp(
+      <Graph concepts={concepts} selected={[]} found={[]} hinted={['ant', 'bee']}
+             onToggle={() => {}} />);
+
+  expect(bubble('ant').querySelector('.nudge')).not.toBeNull();
+  expect(bubble('moth').querySelector('.nudge')).toBeNull();
 });

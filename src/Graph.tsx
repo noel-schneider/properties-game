@@ -404,7 +404,8 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                 const isFresh = arriving.includes(concept.name);
                 if (isFresh) classes.push('bubble--fresh');
                 // Lit for a few seconds when nothing has been found in a while.
-                if (hinted.includes(concept.name)) classes.push('bubble--hinted');
+                const isHinted = hinted.includes(concept.name);
+                if (isHinted) classes.push('bubble--hinted');
                 if (kin.has(concept.name)) classes.push('bubble--kin');
                 else if (kin.size > 0) classes.push('bubble--aside');
                 // Lit while a concept is held over their group, so the offer
@@ -467,6 +468,13 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                           * mark at all for the player who turned motion off.
                           */}
                         {isFresh && <circle className="arrival" r={radius + 4} />}
+                        {/*
+                          * The nudge wears a ring of its own, outside the
+                          * gauge. A thicker outline alone was lost on a board
+                          * of twenty bubbles seen all at once — which is
+                          * exactly the board a stalled player is staring at.
+                          */}
+                        {isHinted && <circle className="nudge" r={radius + 13} />}
                         {/*
                           * The gauge fills rather than empties: a concept
                           * nobody has used yet shows nothing at all. Drawn the

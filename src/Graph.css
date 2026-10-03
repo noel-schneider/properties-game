@@ -369,19 +369,41 @@
  * told which is which.
  * ------------------------------------------------------------------------ */
 .bubble--hinted > circle:first-of-type {
-    animation: nudge 1.75s ease-in-out infinite;
+    animation: nudge 1.6s ease-in-out infinite;
 }
 
 @keyframes nudge {
-    0%, 100% { stroke: #1b1b1b; stroke-width: 3; }
-    50%      { stroke: #8ecae6; stroke-width: 6; }
+    0%, 100% { stroke: #5aa9cc; stroke-width: 4; }
+    50%      { stroke: #d8f3ff; stroke-width: 9; }
+}
+
+/* The ring, outside the gauge so the two never sit on one another. */
+.bubble circle.nudge {
+    fill: none;
+    stroke: #8ecae6;
+    stroke-width: 3;
+    /* The bubbles' own shadow under one of these buys nothing. */
+    filter: none;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: nudge-ring 1.6s ease-in-out infinite;
+}
+
+@keyframes nudge-ring {
+    0%, 100% { opacity: 0.3; transform: scale(0.94); }
+    50%      { opacity: 0.95; transform: scale(1.06); }
 }
 
 @media (prefers-reduced-motion: reduce) {
     /* Still marked, just not breathing. */
     .bubble--hinted > circle:first-of-type {
         animation: none;
-        stroke: #8ecae6;
-        stroke-width: 5;
+        stroke: #d8f3ff;
+        stroke-width: 7;
+    }
+
+    .bubble circle.nudge {
+        animation: none;
+        opacity: 0.8;
     }
 }
