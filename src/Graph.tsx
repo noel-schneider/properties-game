@@ -5,6 +5,7 @@ import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
 import { donePropertiesOf, isSpent, liveProperties, progressOf } from './game'
 import { groupUnderPointer } from './drop'
+import { spreadLabels } from './labels'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -329,6 +330,21 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
 
     const at = (name: string): Point => points[index.get(name) ?? -1] ?? { x: 0, y: 0 };
 
+    /**
+     * Which groups say their name.
+     *
+     * While a concept is being read, all of its own — showing which concepts
+     * share something without ever saying what was half an answer. Otherwise
+     * the one just found, because twenty names drawn at once is a heap nobody
+     * reads.
+     */
+    const named = useMemo(() => {
+        if (kin.size > 0 && hovered !== null) {
+            return live.filter(({ group }) => group.concepts.includes(hovered));
+        }
+        return live.slice(-1);
+    }, [live, kin, hovered]);
+
     return (
         <svg
             ref={svg}
@@ -348,10 +364,9 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                 </linearGradient>
             </defs>
             {live.map(({ group }, groupIndex) => {
-                // Ties stay for every group. Names do not: at twenty groups the
-                // labels pile into an unreadable heap, so only the group just
-                // found says what it was.
-                const named = groupIndex === live.length - 1;
+                // The outline of the group just found is drawn bright, and is
+                // the one the landing animation closes around.
+                const latest = groupIndex === live.length - 1;
                 const places = group.concepts.map(at);
                 const centre = {
                     x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
@@ -361,7 +376,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                 return (
                     <g key={`${group.property}-${groupIndex}`} className="found" data-group={group.property}>
                         <path
-                            className={named ? 'found__loop found__loop--latest' : 'found__loop'}
+                            className={latest ? 'found__loop found__loop--latest' : 'found__loop'}
                             d={groupOutline(places, centre)}
                         />
                     </g>
@@ -497,20 +512,26 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
               * unreadable heap. Which group is which, for the rest, is what
               * the offer under a dragged concept answers.
               */}
-            {live.length > 0 && (() => {
-                const group = live[live.length - 1].group;
-                const places = group.concepts.map(at);
-                const middle = {
-                    x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
-                    y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
-                };
-
-                return (
-                    <text className="found__label" x={middle.x} y={middle.y} textAnchor="middle" dominantBaseline="middle">
-                        {propertyName(group.property)}
-                    </text>
-                );
-            })()}
+            {spreadLabels(
+                named.map(({ group }) => {
+                    const places = group.concepts.map(at);
+                    return {
+                        x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
+                        y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
+                    };
+                }),
+            ).map((middle, i) => (
+                <text
+                    key={`name-${named[i].where}`}
+                    className="found__label"
+                    x={middle.x}
+                    y={middle.y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                >
+                    {propertyName(named[i].group.property)}
+                </text>
+            ))}
 
             {/*
               * The names of the spent concepts, drawn after every bubble.
