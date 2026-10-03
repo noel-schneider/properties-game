@@ -39,11 +39,107 @@ export function voicesOf(chord: number[]): number[] {
 }
 
 /** How long one chord takes, and how long before the next one starts under it. */
-const CHORD_SECONDS = 13;
+export const CHORD_SECONDS = 13;
 const OVERLAP_SECONDS = 4;
 
 /** Quiet enough to think over. The chimes sit a good deal above this. */
 const VOICE_GAIN = 0.035;
+
+/**
+ * A minor pentatonic, in semitones from the root.
+ *
+ * Every chord here is diatonic to A minor and this scale has no note that
+ * grates against any of them, which is what lets one phrase be written and
+ * played over all four without being transposed to fit.
+ */
+export const PENTATONIC = [0, 3, 5, 7, 10];
+
+export interface Note {
+    /** Seconds into the chord. */
+    at: number;
+    /** A step of the scale; past its length it carries on into the next octave. */
+    degree: number;
+}
+
+/** The pitch of a scale degree, in semitones above the given octave. */
+function pitchOf(degree: number, octaves: number): number {
+    const steps = PENTATONIC.length;
+    const within = ((degree % steps) + steps) % steps;
+    const above = Math.floor(degree / steps);
+    return PENTATONIC[within] + (above + octaves) * 12;
+}
+
+/**
+ * The plucked line.
+ *
+ * Four written phrases rather than a walk up the chord: a note every couple of
+ * seconds in pitch order is a scale exercise, and after two chords a player
+ * hears the exercise rather than the music. These have uneven gaps, a rest in
+ * the middle of each, and none of them ends where it started.
+ */
+const PLUCK_PHRASES: Note[][] = [
+    [
+        { at: 0.4, degree: 4 }, { at: 1.1, degree: 5 }, { at: 1.7, degree: 3 },
+        { at: 3.2, degree: 4 }, { at: 6.4, degree: 2 }, { at: 7.3, degree: 1 },
+    ],
+    [
+        { at: 0.9, degree: 2 }, { at: 1.4, degree: 4 }, { at: 2.6, degree: 6 },
+        { at: 5.0, degree: 5 }, { at: 5.6, degree: 3 },
+    ],
+    [
+        { at: 0.3, degree: 7 }, { at: 1.5, degree: 5 }, { at: 2.1, degree: 6 },
+        { at: 2.8, degree: 4 }, { at: 6.0, degree: 2 }, { at: 8.2, degree: 3 },
+    ],
+    [
+        { at: 1.2, degree: 3 }, { at: 2.0, degree: 2 }, { at: 2.4, degree: 4 },
+        { at: 4.6, degree: 5 }, { at: 7.8, degree: 7 },
+    ],
+];
+
+/**
+ * The violin.
+ *
+ * Short strokes in twos and threes with silence between them, rather than one
+ * held note — a bow changes direction, and that is the whole character of the
+ * instrument. The groups move, so it reads as a phrase and not as a tremolo.
+ */
+const BOW_PHRASES: Note[][] = [
+    [
+        { at: 0.0, degree: 2 }, { at: 0.22, degree: 3 }, { at: 0.44, degree: 4 },
+        { at: 3.4, degree: 5 }, { at: 3.62, degree: 4 },
+        { at: 7.1, degree: 2 }, { at: 7.3, degree: 1 }, { at: 7.5, degree: 2 },
+    ],
+    [
+        { at: 0.5, degree: 5 }, { at: 0.72, degree: 4 },
+        { at: 2.9, degree: 3 }, { at: 3.1, degree: 4 }, { at: 3.32, degree: 5 },
+        { at: 6.6, degree: 6 }, { at: 6.82, degree: 5 },
+    ],
+    [
+        { at: 0.2, degree: 4 }, { at: 0.4, degree: 5 }, { at: 0.6, degree: 6 },
+        { at: 4.0, degree: 4 }, { at: 4.2, degree: 3 },
+        { at: 8.0, degree: 2 }, { at: 8.25, degree: 3 },
+    ],
+    [
+        { at: 0.8, degree: 3 }, { at: 1.0, degree: 2 },
+        { at: 3.8, degree: 4 }, { at: 4.0, degree: 5 }, { at: 4.22, degree: 6 },
+        { at: 7.4, degree: 5 }, { at: 7.6, degree: 4 }, { at: 7.8, degree: 3 },
+    ],
+];
+
+function phraseAt(phrases: Note[][], step: number): Note[] {
+    const index = ((step % phrases.length) + phrases.length) % phrases.length;
+    return phrases[index];
+}
+
+/** The plucked phrase for a chord. */
+export function pluckPhrase(step: number): Note[] {
+    return phraseAt(PLUCK_PHRASES, step);
+}
+
+/** The bowed phrase for a chord. */
+export function bowPhrase(step: number): Note[] {
+    return phraseAt(BOW_PHRASES, step);
+}
 
 /**
  * The orchestra, in the order it arrives.
@@ -55,8 +151,8 @@ const VOICE_GAIN = 0.035;
  */
 export interface Layer {
     id: string;
-    /** What this part plays over one chord. */
-    play: (ctx: AudioContext, into: GainNode, at: number, chord: number[]) => void;
+    /** What this part plays over one chord, told which chord of the cycle it is. */
+    play: (ctx: AudioContext, into: GainNode, at: number, chord: number[], step: number) => void;
 }
 
 /** A plain voice: one oscillator, one envelope, gone when it is done. */
@@ -109,14 +205,14 @@ export const LAYERS: Layer[] = [
         },
     },
     {
-        // Something moving at last: four plucked notes walking up the chord,
-        // an octave above it, each gone in a second.
+        // Something moving at last: a written phrase, an octave above the bed,
+        // each note gone in under two seconds.
         id: 'pluck',
-        play: (ctx, into, at, chord) => {
-            chord.forEach((semitones, i) => {
-                voice(ctx, into, at + 1.5 + i * 2.2, ROOT * 2 ** ((semitones + 12) / 12),
+        play: (ctx, into, at, _chord, step) => {
+            for (const note of pluckPhrase(step)) {
+                voice(ctx, into, at + note.at, ROOT * 2 ** (pitchOf(note.degree, 1) / 12),
                       'triangle', VOICE_GAIN * 1.4, 0.015, 1.9);
-            });
+            }
         },
     },
     {
@@ -133,15 +229,15 @@ export const LAYERS: Layer[] = [
         },
     },
     {
-        // The last to arrive and the slowest: a sawtooth swell under the
-        // lowpass, which is where a string section lives.
+        // The violin: short bowed strokes in twos and threes, sawtooth through
+        // the lowpass, which is where that shape stops being a buzz. A quick
+        // attack and a short tail is a bow changing direction; one held note
+        // would be a synthesiser pad with a different name.
         id: 'strings',
-        play: (ctx, into, at, chord) => {
-            // In the pad's own register, where a sawtooth under this lowpass
-            // stops being a buzz and turns into bowed strings.
-            for (const semitones of chord.slice(0, 3)) {
-                voice(ctx, into, at, ROOT * 2 ** (semitones / 12), 'sawtooth',
-                      VOICE_GAIN * 0.6, CHORD_SECONDS * 0.4, CHORD_SECONDS, -5);
+        play: (ctx, into, at, _chord, step) => {
+            for (const note of bowPhrase(step)) {
+                voice(ctx, into, at + note.at, ROOT * 2 ** (pitchOf(note.degree, 1) / 12),
+                      'sawtooth', VOICE_GAIN * 0.85, 0.045, 0.42, -5);
             }
         },
     },
@@ -159,7 +255,7 @@ export function layersFor(finished: number): number {
 let playing = 1;
 
 /** The chord in the air right now, so a part that joins can join it. */
-let sounding: { ctx: AudioContext; into: GainNode; chord: number[] } | null = null;
+let sounding: { ctx: AudioContext; into: GainNode; chord: number[]; step: number } | null = null;
 
 /**
  * Sets how big the orchestra is.
@@ -178,7 +274,8 @@ export function setAmbientLayers(count: number): void {
 
     try {
         const { ctx, into, chord } = sounding;
-        for (const layer of joining) layer.play(ctx, into, ctx.currentTime, chord);
+        const { step: where } = sounding;
+        for (const layer of joining) layer.play(ctx, into, ctx.currentTime, chord, where);
     } catch {
         // Music is a garnish.
     }
@@ -199,8 +296,8 @@ function playChord(ctx: AudioContext, into: GainNode): void {
 
     // Everything this chord will do is scheduled now, at offsets from this one
     // moment. However many parts are playing, the cost in timers is the same.
-    sounding = { ctx, into, chord };
-    for (const layer of LAYERS.slice(0, playing)) layer.play(ctx, into, at, chord);
+    sounding = { ctx, into, chord, step };
+    for (const layer of LAYERS.slice(0, playing)) layer.play(ctx, into, at, chord, step);
     step++;
 
     // The next one starts before this one has finished, so nothing ever lands

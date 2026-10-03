@@ -1,4 +1,7 @@
-import { CHORDS, chordAt, LAYER_EVERY, LAYERS, layersFor, voicesOf } from './ambient'
+import {
+    bowPhrase, CHORD_SECONDS, CHORDS, chordAt, LAYER_EVERY, LAYERS, layersFor,
+    PENTATONIC, pluckPhrase, voicesOf,
+} from './ambient'
 
 test('the progression comes back round, so a long game never runs out', () => {
   expect(chordAt(0)).toEqual(chordAt(CHORDS.length));
@@ -52,5 +55,65 @@ test('nothing is ever asked of a voice that is not there', () => {
     const layers = LAYERS.slice(0, layersFor(count));
     expect(layers.length).toBeGreaterThan(0);
     for (const layer of layers) expect(typeof layer.play).toBe('function');
+  }
+});
+
+test('a melody note is always in the scale, so nothing can clash with a chord', () => {
+  // The four chords are all diatonic to A minor, and the pentatonic has no
+  // note that grates against any of them. That is what lets a phrase be
+  // written once and played over all four.
+  for (let step = 0; step < 8; step++) {
+    for (const note of [...pluckPhrase(step), ...bowPhrase(step)]) {
+      const degree = ((note.degree % PENTATONIC.length) + PENTATONIC.length) % PENTATONIC.length;
+      expect(PENTATONIC[degree]).toBeDefined();
+    }
+  }
+});
+
+test('every phrase fits inside the chord it is played over', () => {
+  for (let step = 0; step < 8; step++) {
+    for (const note of [...pluckPhrase(step), ...bowPhrase(step)]) {
+      expect(note.at).toBeGreaterThanOrEqual(0);
+      expect(note.at).toBeLessThan(CHORD_SECONDS - 1);
+    }
+  }
+});
+
+test('consecutive phrases differ, or four chords in it is a loop again', () => {
+  const shapes = new Set<string>();
+  for (let step = 0; step < 4; step++) {
+    shapes.add(pluckPhrase(step).map((n) => `${n.at}:${n.degree}`).join(','));
+  }
+  expect(shapes.size).toBe(4);
+});
+
+test('the pluck phrase has a rhythm rather than a step', () => {
+  // A note every N seconds up the chord is a scale exercise, not a melody.
+  const gaps = new Set<number>();
+  for (let step = 0; step < 4; step++) {
+    const phrase = pluckPhrase(step);
+    for (let i = 1; i < phrase.length; i++) {
+      gaps.add(Math.round((phrase[i].at - phrase[i - 1].at) * 10) / 10);
+    }
+  }
+  expect(gaps.size).toBeGreaterThan(2);
+});
+
+test('the violin comes in quick strokes, not in held notes', () => {
+  for (let step = 0; step < 4; step++) {
+    const phrase = bowPhrase(step);
+    const quick = phrase.filter((note, i) => i > 0 && note.at - phrase[i - 1].at <= 0.3);
+
+    expect(phrase.length).toBeGreaterThanOrEqual(5);
+    expect(quick.length).toBeGreaterThanOrEqual(2);
+  }
+});
+
+test('neither part floods the chord, however sophisticated it gets', () => {
+  // Voices are cheap but not free, and this is the thing that would make them
+  // expensive without anyone noticing.
+  for (let step = 0; step < 8; step++) {
+    expect(pluckPhrase(step).length).toBeLessThanOrEqual(9);
+    expect(bowPhrase(step).length).toBeLessThanOrEqual(10);
   }
 });
