@@ -65,3 +65,9 @@
     right: 1.25rem;
     align-items: flex-end;
 }
+
+.corner--bottom-left {
+    bottom: 1.25rem;
+    left: 1.25rem;
+    align-items: flex-end;
+}

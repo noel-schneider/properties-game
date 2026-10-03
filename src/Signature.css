@@ -1,0 +1,52 @@
+/*
+ * The footer line. Small, warm, and far enough from the input that nobody
+ * reaches it by accident.
+ */
+.signature {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'Poppins', system-ui, sans-serif;
+}
+
+.signature__by {
+    color: #8f8aa6;
+    font-size: 0.75rem;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.signature__by:hover {
+    color: #c9c9db;
+    border-bottom-color: #5a5a7d;
+}
+
+/*
+ * Louder than the byline on purpose: this one is an offer, and an offer nobody
+ * notices is the same as no offer. Still quieter than anything the player needs
+ * to press to keep playing — warm outline, no fill.
+ */
+.signature__give {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.34rem 0.7rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 173, 105, 0.55);
+    background: rgba(255, 173, 105, 0.09);
+    color: #ffad69;
+    font-size: 0.78rem;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.signature__give:hover {
+    background: rgba(255, 173, 105, 0.18);
+    border-color: #ffad69;
+}
+
+.signature__cup {
+    font-size: 0.9rem;
+    line-height: 1;
+}

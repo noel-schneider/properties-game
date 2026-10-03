@@ -8,7 +8,8 @@ import Help from "./Help";
 import Scoreboard from "./Scoreboard";
 import Sky from "./Sky";
 import Summary from "./Summary";
-import { SupportInvite, SupportLink } from "./Support";
+import { SupportInvite } from "./Support";
+import Signature from "./Signature";
 import LanguageToggle from "./LanguageToggle";
 import Reset from "./Reset";
 import SoundToggle from "./SoundToggle";
@@ -288,8 +289,10 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
           </div>
           <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
+          <div className="corner corner--bottom-left">
+              <Signature />
+          </div>
           <div className="corner corner--bottom-right">
-              <SupportLink />
               <Panel unlocked={unlocked} onForget={forgetAchievements} />
           </div>
           {worthAsking({ finds: countFinds(found), asked: askedForSupport }) && (

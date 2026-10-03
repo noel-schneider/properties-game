@@ -7,6 +7,9 @@
  */
 export const SUPPORT_URL = 'https://ko-fi.com/noeldesv';
 
+/** Whose game this is. The byline leads here. */
+export const PORTFOLIO_URL = 'https://REPLACE-WITH-YOUR-PORTFOLIO';
+
 /**
  * How many right answers before the game mentions it, once.
  *
