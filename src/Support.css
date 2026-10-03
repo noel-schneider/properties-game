@@ -32,9 +32,14 @@
 .support {
     position: fixed;
     left: 50%;
-    bottom: 1.25rem;
+    /* Under the scoreboard, where the sound note sits too — the two are never
+       on screen at the same time, one being an arrival and the other thirty
+       answers in. */
+    top: 4.2rem;
     transform: translateX(-50%);
-    z-index: 8000;
+    /* Over the input, the corners and the achievement toasts, and under the
+       two modals alone: it was sitting behind half the board. */
+    z-index: 10500;
     display: flex;
     align-items: center;
     gap: 0.7rem;
@@ -48,7 +53,7 @@
 }
 
 @keyframes support-in {
-    from { opacity: 0; transform: translate(-50%, 10px); }
+    from { opacity: 0; transform: translate(-50%, -10px); }
     to   { opacity: 1; transform: translate(-50%, 0); }
 }
 

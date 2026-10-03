@@ -9,9 +9,10 @@ interface InviteProps {
 /**
  * The one time the game brings it up itself.
  *
- * A note along the bottom, not a door across the middle: it never takes the
+ * A note across the top, not a door across the middle: it never takes the
  * board, never takes the keyboard, and a player who ignores it carries on
- * answering. It is said once in a player's life — a whole game runs to a
+ * answering. It sits over everything but the two modals — along the bottom it
+ * was behind the input, the corners and the toasts. It is said once in a player's life — a whole game runs to a
  * hundred and fourteen answers, and anything said on a count would be said
  * again and again inside one evening.
  */
