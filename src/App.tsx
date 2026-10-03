@@ -20,7 +20,7 @@ import {
 } from "./achievements/storage";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
-import { formableGroups, openingBoard, refill, waysWanted } from "./board";
+import { formableGroups, isExhausted, openingBoard, refill, waysWanted } from "./board";
 import { getAllConcepts } from "./concepts";
 import { isFinished, isSpent } from "./game";
 import { isExactLabel } from "./guess";
@@ -231,7 +231,10 @@ function App({ playChime = playUnlockChime }: AppProps) {
     const concepts = board.map((name) => byName.get(name)).filter((c): c is NonNullable<typeof c> => !!c);
     const finishedCount = concepts.filter((concept) => isSpent(concept, found, pool)).length;
     const left = formableGroups(board, pool, found).length;
-    const exhausted = formableGroups(pool.map((c) => c.name), pool, found).length === 0;
+    // Not merely "no trio can be formed": a concept can still be dropped into
+    // a category already found, and there are fourteen such moves waiting at
+    // the moment the last trio goes.
+    const exhausted = isExhausted(pool, found);
 
   return (
       <>

@@ -1,5 +1,6 @@
 import { getNRandomElements } from './utils'
 import { isFinished, isSpent, openProperties } from './game'
+import { canJoin } from './join'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -128,6 +129,21 @@ function trim(
 
     const leaving = new Set(finished.slice(0, finished.length - FINISHED_KEPT));
     return board.filter((name) => !leaving.has(name));
+}
+
+/**
+ * Whether the game has nothing left to do at all.
+ *
+ * Not the same as having no trio to form. A category of N members strands N
+ * mod 3 concepts, and those are placed one at a time by dropping them into a
+ * group already found — measured at fourteen such moves still waiting at the
+ * point where no trio can be made anywhere. Calling the game over there ends
+ * it fourteen moves early, which this exists to stop.
+ */
+export function isExhausted(pool: Concept[], found: Solution[]): boolean {
+    if (formableGroups(pool.map((concept) => concept.name), pool, found).length > 0) return false;
+
+    return !pool.some((concept) => found.some((group) => canJoin(concept, group, found)));
 }
 
 /**
