@@ -161,12 +161,16 @@ test('a concept can be dropped onto a category already found', async ({ page }) 
     }
   }
 
-  // Joining adds a member to a group, so the count of groups found does not
-  // move. What moves is the joiner: one more of its properties is spent.
+  // What moves: the joiner spends one more of its properties, and the tally of
+  // answers got right goes up by one. That tally used to count groups alone,
+  // so this move — twelve per cent of the answers in a game — landed with
+  // nothing on screen to show for it.
   const spent = async () => Number(
     (await page.locator(`.bubble[aria-label="${label(joiner)}"]`).getAttribute('data-progress'))!.split('/')[0],
   )
+  const finds = async () => Number(await page.getByTestId('found').textContent())
   const before = await spent()
+  const findsBefore = await finds()
 
   const from = await middleOf([joiner])
   await page.mouse.move(from.x, from.y)
@@ -208,4 +212,5 @@ test('a concept can be dropped onto a category already found', async ({ page }) 
 
   await expect(page.getByRole('status')).toHaveText(/correct/i)
   await expect.poll(spent).toBe(before + 1)
+  await expect.poll(finds).toBe(findsBefore + 1)
 })

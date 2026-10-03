@@ -1,20 +1,43 @@
 .language {
-    display: flex;
-    gap: 0.4rem;
+    position: relative;
 }
 
-/* The flags keep the shared control shape; only their colour says which is on. */
+/*
+ * The flags unfold downwards, in the same shape and size as the button they
+ * came out of: a menu that looks like the thing it opened from reads as that
+ * thing having more to it, rather than as a new widget.
+ */
+.language__list {
+    position: absolute;
+    top: 2.5rem;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.3rem;
+    border-radius: 0.6rem;
+    border: 1px solid #40405c;
+    background: rgba(28, 30, 48, 0.97);
+    box-shadow: 0 12px 26px rgba(8, 8, 16, 0.42);
+    animation: language-in 0.14s ease-out both;
+}
+
+@keyframes language-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .language__list { animation: none; }
+}
+
+/* The one not in use is dimmed, the same way a sound that is off is dimmed. */
 .language__flag {
-    opacity: 0.45;
+    opacity: 0.5;
     filter: grayscale(0.7);
 }
 
 .language__flag:hover {
-    opacity: 0.85;
-    filter: grayscale(0.2);
-}
-
-.control--on {
     opacity: 1;
     filter: none;
 }

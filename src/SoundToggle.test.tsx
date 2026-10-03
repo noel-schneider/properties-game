@@ -8,7 +8,7 @@ test('it offers to mute while the sound is on', async () => {
   const user = userEvent.setup();
   renderApp(<SoundToggle muted={false} onToggle={onToggle} />);
 
-  await user.click(screen.getByRole('button', { name: /mute achievement sound/i }));
+  await user.click(screen.getByRole('button', { name: /turn sound effects off/i }));
 
   expect(onToggle).toHaveBeenCalledTimes(1);
 });
@@ -16,5 +16,5 @@ test('it offers to mute while the sound is on', async () => {
 test('it offers to bring the sound back once muted', () => {
   renderApp(<SoundToggle muted onToggle={() => {}} />);
 
-  expect(screen.getByRole('button', { name: /unmute achievement sound/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /turn sound effects on/i })).toBeInTheDocument();
 });

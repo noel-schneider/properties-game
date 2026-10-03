@@ -116,6 +116,7 @@ test('switching language mid-run keeps what has been found', async () => {
   const scoreBefore = screen.getByTestId('found').textContent;
   const earnedBefore = screen.getByRole('button', { name: /Achievements/ }).textContent;
 
+  await user.click(screen.getByRole('button', { name: words.en.ui['language.group'] }));
   await user.click(screen.getByRole('button', { name: words.fr.ui['language.fr'] }));
 
   // Same progress, told in French.
@@ -129,6 +130,7 @@ test('the chosen language is remembered', async () => {
   const user = userEvent.setup();
   const { unmount } = renderIn('en', <App playChime={() => {}} />);
 
+  await user.click(screen.getByRole('button', { name: words.en.ui['language.group'] }));
   await user.click(screen.getByRole('button', { name: words.fr.ui['language.fr'] }));
   unmount();
 
@@ -152,6 +154,7 @@ test('a board started in one language can be finished in the other', async () =>
   await user.click(screen.getByRole('button', { name: words.fr.ui['form.submit'] }));
   await screen.findByRole('status');
 
+  await user.click(screen.getByRole('button', { name: words.fr.ui['language.group'] }));
   await user.click(screen.getByRole('button', { name: words.en.ui['language.en'] }));
 
   // Still found, and the next answer is taken in the new language. The panel

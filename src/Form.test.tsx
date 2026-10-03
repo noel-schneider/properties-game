@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import { renderApp } from './test-utils';
 import userEvent from '@testing-library/user-event';
 import Form from './Form';
@@ -71,4 +71,32 @@ describe('reaching the input with the keyboard', () => {
 
     expect(screen.getByPlaceholderText(/type a category here/i)).not.toHaveFocus();
   });
+});
+
+test('typing with too few concepts picked says what is missing', async () => {
+  // The submit button goes grey, which says "no" without ever saying why.
+  const user = userEvent.setup();
+  renderApp(<Form selected={['bee']} feedback="none" onSubmit={() => true} />);
+
+  await user.type(screen.getByPlaceholderText(/type a category here/i), 'in');
+
+  expect(screen.getByRole('status')).toHaveTextContent(/at least 3/i);
+});
+
+test('the reminder goes once the third concept is picked', () => {
+  const { rerender } = renderApp(
+      <Form selected={['bee', 'ant']} feedback="none" onSubmit={() => true} />);
+  fireEvent.change(screen.getByPlaceholderText(/type a category here/i), { target: { value: 'insect' } });
+  expect(screen.getByRole('status')).toHaveTextContent(/at least 3/i);
+
+  rerender(<Form selected={['bee', 'ant', 'beetle']} feedback="none" onSubmit={() => true} />);
+  expect(screen.getByRole('status')).not.toHaveTextContent(/at least 3/i);
+});
+
+test('an empty box is not nagged at', () => {
+  // Picking one bubble and stopping is a normal thing to do; it is only once
+  // somebody starts naming a category that the count is worth mentioning.
+  renderApp(<Form selected={['bee']} feedback="none" onSubmit={() => true} />);
+
+  expect(screen.getByRole('status')).toHaveTextContent('');
 });

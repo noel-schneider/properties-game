@@ -102,3 +102,16 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* The thank-you, under the figures and above the buttons: plain text with a
+   link in it, not a third button competing with playing again. */
+.summary__support {
+    margin: 0 0 1.1rem;
+    color: #8f8aa6;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.summary__support a {
+    color: #ffad69;
+}

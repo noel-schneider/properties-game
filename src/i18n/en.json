@@ -86,6 +86,7 @@
         "snow": "snow",
         "soup": "soup",
         "star": "star",
+        "storm": "storm",
         "submarine": "submarine",
         "subway": "subway",
         "surfing": "surfing",
@@ -93,7 +94,6 @@
         "television": "television",
         "tennis": "tennis",
         "theater": "theater",
-        "thunder": "thunder",
         "tornado": "tornado",
         "train": "train",
         "turtle": "turtle",
@@ -129,7 +129,6 @@
         "machine": "machine",
         "metal": "metal",
         "music": "music",
-        "natural phenomenon": "natural phenomenon",
         "night": "night",
         "object": "object",
         "outdoor activity": "outdoor activity",
@@ -309,11 +308,6 @@
             "melody",
             "playing music"
         ],
-        "natural phenomenon": [
-            "nature phenomenon",
-            "natural event",
-            "force of nature"
-        ],
         "night": [
             "nighttime",
             "nocturnal",
@@ -441,17 +435,19 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Type a category here!",
+        "form.needThree": "Pick at least 3 concepts.",
         "form.submit": "Submit",
         "form.correct": "Correct!",
         "form.wrong": "Not quite — try another category.",
         "form.enterHint": "Press 'Enter' to submit!",
         "form.enterAlt": "Press enter",
+        "score.properties": "Categories",
         "score.remaining": "Still findable here",
         "panel.open": "Achievements",
         "panel.title": "Achievements",
         "panel.close": "Close achievements",
-        "panel.mute": "Mute achievement sound",
-        "panel.unmute": "Unmute achievement sound",
+        "panel.mute": "Turn sound effects off",
+        "panel.unmute": "Turn sound effects on",
         "panel.secretName": "???",
         "panel.secretDescription": "A secret achievement.",
         "toast.unlocked": "Achievement unlocked",
@@ -469,8 +465,8 @@
         "language.en": "Switch to English",
         "language.fr": "Passer en français",
         "language.group": "Language",
-        "score.found": "Groups found",
-        "score.finished": "Done on this board",
+        "score.found": "Found",
+        "score.finished": "Concepts done",
         "reset.open": "Start over",
         "reset.title": "Start over?",
         "reset.what": "The groups you have found will be cleared and a fresh board dealt. Your achievements stay.",
@@ -479,9 +475,25 @@
         "drop.add": "Add to",
         "help.open": "How to play",
         "help.group": "Pick three concepts that share a category, then name it.",
+        "help.gauge": "The ring around a concept fills as you find the categories it belongs to.",
         "help.enter": "Press Enter anywhere to put the cursor in the box.",
         "help.reveal": "Point at a concept — or hold it — to see what it already shares.",
-        "help.join": "Drag a concept onto a category you have found to add it there."
+        "help.join": "Drag a concept onto a category you have found to add it there.",
+        "panel.forget": "Clear the achievements",
+        "panel.forgetSure": "They cannot be earned back without playing for them again.",
+        "panel.forgetKeep": "Keep them",
+        "panel.forgetYes": "Yes, clear them",
+        "credit.by": "Built by Noël",
+        "credit.visit": "Noël's portfolio",
+        "music.play": "Turn music on",
+        "music.stop": "Turn music off",
+        "sound.better": "Better with sound on.",
+        "sound.dismiss": "Dismiss",
+        "support.open": "Support the game",
+        "support.invite": "Enjoying this? It is free and always will be — a coffee keeps it going.",
+        "support.yes": "Buy a coffee",
+        "support.no": "No thanks",
+        "summary.support": "If it was worth your evening, you can buy the game a coffee."
     },
     "achievements": {
         "first-light": {
@@ -543,6 +555,22 @@
         "night-owl": {
             "name": "Night Owl",
             "description": "Play between two and four in the morning."
+        },
+        "placed": {
+            "name": "Hands on",
+            "description": "Drop a concept into a category you had already found."
+        },
+        "well-grown": {
+            "name": "Well grown",
+            "description": "Grow one category to six concepts or more."
+        },
+        "streak-of-ten": {
+            "name": "Ten in a row",
+            "description": "Find ten categories without a single miss."
+        },
+        "deja-vu": {
+            "name": "Seen it before",
+            "description": "Find a category you had already found once."
         }
     }
 }

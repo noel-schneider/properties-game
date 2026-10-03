@@ -71,7 +71,11 @@ test('naming a category one of the three has already spent is refused', async ()
   expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
 });
 
-test('there is always something left to find on the board', async () => {
+// Twelve whole answers driven through the interface, which takes about two
+// seconds alone and longer with the rest of the suite competing for the
+// processor. It was failing now and then on the clock rather than on the
+// claim, which is the worst way for a suite to be wrong.
+test('there is always something left to find on the board', { timeout: 30_000 }, async () => {
   const user = userEvent.setup();
   renderApp(<App playChime={() => {}} />);
 

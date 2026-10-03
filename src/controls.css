@@ -65,3 +65,53 @@
     right: 1.25rem;
     align-items: flex-end;
 }
+
+.corner--bottom-left {
+    bottom: 1.25rem;
+    left: 1.25rem;
+    align-items: flex-end;
+}
+
+/*
+ * Switched off: dimmed and struck through, for every control that has an on
+ * and an off. One convention, so a glance at the row says what is running
+ * without reading a single label.
+ */
+.control--off {
+    position: relative;
+    color: #6f6a85;
+}
+
+.control--off > span,
+.control--off > .control__glyph {
+    opacity: 0.6;
+}
+
+.control--off::after {
+    content: '';
+    position: absolute;
+    left: 0.42rem;
+    right: 0.42rem;
+    top: 50%;
+    height: 1.5px;
+    border-radius: 1px;
+    background: #c9c9db;
+    transform: rotate(-32deg);
+}
+
+/*
+ * The drawn glyphs: one weight, one colour, the same size as the typed ones
+ * beside them.
+ */
+.control__glyph {
+    width: 1.05rem;
+    height: 1.05rem;
+    fill: currentColor;
+}
+
+.control__wave {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+}

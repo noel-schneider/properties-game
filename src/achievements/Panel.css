@@ -22,11 +22,13 @@
 .panel__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.4rem;
   margin-bottom: 0.7rem;
 }
 
+/* The title takes the room; the tools sit at the end of the row. */
 .panel__title {
+  flex: 1 1 auto;
   margin: 0;
   font-size: 0.95rem;
   color: #f0ecee;
@@ -84,4 +86,40 @@
 .panel__description {
   font-size: 0.74rem;
   color: #9a9ab0;
+}
+
+/*
+ * The question, when clearing has been asked for. A block of its own under the
+ * header: the warning on one line and the two answers under it, rather than
+ * three things of three different widths wrapping against each other.
+ */
+.panel__clearing {
+    padding: 0.7rem 0.75rem 0.75rem;
+    border-radius: 0.6rem;
+    border: 1px solid #4a3040;
+    background: #2a1f2c;
+    margin-bottom: 0.75rem;
+}
+
+.panel__warning {
+    margin: 0 0 0.6rem;
+    color: #e0b8b8;
+    font-size: 0.76rem;
+    line-height: 1.35;
+}
+
+.panel__choices {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+.control--danger {
+    border-color: #a2515f;
+    color: #ffc9c9;
+}
+
+.control--danger:hover:not(:disabled) {
+    background: #4a2630;
+    border-color: #c4697a;
 }

@@ -40,7 +40,7 @@ export function loadLifetime(): Lifetime {
 
     if (stored === null || typeof stored !== 'object') return emptyLifetime();
 
-    const { unlocked, propertiesFound, aliasAnswers, exactAnswers, conceptsFinished } =
+    const { unlocked, propertiesFound, aliasAnswers, exactAnswers, conceptsFinished, repeats } =
         stored as Record<string, unknown>;
 
     if (
@@ -58,6 +58,9 @@ export function loadLifetime(): Lifetime {
         unlocked: unlocked.filter((id) => known.has(id)),
         // Added after the first records were written, so missing means none.
         conceptsFinished: isNumber(conceptsFinished) ? conceptsFinished : 0,
+        // Added after people had already played: a record written before it
+        // existed is still worth keeping, so it starts from nothing.
+        repeats: isNumber(repeats) ? repeats : 0,
         propertiesFound,
         aliasAnswers,
         exactAnswers,
@@ -80,6 +83,31 @@ export function saveLifetime(lifetime: Lifetime): void {
  * cost players the achievements they had already earned, to store a boolean.
  */
 export const MUTED_KEY = 'properties-game:muted';
+
+/**
+ * Whether the player asked for the music bed.
+ *
+ * Off unless it says otherwise, and deliberately so: music nobody asked for,
+ * starting the moment a page opens, is the thing that makes people close a tab.
+ * Browsers will not let it start without a gesture anyway.
+ */
+export const MUSIC_KEY = 'properties-game:music';
+
+export function loadMusic(): boolean {
+    try {
+        return localStorage.getItem(MUSIC_KEY) === 'true';
+    } catch {
+        return false;
+    }
+}
+
+export function saveMusic(playing: boolean): void {
+    try {
+        localStorage.setItem(MUSIC_KEY, String(playing));
+    } catch {
+        // A preference is not worth a crash.
+    }
+}
 
 export function loadMuted(): boolean {
     try {

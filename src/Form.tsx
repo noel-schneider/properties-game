@@ -24,7 +24,14 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
         wrong: t('form.wrong'),
     };
 
-    const isSubmitEnabled = selected.length >= MIN_SELECTED_CONCEPTS && inputValue.trim().length > 0;
+    const enough = selected.length >= MIN_SELECTED_CONCEPTS;
+    const isSubmitEnabled = enough && inputValue.trim().length > 0;
+
+    // The grey submit button says no without ever saying why. Said only once
+    // somebody starts naming a category: picking one bubble and stopping is a
+    // normal thing to do, and nagging at it would be nagging at play.
+    const short = !enough && inputValue.trim().length > 0;
+    const says = short ? t('form.needThree') : message[feedback];
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -107,8 +114,8 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
                     {t('form.submit')}
                 </button>
             </div>
-            <p className={`feedback feedback--${feedback}`} role="status">
-                {message[feedback]}
+            <p className={`feedback feedback--${short ? 'short' : feedback}`} role="status">
+                {says}
             </p>
             <div className="press-enter-wrapper">
                 <img className={"enter-key-image"} src={"/enter-key.png"} alt={t('form.enterAlt')}/>

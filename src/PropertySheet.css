@@ -1,0 +1,80 @@
+/*
+ * The record of what has been named, under the scoreboard it belongs to.
+ *
+ * Shut by default: fifty categories listed over the board would be the loudest
+ * thing on it, and the player's work is underneath.
+ */
+.sheet {
+    position: relative;
+}
+
+.sheet__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+}
+
+.sheet__button:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.sheet__button--on,
+.sheet__button:hover:not(:disabled) {
+    color: #e2dcde;
+}
+
+.sheet__arrow {
+    margin-left: 0.3rem;
+    font-size: 0.7rem;
+}
+
+.sheet__list {
+    position: absolute;
+    top: 1.8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9500;
+    margin: 0;
+    padding: 0.5rem;
+    list-style: none;
+    width: max-content;
+    min-width: 13rem;
+    max-width: min(26rem, 90vw);
+    max-height: 60vh;
+    overflow-y: auto;
+    border-radius: 0.6rem;
+    border: 1px solid #40405c;
+    background: rgba(28, 30, 48, 0.97);
+    box-shadow: 0 14px 30px rgba(8, 8, 16, 0.45);
+    /* Two columns once there are more than a handful, or fifty of these is a
+       column taller than the window. */
+    columns: 2;
+    column-gap: 1.1rem;
+}
+
+.sheet__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.9rem;
+    padding: 0.18rem 0.3rem;
+    break-inside: avoid;
+    font-size: 0.78rem;
+    color: #8f8aa6;
+}
+
+.sheet__row[data-complete='true'] {
+    color: #ffad69;
+}
+
+.sheet__count {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.8;
+}

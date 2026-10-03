@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import "./App.css";
 import "./controls.css";
 import Answers from "./Answers";
@@ -8,22 +8,30 @@ import Help from "./Help";
 import Scoreboard from "./Scoreboard";
 import Sky from "./Sky";
 import Summary from "./Summary";
+import { SupportInvite } from "./Support";
+import Signature from "./Signature";
+import SoundNote from "./SoundNote";
 import LanguageToggle from "./LanguageToggle";
 import Reset from "./Reset";
 import SoundToggle from "./SoundToggle";
+import MusicToggle from "./MusicToggle";
 import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
-import { playUnlockChime } from "./achievements/chime";
+import { playFoundNote, playUnlockChime } from "./achievements/chime";
 import {
-    emptyRunStats, loadFound, loadLifetime, loadMuted, loadRunStats,
-    saveFound, saveLifetime, saveMuted, saveRunStats,
+    emptyRunStats, loadFound, loadLifetime, loadMuted, loadMusic, loadRunStats,
+    saveFound, saveLifetime, saveMuted, saveMusic, saveRunStats,
 } from "./achievements/storage";
+import { ambientPlaying, layersFor, setAmbientLayers, startAmbient, stopAmbient } from "./ambient";
+import { HINT_AGAIN, HINT_FIRST, HINT_SHOWN, hintPair } from "./hints";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
 import { formableGroups, isExhausted, openingBoard, refill, waysWanted } from "./board";
 import { getAllConcepts } from "./concepts";
-import { isFinished, isSpent } from "./game";
+import { countFinds, isFinished, isSpent } from "./game";
+import { propertyTally } from "./properties";
+import { loadAsked, saveAsked, worthAsking } from "./supporting";
 import { isExactLabel } from "./guess";
 import { resolveGuess } from "./round";
 import { canJoin, joinGroup } from "./join";
@@ -33,6 +41,9 @@ import type { Solution } from "./hand";
 
 export type Feedback = 'none' | 'correct' | 'wrong';
 
+/** How long a newly dealt concept stays marked, in milliseconds. */
+const ARRIVAL_MARK = 2600;
+
 
 const pool = getAllConcepts();
 const byName = new Map(pool.map((concept) => [concept.name, concept]));
@@ -40,9 +51,11 @@ const byName = new Map(pool.map((concept) => [concept.name, concept]));
 interface AppProps {
     /** Injected so tests can watch the unlock sound without making noise. */
     playChime?: () => void;
+    /** Injected too, so the tests can listen without making a sound. */
+    playFound?: (step: number) => void;
 }
 
-function App({ playChime = playUnlockChime }: AppProps) {
+function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProps) {
 
     const { wordings } = useTranslator();
     const [lifetimeAtStart] = useState(loadLifetime);
@@ -76,6 +89,74 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
     const [muted, setMuted] = useState(loadMuted);
+    const [music, setMusic] = useState(loadMusic);
+
+    /**
+     * The bed follows the switch, and nothing else touches it.
+     *
+     * A browser will not let audio start without a gesture, so a player who
+     * left it on last time gets it back on their first click rather than on
+     * arrival — which is also the polite order.
+     */
+    useEffect(() => {
+        if (!music) {
+            stopAmbient();
+            return;
+        }
+
+        startAmbient();
+        if (ambientPlaying()) return;
+
+        const begin = () => startAmbient();
+        document.addEventListener('pointerdown', begin, { once: true });
+        document.addEventListener('keydown', begin, { once: true });
+        return () => {
+            document.removeEventListener('pointerdown', begin);
+            document.removeEventListener('keydown', begin);
+        };
+    }, [music]);
+
+    // Stopped when the game goes, or it outlives the page it belongs to.
+    useEffect(() => stopAmbient, []);
+
+    const toggleMusic = () => {
+        setMusic((playing) => {
+            saveMusic(!playing);
+            return !playing;
+        });
+    };
+    // Asked once in a player's life, never once per sitting.
+    const [askedForSupport, setAskedForSupport] = useState(loadAsked);
+
+    // The two concepts the board is nudging towards, and how many nudges have
+    // been given since the last find — the count is what makes the next one
+    // point somewhere else.
+    const [hinted, setHinted] = useState<string[]>([]);
+    const nudges = useRef(0);
+
+    // What the last answer dealt in, marked on the board for a moment. Held
+    // here rather than worked out in the graph: only this knows which board a
+    // concept arrived on, and a concept that was there before an answer must
+    // not light up because the answer moved it.
+    const [arriving, setArriving] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (arriving.length === 0) return;
+        const timer = setTimeout(() => setArriving([]), ARRIVAL_MARK);
+        return () => clearTimeout(timer);
+    }, [arriving]);
+
+    /**
+     * Refills the board and marks what that brought in.
+     *
+     * Worked out here and not inside a setBoard updater: an updater has to be
+     * pure, and React runs it twice in development to prove it.
+     */
+    const deal = (current: string[], groups: Solution[]) => {
+        const next = refill(current, pool, groups, waysWanted());
+        setArriving(next.filter((name) => !current.includes(name)));
+        setBoard(next);
+    };
 
     const tally = useRef<RunTally>(loadRunStats());
     if (tally.current.boards === 0) {
@@ -135,6 +216,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
             exactName:
                 outcome.property !== undefined && isExactLabel(outcome.property, guess, wordings),
             selection: selected,
+            groupSize: outcome.correct ? selected.length : undefined,
         });
 
         if (!outcome.correct) {
@@ -144,6 +226,8 @@ function App({ playChime = playUnlockChime }: AppProps) {
         }
 
         bumpTally({ correct: tally.current.correct + outcome.points });
+        // After the event, so the note is the one for where the run now stands.
+        if (!muted) playFound(progress.current!.session.streak);
 
         // Each concept that has just run out of properties is announced, so the
         // achievements can count them.
@@ -166,7 +250,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
 
         // Finished concepts stay on the board, small and faded; fresh ones come
         // in beside them so there is always something left to work on.
-        setBoard((current) => refill(current, pool, outcome.found, waysWanted()));
+        deal(board, outcome.found);
         return true;
     };
 
@@ -197,15 +281,34 @@ function App({ playChime = playUnlockChime }: AppProps) {
         bumpTally({ correct: tally.current.correct + 1 });
         record({
             type: 'guess', at: Date.now(), correct: true, property: group.property,
-            exactName: false, selection: [name],
+            exactName: false, selection: [name], groupSize: next[index].concepts.length,
         });
+        if (!muted) playFound(progress.current!.session.streak);
         if (isFinished(concept, next)) record({ type: 'concept-finished', at: Date.now() });
 
         setSelected([]);
         setFeedback('correct');
         setFound(next);
         saveFound(next);
-        setBoard((current) => refill(current, pool, next, waysWanted()));
+        deal(board, next);
+    };
+
+    /**
+     * Throws away every achievement earned.
+     *
+     * The counts behind them go with the list. Clearing only the earned ids
+     * would leave the twenty categories still counted as found, and the
+     * achievement for finding twenty would announce itself again the moment
+     * anything else happened.
+     *
+     * No event is recorded on the way out, so nothing is earned by the act of
+     * clearing — one of them is given simply for playing at a certain hour.
+     */
+    const forgetAchievements = () => {
+        const blank = emptyLifetime();
+        saveLifetime(blank);
+        progress.current = emptyProgress(blank);
+        setUnlocked([]);
     };
 
     const playAgain = () => {
@@ -230,7 +333,55 @@ function App({ playChime = playUnlockChime }: AppProps) {
     };
 
     const concepts = board.map((name) => byName.get(name)).filter((c): c is NonNullable<typeof c> => !!c);
-    const finishedCount = concepts.filter((concept) => isSpent(concept, found, pool)).length;
+    // Against the whole game, not against the board: the board grows as it is
+    // played, and a fraction of it falls as concepts arrive even though the
+    // player has done nothing wrong.
+    //
+    // Worked out only when something is found, because it walks the pool once
+    // per concept — and this renders on every frame while the board settles.
+    const finishedCount = useMemo(
+        () => pool.filter((concept) => isSpent(concept, found, pool)).length,
+        [found],
+    );
+    /**
+     * The nudge for a player who has stalled.
+     *
+     * The clock restarts whenever the board changes — a right answer, or a
+     * concept dropped into a group — and runs on through a wrong one, which is
+     * the whole point: a player guessing and missing is exactly who this is
+     * for. Each nudge lights two concepts for a few seconds and the next one
+     * points somewhere else.
+     */
+    useEffect(() => {
+        let next: ReturnType<typeof setTimeout>;
+        let clear: ReturnType<typeof setTimeout>;
+        nudges.current = 0;
+        setHinted([]);
+
+        const nudge = () => {
+            const pair = hintPair(formableGroups(board, pool, found), nudges.current++);
+            if (pair) setHinted(pair);
+            clear = setTimeout(() => setHinted([]), HINT_SHOWN);
+            next = setTimeout(nudge, HINT_AGAIN);
+        };
+
+        next = setTimeout(nudge, HINT_FIRST);
+        return () => {
+            clearTimeout(next);
+            clearTimeout(clear);
+        };
+    }, [found, board]);
+
+    // The orchestra grows with the game: one more part every twenty concepts
+    // finished, up to five. Set here rather than inside the player, which has
+    // no idea what a concept is.
+    useEffect(() => {
+        setAmbientLayers(layersFor(finishedCount));
+    }, [finishedCount]);
+
+    // Walks the pool once, so it is worked out when something is found rather
+    // than on every frame the board settles through.
+    const namedSoFar = useMemo(() => propertyTally(found, pool), [found]);
     const left = formableGroups(board, pool, found).length;
     // Not merely "no trio can be formed": a concept can still be dropped into
     // a category already found, and there are fourteen such moves waiting at
@@ -242,18 +393,26 @@ function App({ playChime = playUnlockChime }: AppProps) {
           <Sky />
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
-          <Scoreboard found={found.length} finished={finishedCount} onBoard={concepts.length} remaining={left} />
+          <SoundNote muted={muted} />
+          <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} properties={namedSoFar} />
           <div className="corner corner--top-right">
               <Help />
               <LanguageToggle />
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />
+              <MusicToggle playing={music} onToggle={toggleMusic} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} onDropInto={dropInto} />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
-          <div className="corner corner--bottom-right">
-              <Panel unlocked={unlocked} />
+          <div className="corner corner--bottom-left">
+              <Signature />
           </div>
+          <div className="corner corner--bottom-right">
+              <Panel unlocked={unlocked} onForget={forgetAchievements} />
+          </div>
+          {worthAsking({ finds: countFinds(found), asked: askedForSupport }) && (
+              <SupportInvite onDismiss={() => { saveAsked(); setAskedForSupport(true); }} />
+          )}
           <Toast unlocked={announcing} onDismiss={dismissAnnouncement} />
           {exhausted && !dismissedEnd && (
               <Summary

@@ -1,0 +1,42 @@
+import type { Solution } from './hand'
+
+/**
+ * The nudge for a player who has stalled.
+ *
+ * How long the board waits before saying anything, how long it waits between
+ * nudges after that, and how long a nudge stays lit. Six and a half seconds
+ * for the last of those: a player whose eyes are on the other side of the
+ * board needs time to come back and still find it there. Forty-five seconds
+ * because a player scanning twenty bubbles thinks for twenty without being
+ * stuck, and a hint arriving mid-thought is noise rather than help.
+ */
+export const HINT_FIRST = 45_000;
+export const HINT_AGAIN = 25_000;
+export const HINT_SHOWN = 6_500;
+
+/**
+ * Two concepts of a trio that can be made right now, or null if none can.
+ *
+ * Two and not three. Which three go together is half of this game and naming
+ * them is the other half; handing over a whole trio spends both at once, while
+ * two leaves a player something to find and all of the naming.
+ *
+ * Each step picks a different pair — a different group where there is one, and
+ * otherwise a different two of the same group. A nudge that repeats itself
+ * reads as the board stuck rather than the player.
+ */
+export function hintPair(groups: Solution[], step: number): [string, string] | null {
+    if (groups.length === 0) return null;
+
+    const group = groups[step % groups.length];
+    const members = group.concepts;
+    // Which two of the three, rolled on by the step rather than by how many
+    // times the groups have been round. Two groups on a board often share two
+    // members — "drum, radio, bell" and "drum, radio, phone" — and taking the
+    // first two of each would then point at the same pair twice running, which
+    // reads as the board being stuck rather than the player.
+    const first = members[step % members.length];
+    const second = members[(step + 1) % members.length];
+
+    return [first, second];
+}
