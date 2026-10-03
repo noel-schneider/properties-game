@@ -2,27 +2,28 @@ import './Scoreboard.css'
 import { useTranslator } from './i18n'
 
 interface ScoreboardProps {
-    /** Groups found. */
-    found: number;
-    /** Concepts on the board with nothing left to find. */
+    /** Answers got right: a group found, or a concept added to one. */
+    finds: number;
+    /** Concepts in the whole game with nothing left to find. */
     finished: number;
-    onBoard: number;
+    /** Every concept in the game, which does not move while the board does. */
+    total: number;
     /** Groups that can still be formed from what is on the board. */
     remaining: number;
 }
 
-function Scoreboard({ found, finished, onBoard, remaining }: ScoreboardProps) {
+function Scoreboard({ finds, finished, total, remaining }: ScoreboardProps) {
     const { t } = useTranslator();
 
     return (
         <div className="scoreboard">
             <p className="scoreboard__item">
                 {t('score.found')}{' '}
-                <span data-testid="found" className="scoreboard__value">{found}</span>
+                <span data-testid="found" className="scoreboard__value">{finds}</span>
             </p>
             <p className="scoreboard__item">
                 {t('score.finished')}{' '}
-                <span data-testid="finished" className="scoreboard__value">{finished} / {onBoard}</span>
+                <span data-testid="finished" className="scoreboard__value">{finished} / {total}</span>
             </p>
             <p className="scoreboard__item">
                 {t('score.remaining')}{' '}

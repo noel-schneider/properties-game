@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import "./App.css";
 import "./controls.css";
 import Answers from "./Answers";
@@ -23,7 +23,7 @@ import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
 import { formableGroups, isExhausted, openingBoard, refill, waysWanted } from "./board";
 import { getAllConcepts } from "./concepts";
-import { isFinished, isSpent } from "./game";
+import { countFinds, isFinished, isSpent } from "./game";
 import { isExactLabel } from "./guess";
 import { resolveGuess } from "./round";
 import { canJoin, joinGroup } from "./join";
@@ -230,7 +230,16 @@ function App({ playChime = playUnlockChime }: AppProps) {
     };
 
     const concepts = board.map((name) => byName.get(name)).filter((c): c is NonNullable<typeof c> => !!c);
-    const finishedCount = concepts.filter((concept) => isSpent(concept, found, pool)).length;
+    // Against the whole game, not against the board: the board grows as it is
+    // played, and a fraction of it falls as concepts arrive even though the
+    // player has done nothing wrong.
+    //
+    // Worked out only when something is found, because it walks the pool once
+    // per concept — and this renders on every frame while the board settles.
+    const finishedCount = useMemo(
+        () => pool.filter((concept) => isSpent(concept, found, pool)).length,
+        [found],
+    );
     const left = formableGroups(board, pool, found).length;
     // Not merely "no trio can be formed": a concept can still be dropped into
     // a category already found, and there are fourteen such moves waiting at
@@ -242,7 +251,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
           <Sky />
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
-          <Scoreboard found={found.length} finished={finishedCount} onBoard={concepts.length} remaining={left} />
+          <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} />
           <div className="corner corner--top-right">
               <Help />
               <LanguageToggle />

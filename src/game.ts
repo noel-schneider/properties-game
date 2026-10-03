@@ -74,3 +74,20 @@ export function liveProperties(concept: Concept, found: Solution[], pool: Concep
 export function isSpent(concept: Concept, found: Solution[], pool: Concept[]): boolean {
     return liveProperties(concept, found, pool).length === 0;
 }
+
+/**
+ * How many answers the player has got right.
+ *
+ * Groups alone would not do: a concept added to a category already found is an
+ * answer like any other, and twelve per cent of the answers in a game are that
+ * move. Counting groups left every one of them with nothing on screen to show
+ * it had landed.
+ *
+ * A group starts at three members, so each one beyond that was an answer too.
+ */
+export function countFinds(found: Solution[]): number {
+    return found.reduce((count, group) => count + 1 + (group.concepts.length - GROUP_MEMBERS), 0);
+}
+
+/** How many concepts a group holds when it is first found. */
+const GROUP_MEMBERS = 3;
