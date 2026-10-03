@@ -466,7 +466,12 @@
         "panel.forget": "Effacer les succès",
         "panel.forgetSure": "Ils ne reviendront qu’en les méritant de nouveau.",
         "panel.forgetKeep": "Les garder",
-        "panel.forgetYes": "Oui, les effacer"
+        "panel.forgetYes": "Oui, les effacer",
+        "support.open": "Soutenir le jeu",
+        "support.invite": "Ça te plaît ? C’est gratuit et ça le restera — un café et ça continue.",
+        "support.yes": "Offrir un café",
+        "support.no": "Non merci",
+        "summary.support": "Si ça valait ta soirée, tu peux offrir un café au jeu."
     },
     "achievements": {
         "first-light": {

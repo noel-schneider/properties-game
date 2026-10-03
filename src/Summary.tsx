@@ -1,5 +1,6 @@
 import './Summary.css'
 import { useTranslator } from './i18n'
+import { SUPPORT_URL } from './supporting'
 
 export interface RunStats {
     categories: number;
@@ -46,6 +47,15 @@ function Summary({ stats, onPlayAgain, onKeepPlaying }: SummaryProps) {
                         value={`${stats.achievements} / ${stats.totalAchievements}`}
                     />
                 </div>
+
+                {/* After the figures and before the buttons: a thank-you reads as
+                    one when the game is over and the player is already pleased. */}
+                <p className="summary__support">
+                    {t('summary.support')}{' '}
+                    <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+                        {t('support.yes')}
+                    </a>
+                </p>
 
                 <div className="summary__actions">
                     <button type="button" className="summary__button summary__button--primary" onClick={onPlayAgain}>

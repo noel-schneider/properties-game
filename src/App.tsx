@@ -8,6 +8,7 @@ import Help from "./Help";
 import Scoreboard from "./Scoreboard";
 import Sky from "./Sky";
 import Summary from "./Summary";
+import { SupportInvite, SupportLink } from "./Support";
 import LanguageToggle from "./LanguageToggle";
 import Reset from "./Reset";
 import SoundToggle from "./SoundToggle";
@@ -24,6 +25,7 @@ import { CATALOGUE } from "./achievements";
 import { formableGroups, isExhausted, openingBoard, refill, waysWanted } from "./board";
 import { getAllConcepts } from "./concepts";
 import { countFinds, isFinished, isSpent } from "./game";
+import { loadAsked, saveAsked, worthAsking } from "./supporting";
 import { isExactLabel } from "./guess";
 import { resolveGuess } from "./round";
 import { canJoin, joinGroup } from "./join";
@@ -78,6 +80,8 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
 
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
     const [muted, setMuted] = useState(loadMuted);
+    // Asked once in a player's life, never once per sitting.
+    const [askedForSupport, setAskedForSupport] = useState(loadAsked);
 
     const tally = useRef<RunTally>(loadRunStats());
     if (tally.current.boards === 0) {
@@ -285,8 +289,12 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
           <Graph concepts={concepts} pool={pool} selected={selected} found={found} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-right">
+              <SupportLink />
               <Panel unlocked={unlocked} onForget={forgetAchievements} />
           </div>
+          {worthAsking({ finds: countFinds(found), asked: askedForSupport }) && (
+              <SupportInvite onDismiss={() => { saveAsked(); setAskedForSupport(true); }} />
+          )}
           <Toast unlocked={announcing} onDismiss={dismissAnnouncement} />
           {exhausted && !dismissedEnd && (
               <Summary
