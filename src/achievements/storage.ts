@@ -40,7 +40,7 @@ export function loadLifetime(): Lifetime {
 
     if (stored === null || typeof stored !== 'object') return emptyLifetime();
 
-    const { unlocked, propertiesFound, aliasAnswers, exactAnswers, conceptsFinished } =
+    const { unlocked, propertiesFound, aliasAnswers, exactAnswers, conceptsFinished, repeats } =
         stored as Record<string, unknown>;
 
     if (
@@ -58,6 +58,9 @@ export function loadLifetime(): Lifetime {
         unlocked: unlocked.filter((id) => known.has(id)),
         // Added after the first records were written, so missing means none.
         conceptsFinished: isNumber(conceptsFinished) ? conceptsFinished : 0,
+        // Added after people had already played: a record written before it
+        // existed is still worth keeping, so it starts from nothing.
+        repeats: isNumber(repeats) ? repeats : 0,
         propertiesFound,
         aliasAnswers,
         exactAnswers,

@@ -543,6 +543,22 @@
         "night-owl": {
             "name": "Night Owl",
             "description": "Play between two and four in the morning."
+        },
+        "placed": {
+            "name": "Hands on",
+            "description": "Drop a concept into a category you had already found."
+        },
+        "well-grown": {
+            "name": "Well grown",
+            "description": "Grow one category to six concepts or more."
+        },
+        "streak-of-ten": {
+            "name": "Ten in a row",
+            "description": "Find ten categories without a single miss."
+        },
+        "deja-vu": {
+            "name": "Seen it before",
+            "description": "Find a category you had already found once."
         }
     }
 }

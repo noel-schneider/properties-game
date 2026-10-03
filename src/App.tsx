@@ -135,6 +135,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
             exactName:
                 outcome.property !== undefined && isExactLabel(outcome.property, guess, wordings),
             selection: selected,
+            groupSize: outcome.correct ? selected.length : undefined,
         });
 
         if (!outcome.correct) {
@@ -197,7 +198,7 @@ function App({ playChime = playUnlockChime }: AppProps) {
         bumpTally({ correct: tally.current.correct + 1 });
         record({
             type: 'guess', at: Date.now(), correct: true, property: group.property,
-            exactName: false, selection: [name],
+            exactName: false, selection: [name], groupSize: next[index].concepts.length,
         });
         if (isFinished(concept, next)) record({ type: 'concept-finished', at: Date.now() });
 

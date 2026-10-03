@@ -1,7 +1,7 @@
 import type { GameEvent, Lifetime, Progress } from './types'
 
 export function emptyLifetime(): Lifetime {
-    return { unlocked: [], conceptsFinished: 0, propertiesFound: [], aliasAnswers: 0, exactAnswers: 0 };
+    return { unlocked: [], conceptsFinished: 0, propertiesFound: [], repeats: 0, aliasAnswers: 0, exactAnswers: 0 };
 }
 
 export function emptyProgress(lifetime: Lifetime = emptyLifetime()): Progress {
@@ -101,6 +101,11 @@ export function advance(progress: Progress, event: GameEvent): Progress {
                 found && !lifetime.propertiesFound.includes(found)
                     ? [...lifetime.propertiesFound, found]
                     : lifetime.propertiesFound,
+            // Counted rather than read back off the list, because the list has
+            // already been added to by the time a predicate sees it.
+            repeats: found && lifetime.propertiesFound.includes(found)
+                ? lifetime.repeats + 1
+                : lifetime.repeats,
             aliasAnswers: lifetime.aliasAnswers + (event.exactName ? 0 : 1),
             exactAnswers: lifetime.exactAnswers + (event.exactName ? 1 : 0),
         },

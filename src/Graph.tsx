@@ -177,6 +177,16 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
 
     const { points, settled, grab, dragTo, release } = useBubbleLayout(concepts, radii, ties);
 
+    /**
+     * The members of the group found last, so the board can answer back when
+     * an answer lands. Only the latest: marking every group would leave the
+     * whole board flinching for the rest of the game.
+     */
+    const justFound = useMemo(() => {
+        const latest = found[found.length - 1];
+        return new Set(latest ? latest.concepts : []);
+    }, [found]);
+
     const [hovered, setHovered] = useState<string | null>(null);
 
     // Which found group the dragged bubble is currently over, if any.
@@ -369,6 +379,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                 const classes = ['bubble'];
                 if (isDone) classes.push('bubble--done');
                 else if (isSelected) classes.push('bubble--selected');
+                if (justFound.has(concept.name)) classes.push('bubble--just-found');
                 if (kin.has(concept.name)) classes.push('bubble--kin');
                 else if (kin.size > 0) classes.push('bubble--aside');
                 // Lit while a concept is held over their group, so the offer

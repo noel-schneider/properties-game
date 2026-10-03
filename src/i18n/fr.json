@@ -524,6 +524,22 @@
         "night-owl": {
             "name": "Oiseau de nuit",
             "description": "Joue entre deux et quatre heures du matin."
+        },
+        "placed": {
+            "name": "À la main",
+            "description": "Dépose un concept dans une catégorie déjà trouvée."
+        },
+        "well-grown": {
+            "name": "Belle pousse",
+            "description": "Fais grandir une catégorie jusqu’à six concepts ou plus."
+        },
+        "streak-of-ten": {
+            "name": "Dix d’affilée",
+            "description": "Trouve dix catégories sans une seule erreur."
+        },
+        "deja-vu": {
+            "name": "Déjà vu",
+            "description": "Retrouve une catégorie que tu avais déjà trouvée."
         }
     }
 }

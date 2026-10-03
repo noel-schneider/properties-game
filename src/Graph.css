@@ -255,3 +255,63 @@
     transform-box: fill-box;
     transform-origin: center;
 }
+
+/* ---------------------------------------------------------------------------
+ * What the board does when an answer lands.
+ *
+ * All of it on the circle rather than on the group: the group carries the
+ * translate the simulation writes on every frame, and a transform here would
+ * fight it. fill-box, or a scale pivots on the viewBox origin and throws the
+ * bubble across the board.
+ * ------------------------------------------------------------------------ */
+
+/*
+ * The bubble itself, not everything round inside it. The gauge is a circle too
+ * and carries its own rotation to start the dial at the top; a scale here
+ * replaces that rotation outright and the dial swings to three o'clock for the
+ * length of the animation.
+ */
+.bubble--just-found > circle:first-of-type {
+    animation: landed 0.42s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+/* Out past its size and back, which is what a thing being noticed does. */
+@keyframes landed {
+    0%   { transform: scale(1); }
+    38%  { transform: scale(1.16); }
+    100% { transform: scale(1); }
+}
+
+/* The outline closes around them rather than appearing already closed. */
+.found__loop--latest {
+    animation: tighten 0.5s ease-out both;
+}
+
+@keyframes tighten {
+    from { opacity: 0; stroke-width: 16; }
+    to   { opacity: 0.8; stroke-width: 9; }
+}
+
+/* And the name arrives under its own weight. */
+.found__label {
+    animation: name-lands 0.45s ease-out both;
+}
+
+@keyframes name-lands {
+    from { opacity: 0; transform: translateY(7px) scale(0.92); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/*
+ * Asked for less motion: the answer still lands, it simply does not bounce.
+ * The marks that say what happened stay; only the movement goes.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .bubble--just-found > circle:first-of-type,
+    .found__loop--latest,
+    .found__label {
+        animation: none;
+    }
+}
