@@ -20,8 +20,8 @@ import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
 import { playFoundNote, playUnlockChime } from "./achievements/chime";
 import {
-    emptyRunStats, loadFound, loadLifetime, loadMuted, loadMusic, loadRunStats,
-    saveFound, saveLifetime, saveMuted, saveMusic, saveRunStats,
+    emptyRunStats, loadBoard, loadFound, loadLifetime, loadMuted, loadMusic, loadRunStats,
+    saveBoard, saveFound, saveLifetime, saveMuted, saveMusic, saveRunStats,
 } from "./achievements/storage";
 import { ambientPlaying, layersFor, setAmbientLayers, startAmbient, stopAmbient } from "./ambient";
 import MusicBench from "./MusicBench";
@@ -66,11 +66,22 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     // The board is rebuilt from what was found: which concepts are on screen is
     // presentation, what has been found is the game.
     const [board, setBoard] = useState<string[]>(() => {
+        // The board as it was left. It cannot be worked out again: what is
+        // dealt is drawn at random around what has been found, so rebuilding
+        // it handed back a different set of concepts every time — and somebody
+        // stuck on a hard board could refresh their way out of it.
+        const kept = loadBoard().filter((name) => byName.has(name));
+        if (kept.length > 0) return kept;
+
         const stored = loadFound();
         return stored.length > 0
             ? refill([...new Set(stored.flatMap((g) => g.concepts))], pool, stored, waysWanted())
             : openingBoard(pool, waysWanted());
     });
+
+    // Saved wherever it changes, rather than at each of the places that change
+    // it: a deal, a drop, starting over, and the dev bench.
+    useEffect(() => saveBoard(board), [board]);
 
     const [selected, setSelected] = useState<string[]>([]);
     const [feedback, setFeedback] = useState<Feedback>('none');

@@ -99,3 +99,31 @@ test('what has been found survives a reload', async () => {
   renderApp(<App playChime={() => {}} />);
   expect(screen.getByTestId('found')).toHaveTextContent('1');
 });
+
+test('a reload deals nobody a new hand', async () => {
+  // The board is dealt at random around what has been found, so rebuilding it
+  // on a reload handed back a different set of concepts — and a player stuck
+  // on a hard board could refresh their way out of it.
+  const user = userEvent.setup();
+  const { unmount } = renderApp(<App playChime={() => {}} />);
+
+  await solve(user, formable()[0]);
+  const before = screen.getAllByLabelText(/.+/).map((b) => b.getAttribute('aria-label'));
+  unmount();
+
+  renderApp(<App playChime={() => {}} />);
+  const after = screen.getAllByLabelText(/.+/).map((b) => b.getAttribute('aria-label'));
+
+  expect(after).toEqual(before);
+});
+
+test('a board held from before is not thrown away on the way in', () => {
+  // Including the concepts that belong to no group yet, which are exactly the
+  // ones a reload used to replace.
+  localStorage.setItem('properties-game:board', JSON.stringify(['ant', 'bee', 'owl', 'snow']));
+  renderApp(<App playChime={() => {}} />);
+
+  for (const name of ['ant', 'bee', 'owl', 'snow']) {
+    expect(screen.getByLabelText(name)).toBeInTheDocument();
+  }
+});

@@ -428,7 +428,7 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Type a category here!",
-        "form.needThree": "Pick three concepts, then name what they share.",
+        "form.needThree": "Pick at least three concepts.",
         "form.spent": "One of the three has already used that category.",
         "form.submit": "Submit",
         "form.correct": "Correct!",

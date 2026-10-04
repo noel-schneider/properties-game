@@ -80,17 +80,17 @@ test('typing with too few concepts picked says what is missing', async () => {
 
   await user.type(screen.getByPlaceholderText(/type a category here/i), 'in');
 
-  expect(screen.getByRole('status')).toHaveTextContent(/pick three concepts/i);
+  expect(screen.getByRole('status')).toHaveTextContent(/at least three/i);
 });
 
 test('the reminder goes once the third concept is picked', () => {
   const { rerender } = renderApp(
       <Form selected={['bee', 'ant']} feedback="none" onSubmit={() => true} />);
   fireEvent.change(screen.getByPlaceholderText(/type a category here/i), { target: { value: 'insect' } });
-  expect(screen.getByRole('status')).toHaveTextContent(/pick three concepts/i);
+  expect(screen.getByRole('status')).toHaveTextContent(/at least three/i);
 
   rerender(<Form selected={['bee', 'ant', 'beetle']} feedback="none" onSubmit={() => true} />);
-  expect(screen.getByRole('status')).not.toHaveTextContent(/pick three concepts/i);
+  expect(screen.getByRole('status')).not.toHaveTextContent(/at least three/i);
 });
 
 test('an empty box is not nagged at', () => {
@@ -128,7 +128,7 @@ test('the reminder is not on a clock, because the thing it describes is not', ()
     fireEvent.change(screen.getByPlaceholderText(/type a category here/i), { target: { value: 'in' } });
 
     act(() => { vi.advanceTimersByTime(VERDICT_SECONDS * 1000 + 5_000); });
-    expect(screen.getByRole('status')).toHaveTextContent(/pick three concepts/i);
+    expect(screen.getByRole('status')).toHaveTextContent(/at least three/i);
   } finally {
     vi.useRealTimers();
   }

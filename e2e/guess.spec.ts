@@ -133,7 +133,12 @@ test('a concept can be dropped onto a category already found', async ({ page }) 
     const host = names.slice(0, 3)
     await page.goto('/')
     await page.evaluate(
-      ([key, group]) => localStorage.setItem(key as string, JSON.stringify([group])),
+      ([key, group]) => {
+        localStorage.setItem(key as string, JSON.stringify([group]))
+        // The board is kept between visits now, so a seeded game has to clear
+        // it or the last one is restored over the top.
+        localStorage.removeItem('properties-game:board')
+      },
       ['properties-game:found', { property, concepts: host }] as const,
     )
     await page.reload()

@@ -188,6 +188,43 @@ export interface FoundGroup {
     concepts: string[];
 }
 
+/**
+ * The concepts on the board right now.
+ *
+ * Stored because it cannot be worked out again: the board is dealt at random
+ * around what has been found, so rebuilding it on a reload handed the player a
+ * different set of concepts every time. Somebody stuck could refresh their way
+ * out of any hard moment, which is not a game.
+ */
+export const BOARD_KEY = 'properties-game:board';
+
+export function loadBoard(): string[] {
+    let raw: string | null = null;
+    try {
+        raw = localStorage.getItem(BOARD_KEY);
+    } catch {
+        return [];
+    }
+    if (raw === null) return [];
+
+    try {
+        const stored: unknown = JSON.parse(raw);
+        // All or nothing: half a board is worse than a fresh one, because the
+        // missing half is what the player was looking at.
+        return isStringArray(stored) ? stored : [];
+    } catch {
+        return [];
+    }
+}
+
+export function saveBoard(board: string[]): void {
+    try {
+        localStorage.setItem(BOARD_KEY, JSON.stringify(board));
+    } catch {
+        // A board that cannot be remembered is dealt again, as it used to be.
+    }
+}
+
 export function loadFound(): FoundGroup[] {
     let raw: string | null = null;
     try {
