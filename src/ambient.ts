@@ -1,4 +1,5 @@
 import { audioContext } from './achievements/chime'
+import { chordStruck } from './pulse'
 
 /**
  * The bed under the game: a slow chord drift, synthesised rather than bundled.
@@ -371,6 +372,8 @@ function playChord(ctx: AudioContext, into: GainNode): void {
     // Everything this chord will do is scheduled now, at offsets from this one
     // moment. However many parts are playing, the cost in timers is the same.
     sounding = { ctx, into, chord, step };
+    // The background follows the music by being told when a chord lands.
+    chordStruck(playing);
     // Each part into its own fader, so one can be taken out mid-chord.
     for (let i = 0; i < playing; i++) LAYERS[i].play(ctx, channels[i] ?? into, at, chord, step);
     step++;

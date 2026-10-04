@@ -116,3 +116,24 @@ test('an instrument that leaves goes at once, not at the end of the chord', asyn
   expect(after[0]).toBe(1);
   for (const level of after.slice(1)) expect(level).toBeLessThan(0.05);
 })
+
+test('the sunrise moves with the music, and only with it', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  const pulse = page.locator('.sky__pulse');
+
+  // Nothing is playing, so nothing swells.
+  await page.waitForTimeout(2000);
+  expect(await pulse.getAttribute('data-beat')).toBe('0');
+
+  await page.getByRole('button', { name: 'Turn music on' }).click();
+  await expect.poll(async () => Number(await pulse.getAttribute('data-beat')), { timeout: 15_000 })
+    .toBeGreaterThan(0);
+
+  // A chord every nine seconds, and the swell alternates between two identical
+  // animations so that each one actually starts rather than being ignored.
+  const first = await pulse.getAttribute('data-phase');
+  await page.waitForTimeout(10_000);
+  expect(Number(await pulse.getAttribute('data-beat'))).toBeGreaterThan(1);
+  expect(await pulse.getAttribute('data-phase')).not.toBe(first);
+})
