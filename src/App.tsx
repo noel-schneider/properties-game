@@ -24,6 +24,7 @@ import {
     saveFound, saveLifetime, saveMuted, saveMusic, saveRunStats,
 } from "./achievements/storage";
 import { ambientPlaying, layersFor, setAmbientLayers, startAmbient, stopAmbient } from "./ambient";
+import MusicBench from "./MusicBench";
 import { HINT_AGAIN, HINT_FIRST, HINT_SHOWN, hintPair } from "./hints";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
@@ -90,6 +91,10 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
     const [muted, setMuted] = useState(loadMuted);
     const [music, setMusic] = useState(loadMusic);
+    // Dev only: the orchestra forced to a size. A part arrives every twenty
+    // concepts finished — the fifth at the eighty-sixth answer of a game, which
+    // is no way to judge whether it belongs in the piece.
+    const [forcedLayers, setForcedLayers] = useState<number | null>(null);
 
     /**
      * The bed follows the switch, and nothing else touches it.
@@ -376,8 +381,8 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     // finished, up to five. Set here rather than inside the player, which has
     // no idea what a concept is.
     useEffect(() => {
-        setAmbientLayers(layersFor(finishedCount));
-    }, [finishedCount]);
+        setAmbientLayers(forcedLayers ?? layersFor(finishedCount));
+    }, [finishedCount, forcedLayers]);
 
     // Walks the pool once, so it is worked out when something is found rather
     // than on every frame the board settles through.
@@ -393,6 +398,15 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
           <Sky />
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
+          {import.meta.env.DEV && (
+              <MusicBench
+                  forced={forcedLayers}
+                  onPick={(count) => {
+                      setForcedLayers(count);
+                      if (!music) toggleMusic();
+                  }}
+              />
+          )}
           <SoundNote muted={muted} />
           <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} properties={namedSoFar} />
           <div className="corner corner--top-right">

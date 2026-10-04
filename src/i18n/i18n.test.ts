@@ -57,7 +57,7 @@ const IDENTICAL_IN_BOTH = new Set([
   'concepts:robot', 'concepts:satellite', 'concepts:tennis', 'concepts:train',
   'properties:animal', 'properties:communication', 'properties:danger',
   'properties:exploration', 'properties:machine', 'properties:reptile',
-  'properties:sport', 'properties:transport',
+  'properties:art', 'properties:sport', 'properties:transport',
   'ui:graph.label', 'ui:panel.secretName', 'ui:language.en', 'ui:language.fr',
 ]);
 

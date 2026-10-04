@@ -105,7 +105,7 @@
         "accessory": "accessory",
         "airborne": "airborne",
         "animal": "animal",
-        "artistic expression": "artistic expression",
+        "art": "art",
         "astronomy": "astronomy",
         "ball": "ball",
         "biome": "biome",
@@ -120,7 +120,6 @@
         "exploration": "exploration",
         "food": "food",
         "game": "game",
-        "geography": "geography",
         "heat": "heat",
         "insect": "insect",
         "light": "light",
@@ -131,8 +130,7 @@
         "music": "music",
         "night": "night",
         "object": "object",
-        "outdoor activity": "outdoor activity",
-        "physical activity": "physical activity",
+        "outdoors": "outdoors",
         "reading": "reading",
         "reptile": "reptile",
         "sand": "sand",
@@ -172,11 +170,11 @@
             "fauna",
             "beast"
         ],
-        "artistic expression": [
-            "art",
+        "art": [
             "artistic",
-            "creativity",
-            "the arts"
+            "the arts",
+            "artistic expression",
+            "creative"
         ],
         "astronomy": [
             "sky",
@@ -258,12 +256,6 @@
             "pastime",
             "games"
         ],
-        "geography": [
-            "landform",
-            "terrain",
-            "landscape",
-            "earth"
-        ],
         "heat": [
             "hot",
             "warm",
@@ -319,16 +311,11 @@
             "item",
             "stuff"
         ],
-        "outdoor activity": [
-            "outdoors",
-            "outside",
-            "open air"
-        ],
-        "physical activity": [
-            "exercise",
-            "activity",
-            "movement",
-            "workout"
+        "outdoors": [
+            "outdoor",
+            "outdoor activity",
+            "open air",
+            "outside"
         ],
         "reading": [
             "literature",

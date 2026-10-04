@@ -54,8 +54,7 @@
     ],
     "bike": [
         "vehicle",
-        "physical activity",
-        "outdoor activity",
+        "outdoors",
         "sport"
     ],
     "boat": [
@@ -72,8 +71,7 @@
     ],
     "bridge": [
         "building",
-        "city",
-        "geography"
+        "city"
     ],
     "butterfly": [
         "airborne",
@@ -100,7 +98,7 @@
     "campfire": [
         "heat",
         "light",
-        "outdoor activity"
+        "outdoors"
     ],
     "candle": [
         "heat",
@@ -118,7 +116,6 @@
     "cave": [
         "shelter",
         "underground",
-        "geography",
         "biome",
         "location"
     ],
@@ -138,11 +135,10 @@
     "circus": [
         "location",
         "entertainment",
-        "artistic expression"
+        "art"
     ],
     "climbing": [
-        "outdoor activity",
-        "physical activity",
+        "outdoors",
         "sport",
         "exploration"
     ],
@@ -172,22 +168,20 @@
         "danger"
     ],
     "dance": [
-        "artistic expression",
-        "physical activity"
+        "art",
+        "entertainment"
     ],
     "desert": [
         "biome",
-        "sand",
-        "geography"
+        "sand"
     ],
     "drum": [
         "music",
         "sound",
-        "artistic expression"
+        "art"
     ],
     "fishing": [
-        "outdoor activity",
-        "physical activity",
+        "outdoors",
         "water"
     ],
     "football": [
@@ -209,7 +203,7 @@
     "guitar": [
         "music",
         "sound",
-        "artistic expression"
+        "art"
     ],
     "hat": [
         "accessory",
@@ -287,8 +281,7 @@
     "map": [
         "exploration",
         "object",
-        "reading",
-        "geography"
+        "reading"
     ],
     "milk": [
         "white",
@@ -308,7 +301,6 @@
     ],
     "mountain": [
         "cold",
-        "geography",
         "biome"
     ],
     "museum": [
@@ -338,13 +330,13 @@
         "airborne"
     ],
     "painting": [
-        "artistic expression",
+        "art",
         "colors"
     ],
     "park": [
         "trees",
         "location",
-        "outdoor activity",
+        "outdoors",
         "city"
     ],
     "penguin": [
@@ -360,7 +352,7 @@
     "piano": [
         "music",
         "sound",
-        "artistic expression"
+        "art"
     ],
     "pizza": [
         "food",
@@ -372,7 +364,7 @@
     ],
     "poem": [
         "reading",
-        "artistic expression"
+        "art"
     ],
     "radio": [
         "communication",
@@ -392,7 +384,6 @@
     "river": [
         "liquid",
         "water",
-        "geography",
         "biome"
     ],
     "rocket": [
@@ -447,8 +438,7 @@
     "surfing": [
         "water",
         "sport",
-        "physical activity",
-        "outdoor activity"
+        "outdoors"
     ],
     "sword": [
         "metal",
@@ -462,12 +452,11 @@
     "tennis": [
         "sport",
         "ball",
-        "physical activity",
         "game"
     ],
     "theater": [
         "location",
-        "artistic expression",
+        "art",
         "entertainment",
         "building",
         "city"
@@ -490,7 +479,7 @@
     "violin": [
         "music",
         "sound",
-        "artistic expression"
+        "art"
     ],
     "watch": [
         "time",
