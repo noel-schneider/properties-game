@@ -20,6 +20,11 @@
         "entertainment",
         "game"
     ],
+    "atlas": [
+        "exploration",
+        "object",
+        "reading"
+    ],
     "avalanche": [
         "danger",
         "cold"
@@ -178,14 +183,14 @@
         "small",
         "object"
     ],
+    "diving": [
+        "outdoors",
+        "water"
+    ],
     "drum": [
         "music",
         "sound",
         "art"
-    ],
-    "fishing": [
-        "outdoors",
-        "water"
     ],
     "football": [
         "game",
@@ -282,11 +287,6 @@
         "light",
         "weather",
         "danger"
-    ],
-    "map": [
-        "exploration",
-        "object",
-        "reading"
     ],
     "milk": [
         "white",
