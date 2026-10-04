@@ -80,10 +80,6 @@
         "animal",
         "colors"
     ],
-    "button": [
-        "small",
-        "object"
-    ],
     "cabin": [
         "shelter",
         "building"
@@ -177,6 +173,10 @@
     "desert": [
         "biome",
         "sand"
+    ],
+    "dice": [
+        "small",
+        "object"
     ],
     "drum": [
         "music",
