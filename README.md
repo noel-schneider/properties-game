@@ -1,46 +1,78 @@
-# Getting Started with Create React App
+# Properties
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A word game about what things have in common.
 
-## Available Scripts
+The board deals you concepts — a crocodile, an igloo, a bell. Pick three that
+share a category and name it: *reptile*, *cold*, *metal*. Get it right and the
+three are tied together on the board, and the game deals more in.
 
-In the project directory, you can run:
+The catch is that every concept has several categories. A crocodile is a
+reptile, an animal, a danger and a creature of the water, and each of those can
+only be used once by that crocodile. So a concept you have already used comes
+back, waiting for different company. The game is over when all hundred of them
+have given everything they have.
 
-### `npm start`
+Play it: https://properties-game-exzu4z6w2-noelschneiders-projects.vercel.app
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Playing
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- **Pick three concepts that share a category, then name it.** Both spellings,
+  synonyms and near-misses are accepted — *nature* for *biome*, *noise* for
+  *sound*.
+- **Press Enter anywhere** to put the cursor in the box.
+- **Point at a concept** — or hold it with a finger — to see what it already
+  shares with its neighbours.
+- **Drag a concept onto a category you have found** to add it there, which is
+  how the last few are placed once no trio can be made.
+- **The ring around a concept fills** as you find the categories it belongs to.
 
-### `npm test`
+Nothing is sent anywhere. What you have found, the board you left, your
+achievements and your settings live in your browser's local storage, and
+nowhere else.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## The data
 
-### `npm run build`
+A hundred concepts, forty-nine categories, 304 tags between them — three on
+average. It is in [`src/concepts.json`](src/concepts.json), with the two
+languages in [`src/i18n`](src/i18n).
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The shape of it is held by tests rather than by hand: every category has at
+least three members, no two categories hold exactly the same concepts, every
+concept carries between two and five, and the number of concepts that can never
+be part of a trio is capped. A whole game is about ninety-five answers.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Running it
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```sh
+npm install
+npm run dev        # http://localhost:3000
+```
 
-### `npm run eject`
+```sh
+npm test           # 396 unit tests
+npm run test:e2e   # 48 end-to-end tests, in a real browser
+npm run typecheck
+npm run build
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+The end-to-end suite starts the dev server itself. The unit tests run in jsdom,
+which has no audio and no layout, so anything that needs either — the music,
+the sunrise following it, what a crowded board does to itself — is pinned in
+the browser instead.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## How it is built
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Vite, React and TypeScript, with [d3-force](https://d3js.org/d3-force) laying
+the board out. No backend, no accounts, no analytics.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+The sound is synthesised rather than bundled: the note that answers a right
+guess, the chime behind an achievement, and a five-part ambient bed that grows
+an instrument every twenty concepts finished. No audio files, no licences, and
+nothing that loops.
 
-## Learn More
+## Supporting it
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The game is free and always will be. If it was worth your evening there is a
+coffee cup in the corner: [ko-fi.com/noeldesv](https://ko-fi.com/noeldesv).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Built by [Noël](https://noel-schneider.eu).
