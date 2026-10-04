@@ -25,6 +25,7 @@ import {
 } from "./achievements/storage";
 import { ambientPlaying, layersFor, setAmbientLayers, startAmbient, stopAmbient } from "./ambient";
 import MusicBench from "./MusicBench";
+import BoardBench from "./BoardBench";
 import { HINT_AGAIN, HINT_FIRST, HINT_SHOWN, hintPair } from "./hints";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
@@ -95,6 +96,9 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     // concepts finished — the fifth at the eighty-sixth answer of a game, which
     // is no way to judge whether it belongs in the piece.
     const [forcedLayers, setForcedLayers] = useState<number | null>(null);
+
+    // Dev only: what the board looks like once every finished concept has gone.
+    const [swept, setSwept] = useState<string[]>([]);
 
     /**
      * The bed follows the switch, and nothing else touches it.
@@ -398,6 +402,27 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
           <Sky />
           {/* Debugging aid. Folded away in a built game, import and all. */}
           {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
+          {import.meta.env.DEV && (
+              <BoardBench
+                  finished={board.filter((name) => {
+                      const concept = byName.get(name);
+                      return concept && isSpent(concept, found, pool);
+                  }).length}
+                  swept={swept.length}
+                  onSweep={() => {
+                      const going = board.filter((name) => {
+                          const concept = byName.get(name);
+                          return concept && isSpent(concept, found, pool);
+                      });
+                      setSwept(going);
+                      setBoard(board.filter((name) => !going.includes(name)));
+                  }}
+                  onRestore={() => {
+                      setBoard([...board, ...swept]);
+                      setSwept([]);
+                  }}
+              />
+          )}
           {import.meta.env.DEV && (
               <MusicBench
                   forced={forcedLayers}

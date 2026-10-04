@@ -335,6 +335,17 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
     const at = (name: string): Point => points[index.get(name) ?? -1] ?? { x: 0, y: 0 };
 
     /**
+     * Where a group's members are, skipping the ones that are nowhere.
+     *
+     * Past twenty finished concepts the oldest leave the board, and the groups
+     * they belonged to are left naming members that are not drawn. Asking
+     * where those are answered with the middle of the board, so every such
+     * group grew a corner pointing at nothing in the centre of the screen.
+     */
+    const placesOf = (names: string[]): Point[] =>
+        names.filter((name) => index.has(name)).map(at);
+
+    /**
      * Which groups say their name.
      *
      * While a concept is being read, all of its own — showing which concepts
@@ -371,7 +382,10 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                 // The outline of the group just found is drawn bright, and is
                 // the one the landing animation closes around.
                 const latest = groupIndex === live.length - 1;
-                const places = group.concepts.map(at);
+                const places = placesOf(group.concepts);
+                // One corner is a point, and a point is not a shape.
+                if (places.length < 2) return null;
+
                 const centre = {
                     x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
                     y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
@@ -540,7 +554,7 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
               */}
             {spreadLabels(
                 named.map(({ group }) => {
-                    const places = group.concepts.map(at);
+                    const places = placesOf(group.concepts);
                     return {
                         x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
                         y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
