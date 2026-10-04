@@ -51,7 +51,7 @@ test('the two languages carry exactly the same keys', () => {
  * identical is a string that was forgotten rather than translated.
  */
 const IDENTICAL_IN_BOTH = new Set([
-  'concepts:atlas', 'concepts:avalanche', 'concepts:bowling', 'concepts:bus', 'concepts:crocodile',
+  'concepts:atlas', 'concepts:avalanche', 'concepts:bowling', 'concepts:casino', 'concepts:bus', 'concepts:crocodile',
   'concepts:dune', 'concepts:football', 'concepts:glacier', 'concepts:igloo',
   'concepts:jungle', 'concepts:piano', 'concepts:pizza', 'concepts:radio',
   'concepts:robot', 'concepts:satellite', 'concepts:tennis', 'concepts:train',

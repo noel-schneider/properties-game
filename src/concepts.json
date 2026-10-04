@@ -15,11 +15,6 @@
         "building",
         "city"
     ],
-    "arcade": [
-        "location",
-        "entertainment",
-        "game"
-    ],
     "atlas": [
         "exploration",
         "object",
@@ -32,12 +27,6 @@
     "basketball": [
         "game",
         "sport"
-    ],
-    "bat": [
-        "animal",
-        "night",
-        "airborne",
-        "underground"
     ],
     "beach": [
         "water",
@@ -117,6 +106,11 @@
         "vehicle",
         "machine"
     ],
+    "casino": [
+        "location",
+        "entertainment",
+        "game"
+    ],
     "cave": [
         "shelter",
         "underground",
@@ -173,7 +167,8 @@
     ],
     "dance": [
         "art",
-        "entertainment"
+        "entertainment",
+        "sport"
     ],
     "desert": [
         "biome",
@@ -192,6 +187,12 @@
         "sound",
         "art"
     ],
+    "firefly": [
+        "animal",
+        "night",
+        "airborne",
+        "light"
+    ],
     "football": [
         "game",
         "sport"
@@ -200,6 +201,10 @@
         "biome",
         "trees",
         "green"
+    ],
+    "garden": [
+        "trees",
+        "location"
     ],
     "glacier": [
         "water",
@@ -273,7 +278,8 @@
         "heat",
         "danger",
         "liquid",
-        "red"
+        "red",
+        "underground"
     ],
     "letter": [
         "communication",
@@ -323,10 +329,6 @@
     "nest": [
         "shelter",
         "small"
-    ],
-    "orchard": [
-        "trees",
-        "location"
     ],
     "owl": [
         "animal",

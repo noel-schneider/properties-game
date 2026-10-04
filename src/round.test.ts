@@ -21,7 +21,7 @@ test('a group whose property is open for all three is accepted', () => {
 
 test('a concept serves again, for another of its properties', () => {
     const first: Solution[] = [{ property: 'biome', concepts: forest }];
-    const outcome = resolveGuess(['jungle', 'forest', 'orchard'], 'trees', { wordings, pool, found: first });
+    const outcome = resolveGuess(['jungle', 'forest', 'garden'], 'trees', { wordings, pool, found: first });
 
     expect(outcome.correct).toBe(true);
     expect(outcome.property).toBe('trees');
