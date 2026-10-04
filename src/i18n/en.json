@@ -107,19 +107,19 @@
         "animal": "animal",
         "art": "art",
         "astronomy": "astronomy",
-        "ball": "ball",
+        "big": "big",
         "biome": "biome",
         "building": "building",
         "city": "city",
         "cold": "cold",
-        "colors": "colors",
+        "colors": "colourful",
         "communication": "communication",
         "danger": "danger",
-        "dish": "dish",
         "entertainment": "entertainment",
         "exploration": "exploration",
         "food": "food",
         "game": "game",
+        "green": "green",
         "heat": "heat",
         "insect": "insect",
         "light": "light",
@@ -131,7 +131,9 @@
         "night": "night",
         "object": "object",
         "outdoors": "outdoors",
+        "oven": "oven",
         "reading": "reading",
+        "red": "red",
         "reptile": "reptile",
         "sand": "sand",
         "shelter": "shelter",
@@ -144,7 +146,6 @@
         "time": "time",
         "trees": "trees",
         "underground": "underground",
-        "vegetation": "vegetation",
         "vehicle": "vehicle",
         "water": "water",
         "weather": "weather",
@@ -182,9 +183,11 @@
             "outer space",
             "stargazing"
         ],
-        "ball": [
-            "ball game",
-            "played with a ball"
+        "big": [
+            "large",
+            "huge",
+            "enormous",
+            "vast"
         ],
         "biome": [
             "nature",
@@ -212,10 +215,10 @@
             "chilly"
         ],
         "colors": [
-            "color",
-            "colorful",
+            "many colours",
             "colourful",
-            "bright"
+            "multicoloured",
+            "colours"
         ],
         "communication": [
             "talking",
@@ -228,11 +231,6 @@
             "deadly",
             "risky",
             "hazard"
-        ],
-        "dish": [
-            "meal",
-            "course",
-            "recipe"
         ],
         "entertainment": [
             "fun",
@@ -255,6 +253,9 @@
             "play",
             "pastime",
             "games"
+        ],
+        "green": [
+            "greenish"
         ],
         "heat": [
             "hot",
@@ -317,11 +318,20 @@
             "open air",
             "outside"
         ],
+        "oven": [
+            "baked",
+            "baking",
+            "bakery"
+        ],
         "reading": [
             "literature",
             "text",
             "written",
             "books"
+        ],
+        "red": [
+            "scarlet",
+            "crimson"
         ],
         "reptile": [
             "cold blooded",
@@ -375,22 +385,16 @@
             "clock"
         ],
         "trees": [
-            "wood",
+            "tree",
+            "vegetation",
             "woods",
-            "woodland",
-            "timber"
+            "greenery"
         ],
         "underground": [
             "below ground",
             "under the ground",
             "buried",
             "subterranean"
-        ],
-        "vegetation": [
-            "plants",
-            "greenery",
-            "flora",
-            "green"
         ],
         "vehicle": [
             "transportation",

@@ -107,19 +107,19 @@
         "animal": "animal",
         "art": "art",
         "astronomy": "astronomie",
-        "ball": "ballon",
+        "big": "grand",
         "biome": "nature",
         "building": "bâtiment",
         "city": "ville",
         "cold": "froid",
-        "colors": "couleurs",
+        "colors": "multicolore",
         "communication": "communication",
         "danger": "danger",
-        "dish": "plat",
         "entertainment": "divertissement",
         "exploration": "exploration",
         "food": "nourriture",
         "game": "jeu",
+        "green": "vert",
         "heat": "chaleur",
         "insect": "insecte",
         "light": "lumière",
@@ -131,7 +131,9 @@
         "night": "nuit",
         "object": "objet",
         "outdoors": "extérieur",
+        "oven": "four",
         "reading": "lecture",
+        "red": "rouge",
         "reptile": "reptile",
         "sand": "sable",
         "shelter": "abri",
@@ -144,7 +146,6 @@
         "time": "temps",
         "trees": "arbres",
         "underground": "souterrain",
-        "vegetation": "végétation",
         "vehicle": "véhicule",
         "water": "eau",
         "weather": "météo",
@@ -178,10 +179,11 @@
             "ciel",
             "cosmos"
         ],
-        "ball": [
-            "balle",
-            "jeu de ballon",
-            "sport de balle"
+        "big": [
+            "gros",
+            "grande",
+            "immense",
+            "énorme"
         ],
         "biome": [
             "biome",
@@ -207,7 +209,8 @@
             "frais"
         ],
         "colors": [
-            "couleur",
+            "multicolores",
+            "plusieurs couleurs",
             "coloré",
             "bariolé"
         ],
@@ -221,11 +224,6 @@
             "mortel",
             "risqué",
             "péril"
-        ],
-        "dish": [
-            "repas",
-            "recette",
-            "mets"
         ],
         "entertainment": [
             "loisir",
@@ -247,6 +245,10 @@
             "jouer",
             "jeux",
             "passe-temps"
+        ],
+        "green": [
+            "verte",
+            "verdure"
         ],
         "heat": [
             "chaud",
@@ -304,10 +306,19 @@
             "dehors",
             "extérieur"
         ],
+        "oven": [
+            "cuit au four",
+            "cuisson",
+            "boulangerie"
+        ],
         "reading": [
             "lire",
             "littérature",
             "écrit"
+        ],
+        "red": [
+            "rouges",
+            "écarlate"
         ],
         "reptile": [
             "sang froid",
@@ -361,21 +372,16 @@
             "horloge"
         ],
         "trees": [
+            "arbre",
+            "végétation",
             "bois",
-            "forêt",
-            "arbre"
+            "verdure"
         ],
         "underground": [
             "sous terre",
             "en dessous",
             "enterré",
             "sous le sol"
-        ],
-        "vegetation": [
-            "plantes",
-            "verdure",
-            "flore",
-            "végétal"
         ],
         "vehicle": [
             "engin",

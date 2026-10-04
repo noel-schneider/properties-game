@@ -2,7 +2,8 @@
     "airplane": [
         "vehicle",
         "airborne",
-        "machine"
+        "machine",
+        "big"
     ],
     "ant": [
         "insect",
@@ -25,8 +26,7 @@
     ],
     "basketball": [
         "game",
-        "sport",
-        "ball"
+        "sport"
     ],
     "bat": [
         "animal",
@@ -67,11 +67,12 @@
     ],
     "bread": [
         "food",
-        "dish"
+        "oven"
     ],
     "bridge": [
         "building",
-        "city"
+        "city",
+        "big"
     ],
     "butterfly": [
         "airborne",
@@ -89,7 +90,8 @@
     ],
     "cake": [
         "food",
-        "sweet"
+        "sweet",
+        "oven"
     ],
     "calendar": [
         "time",
@@ -98,7 +100,8 @@
     "campfire": [
         "heat",
         "light",
-        "outdoors"
+        "outdoors",
+        "red"
     ],
     "candle": [
         "heat",
@@ -122,7 +125,8 @@
     "chameleon": [
         "reptile",
         "animal",
-        "colors"
+        "colors",
+        "green"
     ],
     "chess": [
         "entertainment",
@@ -150,8 +154,7 @@
     "coin": [
         "metal",
         "object",
-        "small",
-        "city"
+        "small"
     ],
     "compass": [
         "exploration",
@@ -186,19 +189,19 @@
     ],
     "football": [
         "game",
-        "sport",
-        "ball"
+        "sport"
     ],
     "forest": [
         "biome",
-        "vegetation",
-        "trees"
+        "trees",
+        "green"
     ],
     "glacier": [
         "water",
         "cold",
         "white",
-        "biome"
+        "biome",
+        "big"
     ],
     "guitar": [
         "music",
@@ -235,8 +238,8 @@
     ],
     "jungle": [
         "biome",
-        "vegetation",
-        "trees"
+        "trees",
+        "green"
     ],
     "key": [
         "metal",
@@ -246,14 +249,15 @@
     "kite": [
         "airborne",
         "game",
-        "wind"
+        "wind",
+        "colors"
     ],
     "ladybug": [
         "insect",
         "animal",
-        "colors",
         "small",
-        "airborne"
+        "airborne",
+        "red"
     ],
     "lantern": [
         "night",
@@ -263,7 +267,8 @@
     "lava": [
         "heat",
         "danger",
-        "liquid"
+        "liquid",
+        "red"
     ],
     "letter": [
         "communication",
@@ -301,7 +306,8 @@
     ],
     "mountain": [
         "cold",
-        "biome"
+        "biome",
+        "big"
     ],
     "museum": [
         "building",
@@ -316,11 +322,10 @@
     ],
     "nest": [
         "shelter",
-        "trees"
+        "small"
     ],
     "orchard": [
         "trees",
-        "vegetation",
         "location"
     ],
     "owl": [
@@ -337,7 +342,8 @@
         "trees",
         "location",
         "outdoors",
-        "city"
+        "city",
+        "green"
     ],
     "penguin": [
         "water",
@@ -356,11 +362,12 @@
     ],
     "pizza": [
         "food",
-        "dish"
+        "oven"
     ],
     "planet": [
         "astronomy",
-        "space"
+        "space",
+        "big"
     ],
     "poem": [
         "reading",
@@ -401,7 +408,8 @@
     "snake": [
         "animal",
         "reptile",
-        "danger"
+        "danger",
+        "green"
     ],
     "snow": [
         "cold",
@@ -410,7 +418,6 @@
     ],
     "soup": [
         "food",
-        "dish",
         "liquid"
     ],
     "star": [
@@ -427,7 +434,8 @@
         "exploration",
         "vehicle",
         "water",
-        "underground"
+        "underground",
+        "big"
     ],
     "subway": [
         "vehicle",
@@ -451,7 +459,6 @@
     ],
     "tennis": [
         "sport",
-        "ball",
         "game"
     ],
     "theater": [
@@ -474,7 +481,8 @@
     "turtle": [
         "water",
         "animal",
-        "reptile"
+        "reptile",
+        "green"
     ],
     "violin": [
         "music",
