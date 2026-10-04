@@ -318,23 +318,46 @@ let sounding: { ctx: AudioContext; into: GainNode; chord: number[]; step: number
  */
 export function setAmbientLayers(count: number): void {
     const wanted = Math.max(1, Math.min(LAYERS.length, Math.floor(count)));
-    const joining = LAYERS.slice(playing, wanted);
+    const before = playing;
     playing = wanted;
 
-    if (!sounding || joining.length === 0) return;
+    if (!sounding || wanted === before) return;
 
     try {
-        const { ctx, into, chord } = sounding;
-        const { step: where } = sounding;
-        for (const layer of joining) layer.play(ctx, into, ctx.currentTime, chord, where);
+        const { ctx, chord, step: where } = sounding;
+
+        // Leaving: the notes a part has already scheduled run for the rest of
+        // the chord, so without this a game started over kept its whole
+        // orchestra for up to thirteen seconds. Its fader comes down instead.
+        for (let i = wanted; i < before; i++) {
+            const fader = channels[i];
+            if (!fader) continue;
+            fader.gain.cancelScheduledValues(ctx.currentTime);
+            fader.gain.setValueAtTime(fader.gain.value, ctx.currentTime);
+            fader.gain.linearRampToValueAtTime(0, ctx.currentTime + LEAVE_SECONDS);
+        }
+
+        // Joining: on the chord already sounding, not the next one.
+        for (let i = before; i < wanted; i++) {
+            const fader = channels[i];
+            if (!fader) continue;
+            fader.gain.cancelScheduledValues(ctx.currentTime);
+            fader.gain.setValueAtTime(1, ctx.currentTime);
+            LAYERS[i].play(ctx, fader, ctx.currentTime, chord, where);
+        }
     } catch {
         // Music is a garnish.
     }
 }
 
 let bus: GainNode | null = null;
+/** One fader per part, so a part can be taken out without waiting for a chord. */
+let channels: GainNode[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
 let step = 0;
+
+/** How long a part takes to leave. Quick, but not a cut. */
+const LEAVE_SECONDS = 1.4;
 
 /** Whether the bed is running. */
 export function ambientPlaying(): boolean {
@@ -348,7 +371,8 @@ function playChord(ctx: AudioContext, into: GainNode): void {
     // Everything this chord will do is scheduled now, at offsets from this one
     // moment. However many parts are playing, the cost in timers is the same.
     sounding = { ctx, into, chord, step };
-    for (const layer of LAYERS.slice(0, playing)) layer.play(ctx, into, at, chord, step);
+    // Each part into its own fader, so one can be taken out mid-chord.
+    for (let i = 0; i < playing; i++) LAYERS[i].play(ctx, channels[i] ?? into, at, chord, step);
     step++;
 
     // The next one starts before this one has finished, so nothing ever lands
@@ -361,8 +385,15 @@ function playChord(ctx: AudioContext, into: GainNode): void {
 // A way in for the end-to-end tests, which cannot play eighty concepts to
 // reach the fifth instrument. Dropped from a built game along with the branch.
 if (import.meta.env.DEV) {
-    (globalThis as { __ambient?: { setAmbientLayers: (count: number) => void } }).__ambient =
-        { setAmbientLayers };
+    (globalThis as {
+        __ambient?: {
+            setAmbientLayers: (count: number) => void;
+            faders: () => number[];
+        };
+    }).__ambient = {
+        setAmbientLayers,
+        faders: () => channels.map((fader) => fader.gain.value),
+    };
 }
 
 /**
@@ -385,6 +416,13 @@ export function startAmbient(): void {
         gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 4);
 
         gain.connect(ctx.destination);
+        channels = LAYERS.map(() => {
+            const fader = ctx.createGain();
+            fader.gain.setValueAtTime(1, ctx.currentTime);
+            fader.connect(gain);
+            return fader;
+        });
+
         bus = gain;
         playChord(ctx, gain);
     } catch {
@@ -403,6 +441,7 @@ export function stopAmbient(): void {
     const going = bus;
     bus = null;
     sounding = null;
+    channels = [];
 
     try {
         const ctx = audioContext();

@@ -89,3 +89,30 @@ test('an instrument that joins is heard joining, not nine seconds later', async 
   // waited for that chord would add nothing at all inside this window.
   expect(await count(page) - before).toBeGreaterThanOrEqual(5);
 })
+
+test('an instrument that leaves goes at once, not at the end of the chord', async ({ page }) => {
+  // Starting the game over drops the orchestra back to one part. The notes a
+  // part has already scheduled run for the rest of the chord, so without a
+  // fader of its own a reset kept the whole orchestra for thirteen seconds.
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Turn music on' }).click();
+
+  await page.evaluate(() => (window as unknown as {
+    __ambient: { setAmbientLayers: (count: number) => void };
+  }).__ambient.setAmbientLayers(5));
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => (window as unknown as {
+    __ambient: { faders: () => number[] };
+  }).__ambient.faders())).toEqual([1, 1, 1, 1, 1]);
+
+  await page.evaluate(() => (window as unknown as {
+    __ambient: { setAmbientLayers: (count: number) => void };
+  }).__ambient.setAmbientLayers(1));
+  await page.waitForTimeout(1800);
+
+  const after = await page.evaluate(() => (window as unknown as {
+    __ambient: { faders: () => number[] };
+  }).__ambient.faders());
+  expect(after[0]).toBe(1);
+  for (const level of after.slice(1)) expect(level).toBeLessThan(0.05);
+})
