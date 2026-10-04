@@ -42,3 +42,30 @@ test('nothing unfound is ever listed, whatever the board is holding', () => {
 
   expect(propertyTally(found, pool)).toHaveLength(1);
 });
+
+test('a category found twice is one line, not two', () => {
+  // A property can be found again by different concepts — that is what lets
+  // the ones dealt later ever be finished — and the list showed one row per
+  // group, so the same category appeared two and three times over.
+  const found: Solution[] = [
+    { property: 'small', concepts: ['ant', 'bee', 'coin'] },
+    { property: 'small', concepts: ['key', 'moth', 'bell'] },
+  ];
+  const rows = propertyTally(found, pool);
+
+  expect(rows).toHaveLength(1);
+  expect(rows[0].property).toBe('small');
+});
+
+test('the members of a category found twice are counted together', () => {
+  const found: Solution[] = [
+    { property: 'metal', concepts: ['coin', 'key', 'bell'] },
+    { property: 'metal', concepts: ['coin', 'key', 'bell'] },
+  ];
+  const [row] = propertyTally(found, pool);
+
+  // The same three counted once, not six out of three.
+  expect(row.have).toBe(3);
+  expect(row.total).toBe(3);
+  expect(row.complete).toBe(true);
+});

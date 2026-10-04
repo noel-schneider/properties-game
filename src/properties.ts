@@ -28,14 +28,25 @@ export function propertyTally(found: Solution[], pool: Concept[]): PropertyRow[]
         }
     }
 
-    return found
-        .map((group) => {
-            const total = size.get(group.property) ?? group.concepts.length;
+    // One line per category, not one per group. A property can be found again
+    // by different concepts — that is what lets the ones dealt later ever be
+    // finished — so the same name turned up two and three times over, each
+    // time with its own partial count.
+    const placed = new Map<string, Set<string>>();
+    for (const group of found) {
+        const already = placed.get(group.property) ?? new Set<string>();
+        for (const name of group.concepts) already.add(name);
+        placed.set(group.property, already);
+    }
+
+    return [...placed.entries()]
+        .map(([property, members]) => {
+            const total = size.get(property) ?? members.size;
             return {
-                property: group.property,
-                have: group.concepts.length,
+                property,
+                have: members.size,
                 total,
-                complete: group.concepts.length >= total,
+                complete: members.size >= total,
             };
         })
         .sort((a, b) => {

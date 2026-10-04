@@ -115,3 +115,20 @@ describe.each(Object.entries(languages))('%s wordings', (_name, locale) => {
     expect(stolen).toEqual([]);
   });
 });
+
+test('every category answers to its own id in English', () => {
+  // The ids are English words and the game is played in English by default, so
+  // a player typing the id is typing a reasonable answer. Renaming "colors" to
+  // "colourful" and forgetting the old spelling left a category that could not
+  // be answered by the word it is named after — which surfaced as a suite that
+  // failed one run in three, whenever the board happened to offer that trio.
+  const refused: string[] = [];
+  for (const id of properties) {
+    const label = (en.properties as Record<string, string>)[id];
+    const aliases = (en.aliases as Record<string, string[]>)[id] ?? [];
+    const accepted = new Set([label, ...aliases].map(fold));
+    if (!accepted.has(fold(id))) refused.push(id);
+  }
+
+  expect(refused).toEqual([]);
+});
