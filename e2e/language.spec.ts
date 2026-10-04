@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { boardSettled } from './board'
+import { boardSettled, clearGame } from './board'
 import en from '../src/i18n/en.json' with { type: 'json' }
 import fr from '../src/i18n/fr.json' with { type: 'json' }
 
@@ -25,7 +25,7 @@ test('the game opens in English otherwise', async ({ page }) => {
 test('the flags switch the whole game over, and the choice sticks', async ({ page }) => {
   await page.goto('/')
   await boardSettled(page)
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
 

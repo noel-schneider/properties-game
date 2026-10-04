@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { boardSettled } from './board'
+import { boardSettled, clearGame } from './board'
 import english from '../src/i18n/en.json' with { type: 'json' }
 import data from '../src/concepts.json' with { type: 'json' }
 
@@ -80,7 +80,7 @@ test('a found group stays on the board, tied and named, and its concepts carry o
   // Start from a clean record, then read the board that comes with it.
   await page.goto('/')
   await boardSettled(page)
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
   await expect(page.getByTestId('found')).toHaveText('0')

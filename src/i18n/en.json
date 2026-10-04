@@ -468,6 +468,8 @@
         "reset.confirm": "Clear and start over",
         "drop.add": "Add to",
         "help.open": "How to play",
+        "help.welcome": "A few things worth knowing before you start.",
+        "help.start": "Got it",
         "help.group": "Pick three concepts that share a category, then name it.",
         "help.gauge": "The ring around a concept fills as you find the categories it belongs to.",
         "help.enter": "Press Enter anywhere to put the cursor in the box.",

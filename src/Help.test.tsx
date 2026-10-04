@@ -2,6 +2,12 @@ import { fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderApp } from './test-utils'
 import Help, { LESSONS } from './Help'
+import { saveGreeted } from './greeting'
+
+// These are about the panel a returning player meets. What somebody arriving
+// for the first time sees is pinned in HelpIntro.test.tsx.
+beforeEach(() => saveGreeted());
+afterEach(() => localStorage.clear());
 
 test('it is one button until it is asked for', () => {
   renderApp(<Help />);

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { boardSettled } from './board'
+import { boardSettled, clearGame } from './board'
 import data from '../src/concepts.json' with { type: 'json' }
 
 const properties = data as Record<string, string[]>
@@ -149,7 +149,7 @@ test.describe('with the board in motion', () => {
 
 test('starting over asks first, and keeps the achievements', async ({ page }) => {
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
 
@@ -230,7 +230,7 @@ test('a bubble reached with the keyboard keeps the enter key for itself', async 
 
 test('pointing at a concept shows what it shares, once something is found', async ({ page }) => {
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
 
@@ -264,7 +264,7 @@ test('pointing at a concept shows what it shares, once something is found', asyn
 
 test('tabbing to a concept reveals its kin, clicking one does not', async ({ page }) => {
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
 
@@ -383,7 +383,7 @@ test.describe('on a touchscreen', () => {
 
   test('holding a concept with a finger reveals what it shares', async ({ page }) => {
     await page.goto('/')
-    await page.evaluate(() => localStorage.clear())
+    await clearGame(page)
     await page.reload()
     await boardSettled(page)
 

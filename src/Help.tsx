@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import './Help.css'
+import { loadGreeted, saveGreeted } from './greeting'
 import { useTranslator } from './i18n'
 import type { UiKey } from './i18n'
 
@@ -107,7 +108,19 @@ export const LESSONS: { id: string; wording: UiKey; draw: () => React.ReactNode 
  */
 function Help() {
     const { t } = useTranslator();
-    const [open, setOpen] = useState(false);
+    // Pinned open for somebody arriving for the first time: four gestures the
+    // board cannot announce on its own, said once. Pinned rather than merely
+    // open, because the panel normally follows the pointer and shuts the
+    // moment it leaves — a greeting that vanishes before it is read is no
+    // greeting at all.
+    const [greeting, setGreeting] = useState(() => !loadGreeted());
+    const [open, setOpen] = useState(greeting);
+
+    const done = () => {
+        saveGreeted();
+        setGreeting(false);
+        setOpen(false);
+    };
 
     // On the document, not on the sheet: the pointer opens this without ever
     // giving it focus, so a key pressed afterwards lands nowhere near it.
@@ -115,31 +128,38 @@ function Help() {
         if (!open) return;
 
         const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') setOpen(false);
+            if (event.key !== 'Escape') return;
+            if (greeting) done();
+            else setOpen(false);
         };
         document.addEventListener('keydown', onKeyDown);
         return () => document.removeEventListener('keydown', onKeyDown);
-    }, [open]);
+    }, [open, greeting]);
 
     return (
         <div
             className="help"
             onPointerEnter={() => setOpen(true)}
-            onPointerLeave={() => setOpen(false)}
+            onPointerLeave={() => { if (!greeting) setOpen(false); }}
         >
             <button
                 type="button"
                 className={open ? 'control control--icon control--on' : 'control control--icon'}
                 aria-label={t('help.open')}
                 aria-expanded={open}
-                onClick={() => setOpen((shown) => !shown)}
+                onClick={() => (greeting ? done() : setOpen((shown) => !shown))}
                 onFocus={() => setOpen(true)}
             >
                 <span aria-hidden="true">?</span>
             </button>
 
             {open && (
-                <div className="help__sheet" role="dialog" aria-label={t('help.open')}>
+                <div
+                    className={greeting ? 'help__sheet help__sheet--greeting' : 'help__sheet'}
+                    role="dialog"
+                    aria-label={t('help.open')}
+                >
+                    {greeting && <p className="help__welcome">{t('help.welcome')}</p>}
                     <ul className="help__lessons">
                         {LESSONS.map((lesson) => (
                             <li key={lesson.id} className="help__lesson">
@@ -150,6 +170,11 @@ function Help() {
                             </li>
                         ))}
                     </ul>
+                    {greeting && (
+                        <button type="button" className="control help__start" onClick={done}>
+                            {t('help.start')}
+                        </button>
+                    )}
                 </div>
             )}
         </div>

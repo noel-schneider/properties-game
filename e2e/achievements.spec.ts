@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { boardSettled } from './board'
+import { boardSettled, clearGame } from './board'
 import data from '../src/concepts.json' with { type: 'json' }
 
 const properties = data as Record<string, string[]>
@@ -34,7 +34,7 @@ async function solveOnce(page: import('@playwright/test').Page) {
 test('the first find announces an achievement, and it survives a reload', async ({ page }) => {
   await page.goto('/')
   await boardSettled(page)
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
 
@@ -61,7 +61,7 @@ test('the first find announces an achievement, and it survives a reload', async 
 test('the announcement clears itself after a few seconds', async ({ page }) => {
   await page.goto('/')
   await boardSettled(page)
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
 
@@ -73,7 +73,7 @@ test('the announcement clears itself after a few seconds', async ({ page }) => {
 test('the panel names the public achievements and conceals the secret ones', async ({ page }) => {
   await page.goto('/')
   await boardSettled(page)
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
 
@@ -104,7 +104,7 @@ test('the panel names the public achievements and conceals the secret ones', asy
 test('an earned achievement shows up in the panel after a reload', async ({ page }) => {
   await page.goto('/')
   await boardSettled(page)
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
 
@@ -130,7 +130,7 @@ test('an earned achievement shows up in the panel after a reload', async ({ page
 test('the sound can be muted and the choice is remembered', async ({ page }) => {
   await page.goto('/')
   await boardSettled(page)
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
 
@@ -145,7 +145,7 @@ test('the sound can be muted and the choice is remembered', async ({ page }) => 
 
 test('the sound can be muted from the corner, and the choice sticks', async ({ page }) => {
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
 
