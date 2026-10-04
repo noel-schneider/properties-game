@@ -1,5 +1,12 @@
 import './BoardBench.css'
 
+/** Roughly where a game is at each stage, in answers given, out of about 95. */
+export const STAGES: { label: string; answers: number }[] = [
+    { label: 'Début', answers: 0 },
+    { label: 'Milieu', answers: 48 },
+    { label: 'Fin', answers: 85 },
+];
+
 interface Props {
     /** How many concepts on the board have nothing left to find. */
     finished: number;
@@ -9,6 +16,8 @@ interface Props {
     onRestore: () => void;
     /** Whether there is anything to put back. */
     swept: number;
+    /** Plays the game forward to a given number of answers, and shows it. */
+    onJump: (answers: number) => void;
 }
 
 /**
@@ -18,7 +27,7 @@ interface Props {
  * half, which is far too slow and too late to look at while deciding whether
  * it should trim harder. This does the whole lot on a click.
  */
-function BoardBench({ finished, onSweep, onRestore, swept }: Props) {
+function BoardBench({ finished, onSweep, onRestore, swept, onJump }: Props) {
     return (
         <div className="board-bench">
             <span className="board-bench__label">Plateau</span>
@@ -38,6 +47,17 @@ function BoardBench({ finished, onSweep, onRestore, swept }: Props) {
             >
                 Remettre ({swept})
             </button>
+            {/* A board half an hour into a game, without the half hour. */}
+            {STAGES.map(({ label, answers }) => (
+                <button
+                    key={label}
+                    type="button"
+                    className="board-bench__try"
+                    onClick={() => onJump(answers)}
+                >
+                    {label}
+                </button>
+            ))}
         </div>
     );
 }

@@ -421,6 +421,25 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
                       setBoard([...board, ...swept]);
                       setSwept([]);
                   }}
+                  onJump={(answers) => {
+                      // The board a game would have reached, played out by
+                      // always taking the first group going. Dev only: a board
+                      // eighty answers in is otherwise half an hour away.
+                      let next = openingBoard(pool, waysWanted());
+                      let groups: Solution[] = [];
+                      for (let turn = 0; turn < answers; turn++) {
+                          const options = formableGroups(next, pool, groups);
+                          if (options.length === 0) break;
+                          groups = [...groups, { property: options[0].property, concepts: options[0].concepts }];
+                          next = refill(next, pool, groups, waysWanted());
+                      }
+                      setSwept([]);
+                      setSelected([]);
+                      setFeedback('none');
+                      setFound(groups);
+                      saveFound(groups);
+                      setBoard(next);
+                  }}
               />
           )}
           {import.meta.env.DEV && (
