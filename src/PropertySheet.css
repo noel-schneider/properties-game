@@ -36,12 +36,16 @@
     font-size: 0.7rem;
 }
 
-.sheet__list {
+.sheet__drop {
     position: absolute;
-    top: 1.8rem;
+    top: 100%;
     left: 50%;
     transform: translateX(-50%);
     z-index: 9500;
+    padding-top: 0.5rem;
+}
+
+.sheet__list {
     margin: 0;
     padding: 0.5rem;
     list-style: none;

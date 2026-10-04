@@ -1,7 +1,7 @@
-import { fireEvent, screen } from '@testing-library/react'
+import { act, fireEvent, screen } from '@testing-library/react'
 import { renderApp } from './test-utils';
 import userEvent from '@testing-library/user-event';
-import Form from './Form';
+import Form, { VERDICT_SECONDS } from './Form';
 
 test('submit stays disabled until three concepts and a category are given', async () => {
   const user = userEvent.setup();
@@ -99,4 +99,37 @@ test('an empty box is not nagged at', () => {
   renderApp(<Form selected={['bee']} feedback="none" onSubmit={() => true} />);
 
   expect(screen.getByRole('status')).toHaveTextContent('');
+});
+
+test('a verdict clears itself, so nothing hangs over the next answer', () => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  try {
+    const { rerender } = renderApp(<Form selected={[]} feedback="wrong" onSubmit={() => true} />);
+    expect(screen.getByRole('status')).toHaveTextContent(/not a category/i);
+
+    act(() => { vi.advanceTimersByTime(VERDICT_SECONDS * 1000 + 100); });
+    expect(screen.getByRole('status')).toHaveTextContent('');
+
+    // And a fresh verdict shows again, rather than being swallowed by the one
+    // that just went.
+    rerender(<Form selected={[]} feedback="correct" onSubmit={() => true} />);
+    expect(screen.getByRole('status')).toHaveTextContent(/correct/i);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test('the reminder is not on a clock, because the thing it describes is not', () => {
+  // "Pick three concepts" stops being true the moment a third is picked, and
+  // stays true until then however long that takes.
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  try {
+    renderApp(<Form selected={['bee']} feedback="none" onSubmit={() => true} />);
+    fireEvent.change(screen.getByPlaceholderText(/type a category here/i), { target: { value: 'in' } });
+
+    act(() => { vi.advanceTimersByTime(VERDICT_SECONDS * 1000 + 5_000); });
+    expect(screen.getByRole('status')).toHaveTextContent(/pick three concepts/i);
+  } finally {
+    vi.useRealTimers();
+  }
 });

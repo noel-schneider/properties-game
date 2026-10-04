@@ -5,6 +5,16 @@ import type { Feedback } from "./App";
 
 export const MIN_SELECTED_CONCEPTS = 3;
 
+/**
+ * How long a verdict stays before it clears itself.
+ *
+ * Long enough to read twice without hurrying, short enough that the answer to
+ * the last guess is not still sitting there while the next one is being typed.
+ * Only verdicts are on a clock: the reminder about picking three describes a
+ * state of the board, and a state does not expire.
+ */
+export const VERDICT_SECONDS = 5;
+
 interface FormProps {
     selected: string[];
     feedback: Feedback;
@@ -16,7 +26,17 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
 
     const { t } = useTranslator();
     const [inputValue, setInputValue] = React.useState("");
+    const [stale, setStale] = React.useState(false);
     const input = React.useRef<HTMLInputElement>(null);
+
+    // Each new verdict starts its own clock, and clears the one before it.
+    React.useEffect(() => {
+        setStale(false);
+        if (feedback === 'none') return;
+
+        const timer = setTimeout(() => setStale(true), VERDICT_SECONDS * 1000);
+        return () => clearTimeout(timer);
+    }, [feedback]);
 
     const message: Record<Feedback, string> = {
         none: '',
@@ -35,7 +55,7 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
     // somebody starts naming a category: picking one bubble and stopping is a
     // normal thing to do, and nagging at it would be nagging at play.
     const short = !enough && inputValue.trim().length > 0;
-    const says = short ? t('form.needThree') : message[feedback];
+    const says = short ? t('form.needThree') : (stale ? '' : message[feedback]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

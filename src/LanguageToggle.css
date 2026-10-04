@@ -9,8 +9,16 @@
  */
 .language__list {
     position: absolute;
-    top: 2.5rem;
+    /* Flush against the button, with the gap made of padding — a real gap is a
+       strip of nothing that the pointer crosses on its way to a flag, and
+       crossing it used to shut the menu under the hand reaching for it. */
+    top: 100%;
     right: 0;
+    padding-top: 0.4rem;
+    animation: language-in 0.14s ease-out both;
+}
+
+.language__card {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
@@ -19,7 +27,6 @@
     border: 1px solid #40405c;
     background: rgba(28, 30, 48, 0.97);
     box-shadow: 0 12px 26px rgba(8, 8, 16, 0.42);
-    animation: language-in 0.14s ease-out both;
 }
 
 @keyframes language-in {

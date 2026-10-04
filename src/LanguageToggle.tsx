@@ -67,7 +67,12 @@ function LanguageToggle() {
             </button>
 
             {open && (
-                <div className="language__list" role="group" aria-label={t('language.group')}>
+                // The outer box reaches right up to the button, with the gap
+                // made of its own padding: a real gap means the pointer leaves
+                // the menu on the way down to a flag, and the menu shuts under
+                // the hand reaching for it.
+                <div className="language__list">
+                    <div className="language__card" role="group" aria-label={t('language.group')}>
                     {LANGUAGES.map((code) => (
                         <button
                             key={code}
@@ -91,6 +96,7 @@ function LanguageToggle() {
                             <span aria-hidden="true">{FLAGS[code]}</span>
                         </button>
                     ))}
+                    </div>
                 </div>
             )}
         </div>

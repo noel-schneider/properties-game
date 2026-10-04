@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './PropertySheet.css'
 import { useTranslator } from './i18n'
 import type { PropertyRow } from './properties'
@@ -17,6 +17,7 @@ interface Props {
 function PropertySheet({ rows }: Props) {
     const { t, property: propertyName } = useTranslator();
     const [open, setOpen] = useState(false);
+    const box = useRef<HTMLDivElement>(null);
     const done = rows.filter((row) => row.complete).length;
 
     useEffect(() => {
@@ -25,16 +26,38 @@ function PropertySheet({ rows }: Props) {
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') setOpen(false);
         };
+        // A finger never leaves, so a pointer rule alone would strand this open
+        // over the board.
+        const onDown = (event: PointerEvent) => {
+            if (!box.current?.contains(event.target as Node)) setOpen(false);
+        };
+
         document.addEventListener('keydown', onKeyDown);
-        return () => document.removeEventListener('keydown', onKeyDown);
+        document.addEventListener('pointerdown', onDown);
+        return () => {
+            document.removeEventListener('keydown', onKeyDown);
+            document.removeEventListener('pointerdown', onDown);
+        };
     }, [open]);
 
     return (
-        <div className="sheet">
+        <div
+            className="sheet"
+            ref={box}
+            onPointerEnter={() => rows.length > 0 && setOpen(true)}
+            onPointerLeave={(event) => {
+                // Only when the pointer has gone somewhere else on the page; a
+                // leave with nothing on the other side of it means it left the
+                // window, which is no reason to shut a menu.
+                const to = event.relatedTarget as Node | null;
+                if (to instanceof Node && !box.current?.contains(to)) setOpen(false);
+            }}
+        >
             <button
                 type="button"
                 className={open ? 'sheet__button sheet__button--on' : 'sheet__button'}
-                onClick={() => setOpen((shown) => !shown)}
+                onClick={() => setOpen(true)}
+                onFocus={() => rows.length > 0 && setOpen(true)}
                 disabled={rows.length === 0}
                 aria-expanded={open}
             >
@@ -46,6 +69,11 @@ function PropertySheet({ rows }: Props) {
             </button>
 
             {open && (
+                // Flush against the button it drops from, the gap made of its
+                // own padding: a real gap is a strip of nothing the pointer
+                // crosses on the way down, and crossing it shuts the list under
+                // the hand reaching for it.
+                <div className="sheet__drop">
                 <ul className="sheet__list">
                     {rows.map((row) => (
                         <li key={row.property} className="sheet__row" data-complete={String(row.complete)}>
@@ -54,6 +82,7 @@ function PropertySheet({ rows }: Props) {
                         </li>
                     ))}
                 </ul>
+                </div>
             )}
         </div>
     );
