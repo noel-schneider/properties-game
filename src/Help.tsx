@@ -114,7 +114,7 @@ function Help() {
     // moment it leaves — a greeting that vanishes before it is read is no
     // greeting at all.
     const [greeting, setGreeting] = useState(() => !loadGreeted());
-    const [open, setOpen] = useState(greeting);
+    const [open, setOpen] = useState(false);
 
     const done = () => {
         saveGreeted();
@@ -136,48 +136,63 @@ function Help() {
         return () => document.removeEventListener('keydown', onKeyDown);
     }, [open, greeting]);
 
-    return (
-        <div
-            className="help"
-            onPointerEnter={() => setOpen(true)}
-            onPointerLeave={() => { if (!greeting) setOpen(false); }}
-        >
-            <button
-                type="button"
-                className={open ? 'control control--icon control--on' : 'control control--icon'}
-                aria-label={t('help.open')}
-                aria-expanded={open}
-                onClick={() => (greeting ? done() : setOpen((shown) => !shown))}
-                onFocus={() => setOpen(true)}
-            >
-                <span aria-hidden="true">?</span>
-            </button>
+    const lessons = (
+        <ul className="help__lessons">
+            {LESSONS.map((lesson) => (
+                <li key={lesson.id} className="help__lesson">
+                    <svg className="help__drawing" viewBox="0 0 62 48" aria-hidden="true">
+                        {lesson.draw()}
+                    </svg>
+                    <span className="help__words">{t(lesson.wording)}</span>
+                </li>
+            ))}
+        </ul>
+    );
 
-            {open && (
-                <div
-                    className={greeting ? 'help__sheet help__sheet--greeting' : 'help__sheet'}
-                    role="dialog"
-                    aria-label={t('help.open')}
-                >
-                    {greeting && <p className="help__welcome">{t('help.welcome')}</p>}
-                    <ul className="help__lessons">
-                        {LESSONS.map((lesson) => (
-                            <li key={lesson.id} className="help__lesson">
-                                <svg className="help__drawing" viewBox="0 0 62 48" aria-hidden="true">
-                                    {lesson.draw()}
-                                </svg>
-                                <span className="help__words">{t(lesson.wording)}</span>
-                            </li>
-                        ))}
-                    </ul>
-                    {greeting && (
-                        <button type="button" className="control help__start" onClick={done}>
+    return (
+        <>
+            {/*
+              * The first arrival gets the middle of the screen, not a corner:
+              * the rules are the only thing to read at that moment, and a panel
+              * hanging off a question mark reads as a tooltip somebody opened
+              * by accident. Afterwards the same lessons live in that corner for
+              * the rest of the game.
+              */}
+            {greeting && (
+                <div className="greeting" role="dialog" aria-modal="true" aria-label={t('help.open')}>
+                    <div className="greeting__card">
+                        <p className="greeting__welcome">{t('help.welcome')}</p>
+                        {lessons}
+                        <button type="button" className="control greeting__start" onClick={done}>
                             {t('help.start')}
                         </button>
-                    )}
+                    </div>
                 </div>
             )}
-        </div>
+
+            <div
+                className="help"
+                onPointerEnter={() => { if (!greeting) setOpen(true); }}
+                onPointerLeave={() => { if (!greeting) setOpen(false); }}
+            >
+                <button
+                    type="button"
+                    className={open && !greeting ? 'control control--icon control--on' : 'control control--icon'}
+                    aria-label={t('help.open')}
+                    aria-expanded={open && !greeting}
+                    onClick={() => (greeting ? done() : setOpen((shown) => !shown))}
+                    onFocus={() => { if (!greeting) setOpen(true); }}
+                >
+                    <span aria-hidden="true">?</span>
+                </button>
+
+                {open && !greeting && (
+                    <div className="help__sheet" role="dialog" aria-label={t('help.open')}>
+                        {lessons}
+                    </div>
+                )}
+            </div>
+        </>
     );
 }
 
