@@ -75,4 +75,4 @@ nothing that loops.
 The game is free and always will be. If it was worth your evening there is a
 coffee cup in the corner: [ko-fi.com/noeldesv](https://ko-fi.com/noeldesv).
 
-Built by [Noël](https://noel-schneider.eu).
+Built by [Noël](https://www.noel-schneider.eu).
