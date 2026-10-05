@@ -11,6 +11,13 @@ test('a first arrival is shown how to play, once', async ({ page }) => {
   await expect(sheet).toBeVisible()
   await expect(sheet.getByRole('listitem')).toHaveCount(5)
 
+  // In the middle of the screen, not hanging off the question mark.
+  const card = (await page.locator('.greeting__card').boundingBox())!
+  const view = page.viewportSize()!
+  const middle = card.x + card.width / 2
+  expect(Math.abs(middle - view.width / 2)).toBeLessThan(2)
+  expect(card.width).toBeGreaterThan(400)
+
   // It does not follow the pointer the way the panel normally does: a greeting
   // that vanishes before it is read is no greeting.
   await page.mouse.move(640, 400)

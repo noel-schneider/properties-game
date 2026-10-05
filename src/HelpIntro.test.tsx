@@ -48,6 +48,28 @@ test('the welcome does not count the lessons for itself', () => {
 
   // The opening line only — "pick three concepts" is a lesson, and counts
   // the concepts in a group rather than the lessons in the panel.
-  expect(document.querySelector('.help__welcome')!.textContent)
+  expect(document.querySelector('.greeting__welcome')!.textContent)
       .not.toMatch(/\b(three|four|five|six)\b/i);
+});
+
+test('the greeting takes the middle of the screen, not the corner', () => {
+  // A panel hanging off the question mark reads as a tooltip somebody opened
+  // by accident. The rules are the only thing to read at that moment.
+  renderApp(<Help />);
+
+  const card = document.querySelector('.greeting__card')!;
+  expect(card).not.toBeNull();
+  expect(card.closest('.help')).toBeNull();
+  expect(document.querySelector('.help__sheet')).toBeNull();
+});
+
+test('the question mark still answers for the rest of the game', () => {
+  saveGreeted();
+  renderApp(<Help />);
+
+  // Pointed at rather than clicked: a click arrives after the pointer has
+  // entered, which opens the panel and then shuts it again.
+  fireEvent.pointerEnter(screen.getByRole('button', { name: /how to play/i }).parentElement!);
+  expect(document.querySelector('.help__sheet')).not.toBeNull();
+  expect(document.querySelector('.greeting__card')).toBeNull();
 });
