@@ -2,11 +2,11 @@ import { fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderApp } from './test-utils'
 import Help, { LESSONS } from './Help'
-import { saveGreeted } from './greeting'
+import { SKIP_KEY } from './greeting'
 
-// These are about the panel a returning player meets. What somebody arriving
-// for the first time sees is pinned in HelpIntro.test.tsx.
-beforeEach(() => saveGreeted());
+// These are about the panel behind the question mark, with the arrival card
+// put aside. What that card does is pinned in HelpIntro.test.tsx.
+beforeEach(() => localStorage.setItem(SKIP_KEY, 'true'));
 afterEach(() => localStorage.clear());
 
 test('it is one button until it is asked for', () => {

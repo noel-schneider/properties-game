@@ -12,16 +12,15 @@ export async function boardSettled(page: Page) {
 }
 
 /**
- * Throws the saved game away without forgetting that this player has been here.
+ * Throws the saved game away while keeping the arrival card out of the way.
  *
- * Clearing everything also clears the flag that says the rules have been
- * shown, and the panel that greets a first arrival covers part of the board —
- * which is right for a player and wrong for a test that is about something
- * else. What that panel does is pinned in greeting.spec.ts.
+ * Clearing everything also clears the key that holds that card back, and it
+ * sits over the board — which is right for a player and wrong for a test about
+ * something else. What the card does is pinned in greeting.spec.ts.
  */
 export async function clearGame(page: Page) {
   await page.evaluate(() => {
     localStorage.clear()
-    localStorage.setItem('properties-game:greeted', 'true')
+    localStorage.setItem('properties-game:skip-intro', 'true')
   })
 }

@@ -1,26 +1,23 @@
-import { GREETED_KEY, loadGreeted, saveGreeted } from './greeting'
+import { SKIP_KEY, skipIntro } from './greeting'
 
 afterEach(() => localStorage.clear());
 
-test('a player who has never been here has not been greeted', () => {
-  expect(loadGreeted()).toBe(false);
+test('the rules are shown unless something says otherwise', () => {
+  expect(skipIntro()).toBe(false);
 });
 
-test('once greeted, they are not greeted again', () => {
-  saveGreeted();
+test('the end-to-end suite can put them aside', () => {
+  localStorage.setItem(SKIP_KEY, 'true');
 
-  expect(loadGreeted()).toBe(true);
-  expect(localStorage.getItem(GREETED_KEY)).toBe('true');
+  expect(skipIntro()).toBe(true);
 });
 
-test('a browser that refuses to remember greets them again rather than breaking', () => {
-  const refuse = () => { throw new Error('no storage here'); };
-  const store = Object.getOwnPropertyDescriptor(Storage.prototype, 'getItem')!;
-  Storage.prototype.getItem = refuse;
+test('a browser that refuses to remember shows them rather than breaking', () => {
+  const kept = Object.getOwnPropertyDescriptor(Storage.prototype, 'getItem')!;
+  Storage.prototype.getItem = () => { throw new Error('no storage here'); };
   try {
-    expect(loadGreeted()).toBe(false);
-    expect(() => saveGreeted()).not.toThrow();
+    expect(skipIntro()).toBe(false);
   } finally {
-    Object.defineProperty(Storage.prototype, 'getItem', store);
+    Object.defineProperty(Storage.prototype, 'getItem', kept);
   }
 });
