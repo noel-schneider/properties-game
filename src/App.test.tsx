@@ -327,7 +327,7 @@ test('the controls sit where they belong: achievements low, the rest high', () =
   const bottom = document.querySelector('.corner--bottom-right')!;
 
   expect(bottom).toContainElement(screen.getByRole('button', { name: /achievements/i }));
-  for (const name of [/^language$/i, /start over/i, /turn sound effects off/i, /turn music on/i]) {
+  for (const name of [/^language$/i, /start over/i, /turn sound effects off/i, /turn music off/i]) {
     expect(top).toContainElement(screen.getByRole('button', { name }));
   }
 });

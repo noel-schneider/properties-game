@@ -31,23 +31,30 @@ const count = (page: import('@playwright/test').Page) =>
 const voices = (page: import('@playwright/test').Page) =>
   page.evaluate(() => (window as unknown as { started: number[] }).started.length);
 
-test('nothing plays until the music is asked for', async ({ page }) => {
+test('the music plays for somebody who has not turned it off', async ({ page }) => {
+  // Whether a real browser waits for a gesture first cannot be checked here:
+  // the one these tests drive allows audio without one. What a player who
+  // leaves the switch alone gets is a chord, and that is what this pins.
   await page.goto('/');
   await page.locator('.bubble').first().click();
-
-  expect(await voices(page)).toBe(0);
-});
-
-test('asking for the music starts a chord', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Turn music on' }).click();
 
   await expect.poll(() => voices(page)).toBeGreaterThanOrEqual(4);
 });
 
+test('and a player who turned it off is not given it back', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Turn music off' }).click();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Turn music on' })).toBeVisible();
+
+  await page.locator('.bubble').first().click();
+  await page.waitForTimeout(1500);
+  expect(await voices(page)).toBe(0);
+});
+
 test('the chord is low and wide, which is what makes it a bed', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Turn music on' }).click();
+  await page.locator('.bubble').first().click();
   await expect.poll(() => voices(page)).toBeGreaterThanOrEqual(4);
 
   const pitches = await page.evaluate(() => (window as unknown as { started: number[] }).started);
@@ -60,7 +67,7 @@ test('the chord is low and wide, which is what makes it a bed', async ({ page })
 
 test('stopping it starts nothing more, and the choice is remembered', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Turn music on' }).click();
+  await page.locator('.bubble').first().click();
   await expect.poll(() => voices(page)).toBeGreaterThanOrEqual(4);
 
   await page.getByRole('button', { name: 'Turn music off' }).click();
@@ -74,7 +81,7 @@ test('stopping it starts nothing more, and the choice is remembered', async ({ p
 
 test('an instrument that joins is heard joining, not nine seconds later', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Turn music on' }).click();
+  await page.locator('.bubble').first().click();
   await page.waitForTimeout(1500);
   const before = await count(page);
 
@@ -95,7 +102,7 @@ test('an instrument that leaves goes at once, not at the end of the chord', asyn
   // part has already scheduled run for the rest of the chord, so without a
   // fader of its own a reset kept the whole orchestra for thirteen seconds.
   await page.goto('/');
-  await page.getByRole('button', { name: 'Turn music on' }).click();
+  await page.locator('.bubble').first().click();
 
   await page.evaluate(() => (window as unknown as {
     __ambient: { setAmbientLayers: (count: number) => void };
@@ -119,11 +126,15 @@ test('an instrument that leaves goes at once, not at the end of the chord', asyn
 
 test('the sunrise moves with the music, and only with it', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
+  // Turned off first, so that "only with it" is what is being measured rather
+  // than a bed that is on by default anyway.
   await page.goto('/');
-  const pulse = page.locator('.sky__pulse');
+  await page.getByRole('button', { name: 'Turn music off' }).click();
+  await page.reload();
 
-  // Nothing is playing, so nothing swells.
-  await page.waitForTimeout(2000);
+  const pulse = page.locator('.sky__pulse');
+  await page.locator('.bubble').first().click();
+  await page.waitForTimeout(2500);
   expect(await pulse.getAttribute('data-beat')).toBe('0');
 
   await page.getByRole('button', { name: 'Turn music on' }).click();

@@ -6,9 +6,13 @@ import { loadMusic, saveMusic } from './achievements/storage'
 
 afterEach(() => localStorage.clear());
 
-test('music is off until it is asked for', () => {
-  // Music nobody asked for, starting on arrival, is the thing that makes
-  // people close a tab.
+test('music is on unless it has been turned off', () => {
+  // It cannot start on its own — a browser refuses audio until somebody has
+  // clicked something — so this means it begins on a player's first gesture
+  // rather than waiting to be asked for.
+  expect(loadMusic()).toBe(true);
+
+  saveMusic(false);
   expect(loadMusic()).toBe(false);
 });
 

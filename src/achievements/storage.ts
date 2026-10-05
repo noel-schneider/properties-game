@@ -85,19 +85,20 @@ export function saveLifetime(lifetime: Lifetime): void {
 export const MUTED_KEY = 'properties-game:muted';
 
 /**
- * Whether the player asked for the music bed.
+ * Whether the player wants the music bed.
  *
- * Off unless it says otherwise, and deliberately so: music nobody asked for,
- * starting the moment a page opens, is the thing that makes people close a tab.
- * Browsers will not let it start without a gesture anyway.
+ * On unless they have turned it off. It still cannot start on its own — a
+ * browser refuses audio until somebody has clicked something — so what this
+ * really means is that it begins on a player's first gesture rather than
+ * waiting to be asked for. Dismissing the greeting is usually that gesture.
  */
 export const MUSIC_KEY = 'properties-game:music';
 
 export function loadMusic(): boolean {
     try {
-        return localStorage.getItem(MUSIC_KEY) === 'true';
+        return localStorage.getItem(MUSIC_KEY) !== 'false';
     } catch {
-        return false;
+        return true;
     }
 }
 
