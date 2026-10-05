@@ -8,7 +8,7 @@
 export const SUPPORT_URL = 'https://ko-fi.com/noeldesv';
 
 /** Whose game this is. The byline leads here. */
-export const PORTFOLIO_URL = 'https://noel-schneider.eu';
+export const PORTFOLIO_URL = 'https://www.noel-schneider.eu';
 
 /**
  * How many right answers before the game mentions it, once.
