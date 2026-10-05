@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 // arrives for the first time.
 test.use({ storageState: { cookies: [], origins: [] } })
 
-test('a first arrival is shown how to play, once', async ({ page }) => {
+test('every arrival is shown how to play', async ({ page }) => {
   await page.goto('/')
 
   const sheet = page.getByRole('dialog')
@@ -26,8 +26,10 @@ test('a first arrival is shown how to play, once', async ({ page }) => {
   await page.getByRole('button', { name: 'Got it' }).click()
   await expect(sheet).toBeHidden()
 
+  // And again next time: nothing is remembered between visits, because
+  // somebody coming back after a week has forgotten the gestures too.
   await page.reload()
-  await expect(page.getByRole('dialog')).toBeHidden()
+  await expect(page.getByRole('dialog')).toBeVisible()
 })
 
 test('and the panel still answers the question mark afterwards', async ({ page }) => {

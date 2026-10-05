@@ -1,25 +1,17 @@
 /**
- * Whether this player has been shown how to play.
+ * Whether to skip the rules a player is shown on arrival.
  *
- * The rules are four gestures that the board cannot announce on its own, so
- * they are put in front of somebody arriving for the first time — once, and
- * never again. A player who cannot be remembered is greeted again next time,
- * which is a far better failure than refusing to start.
+ * They are shown every visit. The game never writes this key: it exists for
+ * the end-to-end suite, whose tests are about the board and would otherwise
+ * each have to dismiss a card sitting over it. Naming it for what it is beats
+ * dressing it up as a preference nobody can set.
  */
-export const GREETED_KEY = 'properties-game:greeted';
+export const SKIP_KEY = 'properties-game:skip-intro';
 
-export function loadGreeted(): boolean {
+export function skipIntro(): boolean {
     try {
-        return localStorage.getItem(GREETED_KEY) === 'true';
+        return localStorage.getItem(SKIP_KEY) === 'true';
     } catch {
         return false;
-    }
-}
-
-export function saveGreeted(): void {
-    try {
-        localStorage.setItem(GREETED_KEY, 'true');
-    } catch {
-        // Nothing here is worth a crash.
     }
 }

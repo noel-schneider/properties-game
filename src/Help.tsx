@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import './Help.css'
-import { loadGreeted, saveGreeted } from './greeting'
+import { skipIntro } from './greeting'
 import { useTranslator } from './i18n'
 import type { UiKey } from './i18n'
 
@@ -108,16 +108,13 @@ export const LESSONS: { id: string; wording: UiKey; draw: () => React.ReactNode 
  */
 function Help() {
     const { t } = useTranslator();
-    // Pinned open for somebody arriving for the first time: four gestures the
-    // board cannot announce on its own, said once. Pinned rather than merely
-    // open, because the panel normally follows the pointer and shuts the
-    // moment it leaves — a greeting that vanishes before it is read is no
-    // greeting at all.
-    const [greeting, setGreeting] = useState(() => !loadGreeted());
+    // Shown on arrival, every visit: five gestures the board cannot announce on
+    // its own. Nothing is remembered between visits — somebody coming back
+    // after a week has forgotten them too, and the way past is one click.
+    const [greeting, setGreeting] = useState(() => !skipIntro());
     const [open, setOpen] = useState(false);
 
     const done = () => {
-        saveGreeted();
         setGreeting(false);
         setOpen(false);
     };

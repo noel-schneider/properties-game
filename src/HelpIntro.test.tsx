@@ -2,7 +2,7 @@ import { fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderApp } from './test-utils'
 import Help, { LESSONS } from './Help'
-import { saveGreeted } from './greeting'
+import { SKIP_KEY } from './greeting'
 
 afterEach(() => localStorage.clear());
 
@@ -22,23 +22,22 @@ test('the welcome stays put while the pointer wanders', () => {
   expect(screen.getByRole('dialog')).toBeInTheDocument();
 });
 
-test('it goes when it is dismissed, and does not come back', async () => {
+test('it goes when it is dismissed', async () => {
   const user = userEvent.setup();
-  const { unmount } = renderApp(<Help />);
+  renderApp(<Help />);
 
   await user.click(screen.getByRole('button', { name: /got it|c.est parti/i }));
   expect(screen.queryByRole('dialog')).toBeNull();
+});
+
+test('and comes back on the next visit', () => {
+  // Nothing is remembered between visits: somebody coming back after a week
+  // has forgotten the gestures too, and the way past is one click.
+  const { unmount } = renderApp(<Help />);
   unmount();
 
   renderApp(<Help />);
-  expect(screen.queryByRole('dialog')).toBeNull();
-});
-
-test('a player who has been here before is left alone', () => {
-  saveGreeted();
-  renderApp(<Help />);
-
-  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(screen.getByRole('dialog')).toBeInTheDocument();
 });
 
 test('the welcome does not count the lessons for itself', () => {
@@ -64,7 +63,7 @@ test('the greeting takes the middle of the screen, not the corner', () => {
 });
 
 test('the question mark still answers for the rest of the game', () => {
-  saveGreeted();
+  localStorage.setItem(SKIP_KEY, 'true');
   renderApp(<Help />);
 
   // Pointed at rather than clicked: a click arrives after the pointer has

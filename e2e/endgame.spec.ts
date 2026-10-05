@@ -66,7 +66,7 @@ async function oneGroupLeft(page: import('@playwright/test').Page) {
   await page.evaluate(
     ({ key, found }) => {
       localStorage.clear()
-      localStorage.setItem('properties-game:greeted', 'true')
+      localStorage.setItem('properties-game:skip-intro', 'true')
       localStorage.setItem(key, JSON.stringify(found))
     },
     // Everything the run does except that one trio, the joins included.
@@ -153,7 +153,7 @@ test('the end screen waits for the last concept to be placed', async ({ page }) 
   await page.evaluate(
     ({ key, found }) => {
       localStorage.clear()
-      localStorage.setItem('properties-game:greeted', 'true')
+      localStorage.setItem('properties-game:skip-intro', 'true')
       localStorage.setItem(key, JSON.stringify(found))
     },
     { key: FOUND_KEY, found: upToTheTrio },
