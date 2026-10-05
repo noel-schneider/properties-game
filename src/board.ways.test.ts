@@ -42,10 +42,15 @@ test('the number aimed at moves from deal to deal', () => {
   expect(Math.max(...aimed)).toBeLessThanOrEqual(WAYS_ON + 1);
 });
 
-test('and the count the board lands on is not fixed either', () => {
+test('and the count a top-up lands on is not fixed either', () => {
+  // Measured on a top-up rather than on an opening: everybody now starts from
+  // the same written board, so the first count is the same for everybody by
+  // design. It is every board after it that must not sit on one number.
   const counts = new Set<number>();
+  const found: Solution[] = [{ property: 'food', concepts: ['chocolate', 'honey', 'cake'] }];
+
   for (let go = 0; go < 30; go++) {
-    counts.add(ways(openingBoard(pool, waysWanted()), []));
+    counts.add(ways(refill(['ant', 'bee', 'ladybug'], pool, found, waysWanted()), found));
   }
 
   expect(counts.size).toBeGreaterThan(1);

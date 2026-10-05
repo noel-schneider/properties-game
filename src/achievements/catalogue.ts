@@ -100,6 +100,36 @@ export const CATALOGUE: Achievement[] = [
         earnedBy: ({ session }) => session.redeemedLastMiss,
     },
     {
+        // The drag is the one move the game never taught and never rewarded:
+        // a lone concept dropped into a category already found.
+        id: 'placed',
+        icon: '🧲',
+        secret: false,
+        earnedBy: (_, event) =>
+            isWin(event) && event.type === 'guess' && event.selection.length === 1,
+    },
+    {
+        id: 'well-grown',
+        icon: '🌳',
+        secret: false,
+        earnedBy: (_, event) =>
+            isWin(event) && event.type === 'guess' && (event.groupSize ?? 0) >= 6,
+    },
+    {
+        id: 'streak-of-ten',
+        icon: '🌋',
+        secret: false,
+        earnedBy: ({ session }) => session.streak >= 10,
+    },
+    {
+        // The counter of categories found does not move for this one, because
+        // the category was already known — so something ought to.
+        id: 'deja-vu',
+        icon: '🔁',
+        secret: true,
+        earnedBy: ({ lifetime }) => lifetime.repeats >= 1,
+    },
+    {
         id: 'night-owl',
         icon: '🦉',
         secret: true,

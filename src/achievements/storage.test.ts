@@ -1,4 +1,4 @@
-import { loadLifetime, loadMuted, loadRunStats, MUTED_KEY, RUN_KEY, saveLifetime, saveMuted, saveRunStats, STORAGE_KEY } from './storage'
+import { BOARD_KEY, loadBoard, loadLifetime, loadMuted, loadRunStats, MUTED_KEY, RUN_KEY, saveBoard, saveLifetime, saveMuted, saveRunStats, STORAGE_KEY } from './storage'
 import { emptyLifetime } from './progress'
 
 afterEach(() => {
@@ -108,4 +108,31 @@ test('storage that throws leaves a fresh run rather than crashing', () => {
 
   expect(loadRunStats()).toEqual({ boards: 0, correct: 0, wrong: 0, bestStreak: 0 });
   expect(() => saveRunStats({ boards: 1, correct: 1, wrong: 0, bestStreak: 1 })).not.toThrow();
+});
+
+describe('the board itself', () => {
+  afterEach(() => localStorage.clear());
+
+  test('what was dealt comes back exactly as it was', () => {
+    // Otherwise a player who is stuck reloads the page and is handed a
+    // different set of concepts, which is a way out of every hard moment.
+    saveBoard(['ant', 'bee', 'moth']);
+
+    expect(loadBoard()).toEqual(['ant', 'bee', 'moth']);
+  });
+
+  test('nothing stored means nothing to restore', () => {
+    expect(loadBoard()).toEqual([]);
+  });
+
+  test('a board that is not a list of names is thrown away rather than trusted', () => {
+    localStorage.setItem(BOARD_KEY, '{"not":"a list"}');
+    expect(loadBoard()).toEqual([]);
+
+    localStorage.setItem(BOARD_KEY, '["ant", 7, null]');
+    expect(loadBoard()).toEqual([]);
+
+    localStorage.setItem(BOARD_KEY, 'not json at all');
+    expect(loadBoard()).toEqual([]);
+  });
 });

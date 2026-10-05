@@ -96,3 +96,47 @@
 .sky[data-still="true"] .sky__glow {
     animation: none;
 }
+
+/*
+ * The sunrise following the music.
+ *
+ * One swell per chord, started by a class change every nine seconds rather
+ * than by anything measured per frame. It alternates between two identical
+ * animations because a running animation ignores a request to start again.
+ *
+ * The rise is tiny on purpose — a background that keeps catching the eye is a
+ * background that has stopped being one — and it deepens as the orchestra
+ * grows, so a game played to the end is lit a little more warmly.
+ */
+.sky__pulse {
+    position: absolute;
+    inset: 0;
+    transform-origin: 50% 100%;
+    --swell: 0;
+}
+
+.sky__pulse[data-phase="a"] { animation: sky-swell-a 9s ease-out; }
+.sky__pulse[data-phase="b"] { animation: sky-swell-b 9s ease-out; }
+
+/* Nothing has played yet: no swell on the first paint. */
+.sky__pulse[data-beat="0"] { animation: none; }
+
+@keyframes sky-swell-a {
+    0%   { opacity: 1; transform: scale(1); }
+    14%  { opacity: calc(1 + var(--swell) * 0.022); transform: scale(calc(1 + var(--swell) * 0.0024)); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes sky-swell-b {
+    0%   { opacity: 1; transform: scale(1); }
+    14%  { opacity: calc(1 + var(--swell) * 0.022); transform: scale(calc(1 + var(--swell) * 0.0024)); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.sky[data-still="true"] .sky__pulse {
+    animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sky__pulse { animation: none !important; }
+}

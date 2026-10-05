@@ -40,7 +40,7 @@ export function loadLifetime(): Lifetime {
 
     if (stored === null || typeof stored !== 'object') return emptyLifetime();
 
-    const { unlocked, propertiesFound, aliasAnswers, exactAnswers, conceptsFinished } =
+    const { unlocked, propertiesFound, aliasAnswers, exactAnswers, conceptsFinished, repeats } =
         stored as Record<string, unknown>;
 
     if (
@@ -58,6 +58,9 @@ export function loadLifetime(): Lifetime {
         unlocked: unlocked.filter((id) => known.has(id)),
         // Added after the first records were written, so missing means none.
         conceptsFinished: isNumber(conceptsFinished) ? conceptsFinished : 0,
+        // Added after people had already played: a record written before it
+        // existed is still worth keeping, so it starts from nothing.
+        repeats: isNumber(repeats) ? repeats : 0,
         propertiesFound,
         aliasAnswers,
         exactAnswers,
@@ -80,6 +83,31 @@ export function saveLifetime(lifetime: Lifetime): void {
  * cost players the achievements they had already earned, to store a boolean.
  */
 export const MUTED_KEY = 'properties-game:muted';
+
+/**
+ * Whether the player asked for the music bed.
+ *
+ * Off unless it says otherwise, and deliberately so: music nobody asked for,
+ * starting the moment a page opens, is the thing that makes people close a tab.
+ * Browsers will not let it start without a gesture anyway.
+ */
+export const MUSIC_KEY = 'properties-game:music';
+
+export function loadMusic(): boolean {
+    try {
+        return localStorage.getItem(MUSIC_KEY) === 'true';
+    } catch {
+        return false;
+    }
+}
+
+export function saveMusic(playing: boolean): void {
+    try {
+        localStorage.setItem(MUSIC_KEY, String(playing));
+    } catch {
+        // A preference is not worth a crash.
+    }
+}
 
 export function loadMuted(): boolean {
     try {
@@ -158,6 +186,43 @@ export const FOUND_KEY = 'properties-game:found';
 export interface FoundGroup {
     property: string;
     concepts: string[];
+}
+
+/**
+ * The concepts on the board right now.
+ *
+ * Stored because it cannot be worked out again: the board is dealt at random
+ * around what has been found, so rebuilding it on a reload handed the player a
+ * different set of concepts every time. Somebody stuck could refresh their way
+ * out of any hard moment, which is not a game.
+ */
+export const BOARD_KEY = 'properties-game:board';
+
+export function loadBoard(): string[] {
+    let raw: string | null = null;
+    try {
+        raw = localStorage.getItem(BOARD_KEY);
+    } catch {
+        return [];
+    }
+    if (raw === null) return [];
+
+    try {
+        const stored: unknown = JSON.parse(raw);
+        // All or nothing: half a board is worse than a fresh one, because the
+        // missing half is what the player was looking at.
+        return isStringArray(stored) ? stored : [];
+    } catch {
+        return [];
+    }
+}
+
+export function saveBoard(board: string[]): void {
+    try {
+        localStorage.setItem(BOARD_KEY, JSON.stringify(board));
+    } catch {
+        // A board that cannot be remembered is dealt again, as it used to be.
+    }
 }
 
 export function loadFound(): FoundGroup[] {

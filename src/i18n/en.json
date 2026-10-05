@@ -3,10 +3,9 @@
         "airplane": "airplane",
         "ant": "ant",
         "apartment": "apartment",
-        "arcade": "arcade",
+        "atlas": "atlas",
         "avalanche": "avalanche",
         "basketball": "basketball",
-        "bat": "bat",
         "beach": "beach",
         "bee": "bee",
         "bell": "bell",
@@ -16,7 +15,6 @@
         "bread": "bread",
         "bridge": "bridge",
         "butterfly": "butterfly",
-        "button": "button",
         "cabin": "cabin",
         "cake": "cake",
         "calendar": "calendar",
@@ -24,6 +22,7 @@
         "candle": "candle",
         "candy": "candy",
         "car": "car",
+        "casino": "casino",
         "cave": "cave",
         "chameleon": "chameleon",
         "chess": "chess",
@@ -37,10 +36,13 @@
         "crocodile": "crocodile",
         "dance": "dance",
         "desert": "desert",
+        "dice": "dice",
+        "diving": "diving",
         "drum": "drum",
-        "fishing": "fishing",
+        "firefly": "firefly",
         "football": "football",
         "forest": "forest",
+        "garden": "garden",
         "glacier": "glacier",
         "guitar": "guitar",
         "hat": "hat",
@@ -58,7 +60,6 @@
         "letter": "letter",
         "library": "library",
         "lightning": "lightning",
-        "map": "map",
         "milk": "milk",
         "mole": "mole",
         "moon": "moon",
@@ -66,7 +67,6 @@
         "museum": "museum",
         "necklace": "necklace",
         "nest": "nest",
-        "orchard": "orchard",
         "owl": "owl",
         "painting": "painting",
         "park": "park",
@@ -86,6 +86,7 @@
         "snow": "snow",
         "soup": "soup",
         "star": "star",
+        "storm": "storm",
         "submarine": "submarine",
         "subway": "subway",
         "surfing": "surfing",
@@ -93,7 +94,6 @@
         "television": "television",
         "tennis": "tennis",
         "theater": "theater",
-        "thunder": "thunder",
         "tornado": "tornado",
         "train": "train",
         "turtle": "turtle",
@@ -105,22 +105,21 @@
         "accessory": "accessory",
         "airborne": "airborne",
         "animal": "animal",
-        "artistic expression": "artistic expression",
+        "art": "art",
         "astronomy": "astronomy",
-        "ball": "ball",
+        "big": "big",
         "biome": "biome",
         "building": "building",
         "city": "city",
         "cold": "cold",
-        "colors": "colors",
+        "colors": "colourful",
         "communication": "communication",
         "danger": "danger",
-        "dish": "dish",
         "entertainment": "entertainment",
         "exploration": "exploration",
         "food": "food",
         "game": "game",
-        "geography": "geography",
+        "green": "green",
         "heat": "heat",
         "insect": "insect",
         "light": "light",
@@ -129,12 +128,12 @@
         "machine": "machine",
         "metal": "metal",
         "music": "music",
-        "natural phenomenon": "natural phenomenon",
         "night": "night",
         "object": "object",
-        "outdoor activity": "outdoor activity",
-        "physical activity": "physical activity",
+        "outdoors": "outdoors",
+        "oven": "oven",
         "reading": "reading",
+        "red": "red",
         "reptile": "reptile",
         "sand": "sand",
         "shelter": "shelter",
@@ -147,7 +146,6 @@
         "time": "time",
         "trees": "trees",
         "underground": "underground",
-        "vegetation": "vegetation",
         "vehicle": "vehicle",
         "water": "water",
         "weather": "weather",
@@ -173,11 +171,11 @@
             "fauna",
             "beast"
         ],
-        "artistic expression": [
-            "art",
+        "art": [
             "artistic",
-            "creativity",
-            "the arts"
+            "the arts",
+            "artistic expression",
+            "creative"
         ],
         "astronomy": [
             "sky",
@@ -185,9 +183,11 @@
             "outer space",
             "stargazing"
         ],
-        "ball": [
-            "ball game",
-            "played with a ball"
+        "big": [
+            "large",
+            "huge",
+            "enormous",
+            "vast"
         ],
         "biome": [
             "nature",
@@ -215,10 +215,12 @@
             "chilly"
         ],
         "colors": [
+            "colors",
             "color",
-            "colorful",
+            "many colours",
             "colourful",
-            "bright"
+            "multicoloured",
+            "colours"
         ],
         "communication": [
             "talking",
@@ -231,11 +233,6 @@
             "deadly",
             "risky",
             "hazard"
-        ],
-        "dish": [
-            "meal",
-            "course",
-            "recipe"
         ],
         "entertainment": [
             "fun",
@@ -259,11 +256,8 @@
             "pastime",
             "games"
         ],
-        "geography": [
-            "landform",
-            "terrain",
-            "landscape",
-            "earth"
+        "green": [
+            "greenish"
         ],
         "heat": [
             "hot",
@@ -309,11 +303,6 @@
             "melody",
             "playing music"
         ],
-        "natural phenomenon": [
-            "nature phenomenon",
-            "natural event",
-            "force of nature"
-        ],
         "night": [
             "nighttime",
             "nocturnal",
@@ -325,22 +314,26 @@
             "item",
             "stuff"
         ],
-        "outdoor activity": [
-            "outdoors",
-            "outside",
-            "open air"
+        "outdoors": [
+            "outdoor",
+            "outdoor activity",
+            "open air",
+            "outside"
         ],
-        "physical activity": [
-            "exercise",
-            "activity",
-            "movement",
-            "workout"
+        "oven": [
+            "baked",
+            "baking",
+            "bakery"
         ],
         "reading": [
             "literature",
             "text",
             "written",
             "books"
+        ],
+        "red": [
+            "scarlet",
+            "crimson"
         ],
         "reptile": [
             "cold blooded",
@@ -394,22 +387,16 @@
             "clock"
         ],
         "trees": [
-            "wood",
+            "tree",
+            "vegetation",
             "woods",
-            "woodland",
-            "timber"
+            "greenery"
         ],
         "underground": [
             "below ground",
             "under the ground",
             "buried",
             "subterranean"
-        ],
-        "vegetation": [
-            "plants",
-            "greenery",
-            "flora",
-            "green"
         ],
         "vehicle": [
             "transportation",
@@ -441,17 +428,20 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Type a category here!",
+        "form.needThree": "Pick at least three concepts.",
+        "form.spent": "One of the three has already used that category.",
         "form.submit": "Submit",
         "form.correct": "Correct!",
-        "form.wrong": "Not quite — try another category.",
+        "form.wrong": "Not a category these three share.",
         "form.enterHint": "Press 'Enter' to submit!",
         "form.enterAlt": "Press enter",
+        "score.properties": "Categories",
         "score.remaining": "Still findable here",
         "panel.open": "Achievements",
         "panel.title": "Achievements",
         "panel.close": "Close achievements",
-        "panel.mute": "Mute achievement sound",
-        "panel.unmute": "Unmute achievement sound",
+        "panel.mute": "Turn sound effects off",
+        "panel.unmute": "Turn sound effects on",
         "panel.secretName": "???",
         "panel.secretDescription": "A secret achievement.",
         "toast.unlocked": "Achievement unlocked",
@@ -469,8 +459,8 @@
         "language.en": "Switch to English",
         "language.fr": "Passer en français",
         "language.group": "Language",
-        "score.found": "Groups found",
-        "score.finished": "Done on this board",
+        "score.found": "Found",
+        "score.finished": "Concepts done",
         "reset.open": "Start over",
         "reset.title": "Start over?",
         "reset.what": "The groups you have found will be cleared and a fresh board dealt. Your achievements stay.",
@@ -478,10 +468,28 @@
         "reset.confirm": "Clear and start over",
         "drop.add": "Add to",
         "help.open": "How to play",
+        "help.welcome": "A few things worth knowing before you start.",
+        "help.start": "Got it",
         "help.group": "Pick three concepts that share a category, then name it.",
+        "help.gauge": "The ring around a concept fills as you find the categories it belongs to.",
         "help.enter": "Press Enter anywhere to put the cursor in the box.",
         "help.reveal": "Point at a concept — or hold it — to see what it already shares.",
-        "help.join": "Drag a concept onto a category you have found to add it there."
+        "help.join": "Drag a concept onto a category you have found to add it there.",
+        "panel.forget": "Clear the achievements",
+        "panel.forgetSure": "They cannot be earned back without playing for them again.",
+        "panel.forgetKeep": "Keep them",
+        "panel.forgetYes": "Yes, clear them",
+        "credit.by": "Built by Noël",
+        "credit.visit": "Noël's portfolio",
+        "music.play": "Turn music on",
+        "music.stop": "Turn music off",
+        "sound.better": "Better with sound on.",
+        "sound.dismiss": "Dismiss",
+        "support.open": "Support the game",
+        "support.invite": "Enjoying this? It is free and always will be — a coffee keeps it going.",
+        "support.yes": "Buy a coffee",
+        "support.no": "No thanks",
+        "summary.support": "If it was worth your evening, you can buy the game a coffee."
     },
     "achievements": {
         "first-light": {
@@ -543,6 +551,22 @@
         "night-owl": {
             "name": "Night Owl",
             "description": "Play between two and four in the morning."
+        },
+        "placed": {
+            "name": "Hands on",
+            "description": "Drop a concept into a category you had already found."
+        },
+        "well-grown": {
+            "name": "Well grown",
+            "description": "Grow one category to six concepts or more."
+        },
+        "streak-of-ten": {
+            "name": "Ten in a row",
+            "description": "Find ten categories without a single miss."
+        },
+        "deja-vu": {
+            "name": "Seen it before",
+            "description": "Find a category you had already found once."
         }
     }
 }

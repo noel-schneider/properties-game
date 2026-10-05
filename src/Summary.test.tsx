@@ -33,3 +33,14 @@ test('offers to carry on without ending', async () => {
   await user.click(screen.getByRole('button', { name: /keep playing/i }));
   expect(onKeepPlaying).toHaveBeenCalled();
 });
+
+// The second half of the funding ask: the invite catches a player mid-run, and
+// this catches the one who went all the way. A link, never a button — a button
+// here would sit beside "play again" and compete with it.
+test('thanks the player and leaves a way to give', () => {
+  renderApp(<Summary stats={stats} onPlayAgain={() => {}} onKeepPlaying={() => {}} />);
+
+  const give = screen.getByRole('link', { name: /buy a coffee/i });
+  expect(give).toHaveAttribute('href', expect.stringContaining('ko-fi.com'));
+  expect(give).toHaveAttribute('rel', 'noopener noreferrer');
+});

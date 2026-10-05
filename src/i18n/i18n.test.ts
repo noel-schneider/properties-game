@@ -51,13 +51,13 @@ test('the two languages carry exactly the same keys', () => {
  * identical is a string that was forgotten rather than translated.
  */
 const IDENTICAL_IN_BOTH = new Set([
-  'concepts:avalanche', 'concepts:bowling', 'concepts:bus', 'concepts:crocodile',
+  'concepts:atlas', 'concepts:avalanche', 'concepts:bowling', 'concepts:casino', 'concepts:bus', 'concepts:crocodile',
   'concepts:dune', 'concepts:football', 'concepts:glacier', 'concepts:igloo',
   'concepts:jungle', 'concepts:piano', 'concepts:pizza', 'concepts:radio',
   'concepts:robot', 'concepts:satellite', 'concepts:tennis', 'concepts:train',
   'properties:animal', 'properties:communication', 'properties:danger',
   'properties:exploration', 'properties:machine', 'properties:reptile',
-  'properties:sport', 'properties:transport',
+  'properties:art', 'properties:sport', 'properties:transport',
   'ui:graph.label', 'ui:panel.secretName', 'ui:language.en', 'ui:language.fr',
 ]);
 
@@ -114,4 +114,21 @@ describe.each(Object.entries(languages))('%s wordings', (_name, locale) => {
 
     expect(stolen).toEqual([]);
   });
+});
+
+test('every category answers to its own id in English', () => {
+  // The ids are English words and the game is played in English by default, so
+  // a player typing the id is typing a reasonable answer. Renaming "colors" to
+  // "colourful" and forgetting the old spelling left a category that could not
+  // be answered by the word it is named after — which surfaced as a suite that
+  // failed one run in three, whenever the board happened to offer that trio.
+  const refused: string[] = [];
+  for (const id of properties) {
+    const label = (en.properties as Record<string, string>)[id];
+    const aliases = (en.aliases as Record<string, string[]>)[id] ?? [];
+    const accepted = new Set([label, ...aliases].map(fold));
+    if (!accepted.has(fold(id))) refused.push(id);
+  }
+
+  expect(refused).toEqual([]);
 });

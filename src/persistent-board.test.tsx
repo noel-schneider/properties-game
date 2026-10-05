@@ -68,10 +68,16 @@ test('naming a category one of the three has already spent is refused', async ()
   await user.type(screen.getByPlaceholderText(/type a category here/i), group.property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  // Not "they share nothing" — they share it; one of them has used it up, and
+  // saying which is true is the only honest answer here.
+  expect(await screen.findByRole('status')).toHaveTextContent(/already used/i);
 });
 
-test('there is always something left to find on the board', async () => {
+// Twelve whole answers driven through the interface, which takes about two
+// seconds alone and longer with the rest of the suite competing for the
+// processor. It was failing now and then on the clock rather than on the
+// claim, which is the worst way for a suite to be wrong.
+test('there is always something left to find on the board', { timeout: 30_000 }, async () => {
   const user = userEvent.setup();
   renderApp(<App playChime={() => {}} />);
 
@@ -92,4 +98,32 @@ test('what has been found survives a reload', async () => {
 
   renderApp(<App playChime={() => {}} />);
   expect(screen.getByTestId('found')).toHaveTextContent('1');
+});
+
+test('a reload deals nobody a new hand', async () => {
+  // The board is dealt at random around what has been found, so rebuilding it
+  // on a reload handed back a different set of concepts — and a player stuck
+  // on a hard board could refresh their way out of it.
+  const user = userEvent.setup();
+  const { unmount } = renderApp(<App playChime={() => {}} />);
+
+  await solve(user, formable()[0]);
+  const before = screen.getAllByLabelText(/.+/).map((b) => b.getAttribute('aria-label'));
+  unmount();
+
+  renderApp(<App playChime={() => {}} />);
+  const after = screen.getAllByLabelText(/.+/).map((b) => b.getAttribute('aria-label'));
+
+  expect(after).toEqual(before);
+});
+
+test('a board held from before is not thrown away on the way in', () => {
+  // Including the concepts that belong to no group yet, which are exactly the
+  // ones a reload used to replace.
+  localStorage.setItem('properties-game:board', JSON.stringify(['ant', 'bee', 'owl', 'snow']));
+  renderApp(<App playChime={() => {}} />);
+
+  for (const name of ['ant', 'bee', 'owl', 'snow']) {
+    expect(screen.getByLabelText(name)).toBeInTheDocument();
+  }
 });

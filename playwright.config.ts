@@ -10,6 +10,16 @@ export default defineConfig({
     // system for less animation would see it: laid out at once. The tests that
     // are about the motion opt back into it.
     reducedMotion: 'reduce',
+    // These tests play as somebody who has been here before. The panel that
+    // greets a first arrival covers part of the board on purpose, and what it
+    // does is pinned in its own spec, which clears this.
+    storageState: {
+      cookies: [],
+      origins: [{
+        origin: 'http://localhost:3000',
+        localStorage: [{ name: 'properties-game:greeted', value: 'true' }],
+      }],
+    },
   },
   webServer: {
     command: 'npm run dev',

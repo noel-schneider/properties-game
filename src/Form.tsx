@@ -5,6 +5,16 @@ import type { Feedback } from "./App";
 
 export const MIN_SELECTED_CONCEPTS = 3;
 
+/**
+ * How long a verdict stays before it clears itself.
+ *
+ * Long enough to read twice without hurrying, short enough that the answer to
+ * the last guess is not still sitting there while the next one is being typed.
+ * Only verdicts are on a clock: the reminder about picking three describes a
+ * state of the board, and a state does not expire.
+ */
+export const VERDICT_SECONDS = 5;
+
 interface FormProps {
     selected: string[];
     feedback: Feedback;
@@ -16,15 +26,36 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
 
     const { t } = useTranslator();
     const [inputValue, setInputValue] = React.useState("");
+    const [stale, setStale] = React.useState(false);
     const input = React.useRef<HTMLInputElement>(null);
+
+    // Each new verdict starts its own clock, and clears the one before it.
+    React.useEffect(() => {
+        setStale(false);
+        if (feedback === 'none') return;
+
+        const timer = setTimeout(() => setStale(true), VERDICT_SECONDS * 1000);
+        return () => clearTimeout(timer);
+    }, [feedback]);
 
     const message: Record<Feedback, string> = {
         none: '',
         correct: t('form.correct'),
         wrong: t('form.wrong'),
+        // Said apart from a plain miss: the three do share this one, and one of
+        // them has used it up. Denying that they share it would be a lie, and
+        // the group that used it is drawn on the board anyway.
+        spent: t('form.spent'),
     };
 
-    const isSubmitEnabled = selected.length >= MIN_SELECTED_CONCEPTS && inputValue.trim().length > 0;
+    const enough = selected.length >= MIN_SELECTED_CONCEPTS;
+    const isSubmitEnabled = enough && inputValue.trim().length > 0;
+
+    // The grey submit button says no without ever saying why. Said only once
+    // somebody starts naming a category: picking one bubble and stopping is a
+    // normal thing to do, and nagging at it would be nagging at play.
+    const short = !enough && inputValue.trim().length > 0;
+    const says = short ? t('form.needThree') : (stale ? '' : message[feedback]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -107,8 +138,8 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
                     {t('form.submit')}
                 </button>
             </div>
-            <p className={`feedback feedback--${feedback}`} role="status">
-                {message[feedback]}
+            <p className={`feedback feedback--${short ? 'short' : feedback}`} role="status">
+                {says}
             </p>
             <div className="press-enter-wrapper">
                 <img className={"enter-key-image"} src={"/enter-key.png"} alt={t('form.enterAlt')}/>

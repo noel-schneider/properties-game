@@ -1,0 +1,45 @@
+/*
+ * The footer line. Small, warm, and far enough from the input that nobody
+ * reaches it by accident. No box on either half: a corner is not a place to put
+ * a button somebody has to press to keep playing.
+ */
+.signature {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 0.75rem;
+    color: #8f8aa6;
+}
+
+/* Underlined, both of them: in a line of small grey text a link that is only
+   a shade different from its neighbours is a link nobody tries. */
+.signature__by {
+    color: #8f8aa6;
+    text-decoration: none;
+    border-bottom: 1px solid #5a5a7d;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.signature__by:hover {
+    color: #c9c9db;
+    border-bottom-color: #8f8aa6;
+}
+
+.signature__dot {
+    color: #5a5a7d;
+}
+
+/* Warmer than the byline on purpose: it is an offer, and an offer nobody
+   notices is the same as no offer. */
+.signature__give {
+    color: #ffad69;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 173, 105, 0.4);
+    transition: border-color 0.15s ease;
+}
+
+.signature__give:hover {
+    border-bottom-color: #ffad69;
+}

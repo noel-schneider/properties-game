@@ -5,6 +5,7 @@ import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
 import { donePropertiesOf, isSpent, liveProperties, progressOf } from './game'
 import { groupUnderPointer } from './drop'
+import { spreadLabels } from './labels'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -71,6 +72,10 @@ interface GraphProps {
     selected: string[];
     /** Every group found so far, drawn linked. */
     found: Solution[];
+    /** Concepts dealt onto the board by the last answer, marked while new. */
+    arriving?: string[];
+    /** Two concepts the board is nudging a stalled player towards. */
+    hinted?: string[];
     onToggle: (name: string) => void;
     /**
      * Dropping a concept onto a category already found. The index is into
@@ -126,7 +131,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInto }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, arriving = [], hinted = [], onToggle, onDropInto }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -176,6 +181,16 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
     );
 
     const { points, settled, grab, dragTo, release } = useBubbleLayout(concepts, radii, ties);
+
+    /**
+     * The members of the group found last, so the board can answer back when
+     * an answer lands. Only the latest: marking every group would leave the
+     * whole board flinching for the rest of the game.
+     */
+    const justFound = useMemo(() => {
+        const latest = found[found.length - 1];
+        return new Set(latest ? latest.concepts : []);
+    }, [found]);
 
     const [hovered, setHovered] = useState<string | null>(null);
 
@@ -319,6 +334,32 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
 
     const at = (name: string): Point => points[index.get(name) ?? -1] ?? { x: 0, y: 0 };
 
+    /**
+     * Where a group's members are, skipping the ones that are nowhere.
+     *
+     * Past twenty finished concepts the oldest leave the board, and the groups
+     * they belonged to are left naming members that are not drawn. Asking
+     * where those are answered with the middle of the board, so every such
+     * group grew a corner pointing at nothing in the centre of the screen.
+     */
+    const placesOf = (names: string[]): Point[] =>
+        names.filter((name) => index.has(name)).map(at);
+
+    /**
+     * Which groups say their name.
+     *
+     * While a concept is being read, all of its own — showing which concepts
+     * share something without ever saying what was half an answer. Otherwise
+     * the one just found, because twenty names drawn at once is a heap nobody
+     * reads.
+     */
+    const named = useMemo(() => {
+        if (kin.size > 0 && hovered !== null) {
+            return live.filter(({ group }) => group.concepts.includes(hovered));
+        }
+        return live.slice(-1);
+    }, [live, kin, hovered]);
+
     return (
         <svg
             ref={svg}
@@ -338,11 +379,13 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                 </linearGradient>
             </defs>
             {live.map(({ group }, groupIndex) => {
-                // Ties stay for every group. Names do not: at twenty groups the
-                // labels pile into an unreadable heap, so only the group just
-                // found says what it was.
-                const named = groupIndex === live.length - 1;
-                const places = group.concepts.map(at);
+                // The outline of the group just found is drawn bright, and is
+                // the one the landing animation closes around.
+                const latest = groupIndex === live.length - 1;
+                const places = placesOf(group.concepts);
+                // One corner is a point, and a point is not a shape.
+                if (places.length < 2) return null;
+
                 const centre = {
                     x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
                     y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
@@ -351,7 +394,7 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                 return (
                     <g key={`${group.property}-${groupIndex}`} className="found" data-group={group.property}>
                         <path
-                            className={named ? 'found__loop found__loop--latest' : 'found__loop'}
+                            className={latest ? 'found__loop found__loop--latest' : 'found__loop'}
                             d={groupOutline(places, centre)}
                         />
                     </g>
@@ -369,6 +412,14 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                 const classes = ['bubble'];
                 if (isDone) classes.push('bubble--done');
                 else if (isSelected) classes.push('bubble--selected');
+                if (justFound.has(concept.name)) classes.push('bubble--just-found');
+                // Dealt in by the answer just given. A board of twenty bubbles
+                // swallows three more without a word otherwise.
+                const isFresh = arriving.includes(concept.name);
+                if (isFresh) classes.push('bubble--fresh');
+                // Lit for a few seconds when nothing has been found in a while.
+                const isHinted = hinted.includes(concept.name);
+                if (isHinted) classes.push('bubble--hinted');
                 if (kin.has(concept.name)) classes.push('bubble--kin');
                 else if (kin.size > 0) classes.push('bubble--aside');
                 // Lit while a concept is held over their group, so the offer
@@ -423,6 +474,21 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
                               })}
                     >
                         <circle r={radius} />
+                        {/*
+                          * A ring around whatever has just been dealt in. Both
+                          * halves matter: the ring widens and fades, and under
+                          * reduced motion, where it does neither, it is still
+                          * drawn — a mark that only exists while it moves is no
+                          * mark at all for the player who turned motion off.
+                          */}
+                        {isFresh && <circle className="arrival" r={radius + 4} />}
+                        {/*
+                          * The nudge wears a ring of its own, outside the
+                          * gauge. A thicker outline alone was lost on a board
+                          * of twenty bubbles seen all at once — which is
+                          * exactly the board a stalled player is staring at.
+                          */}
+                        {isHinted && <circle className="nudge" r={radius + 13} />}
                         {/*
                           * The gauge fills rather than empties: a concept
                           * nobody has used yet shows nothing at all. Drawn the
@@ -486,20 +552,26 @@ function Graph({ concepts, pool = concepts, selected, found, onToggle, onDropInt
               * unreadable heap. Which group is which, for the rest, is what
               * the offer under a dragged concept answers.
               */}
-            {live.length > 0 && (() => {
-                const group = live[live.length - 1].group;
-                const places = group.concepts.map(at);
-                const middle = {
-                    x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
-                    y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
-                };
-
-                return (
-                    <text className="found__label" x={middle.x} y={middle.y} textAnchor="middle" dominantBaseline="middle">
-                        {propertyName(group.property)}
-                    </text>
-                );
-            })()}
+            {spreadLabels(
+                named.map(({ group }) => {
+                    const places = placesOf(group.concepts);
+                    return {
+                        x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
+                        y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
+                    };
+                }),
+            ).map((middle, i) => (
+                <text
+                    key={`name-${named[i].where}`}
+                    className="found__label"
+                    x={middle.x}
+                    y={middle.y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                >
+                    {propertyName(named[i].group.property)}
+                </text>
+            ))}
 
             {/*
               * The names of the spent concepts, drawn after every bubble.

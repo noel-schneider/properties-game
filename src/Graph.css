@@ -255,3 +255,155 @@
     transform-box: fill-box;
     transform-origin: center;
 }
+
+/* ---------------------------------------------------------------------------
+ * What the board does when an answer lands.
+ *
+ * All of it on the circle rather than on the group: the group carries the
+ * translate the simulation writes on every frame, and a transform here would
+ * fight it. fill-box, or a scale pivots on the viewBox origin and throws the
+ * bubble across the board.
+ * ------------------------------------------------------------------------ */
+
+/*
+ * The bubble itself, not everything round inside it. The gauge is a circle too
+ * and carries its own rotation to start the dial at the top; a scale here
+ * replaces that rotation outright and the dial swings to three o'clock for the
+ * length of the animation.
+ */
+.bubble--just-found > circle:first-of-type {
+    animation: landed 0.42s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+/* Out past its size and back, which is what a thing being noticed does. */
+@keyframes landed {
+    0%   { transform: scale(1); }
+    38%  { transform: scale(1.16); }
+    100% { transform: scale(1); }
+}
+
+/* The outline closes around them rather than appearing already closed. */
+.found__loop--latest {
+    animation: tighten 0.5s ease-out both;
+}
+
+@keyframes tighten {
+    from { opacity: 0; stroke-width: 16; }
+    to   { opacity: 0.8; stroke-width: 9; }
+}
+
+/* And the name arrives under its own weight. */
+.found__label {
+    animation: name-lands 0.45s ease-out both;
+}
+
+@keyframes name-lands {
+    from { opacity: 0; transform: translateY(7px) scale(0.92); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/*
+ * Asked for less motion: the answer still lands, it simply does not bounce.
+ * The marks that say what happened stay; only the movement goes.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .bubble--just-found > circle:first-of-type,
+    .found__loop--latest,
+    .found__label {
+        animation: none;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+ * Arrivals
+ *
+ * A concept dealt in by the last answer. The board is busy at that moment —
+ * three bubbles have just been looped together and the simulation is moving
+ * everything — so the mark has to be visible without being another thing
+ * flashing: a warm ring that swells once and settles, over a bubble whose own
+ * outline warms for a breath.
+ * ------------------------------------------------------------------------ */
+.bubble--fresh > circle:first-of-type {
+    animation: arrive 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes arrive {
+    from { stroke: #ffad69; stroke-width: 6; }
+    to   { stroke: #1b1b1b; stroke-width: 3; }
+}
+
+.bubble circle.arrival {
+    fill: none;
+    stroke: #ffad69;
+    stroke-width: 2.5;
+    /* The bubbles' own shadow under one of these buys nothing. */
+    filter: none;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: arrival-ring 2.4s ease-out both;
+}
+
+@keyframes arrival-ring {
+    0%   { opacity: 0; transform: scale(0.72); }
+    18%  { opacity: 0.85; transform: scale(1); }
+    70%  { opacity: 0.5; transform: scale(1.06); }
+    100% { opacity: 0.22; transform: scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bubble--fresh > circle:first-of-type { animation: none; }
+    .bubble circle.arrival {
+        animation: none;
+        opacity: 0.6;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+ * The nudge
+ *
+ * Two bubbles lit for a few seconds when nothing has been found in a while.
+ * Cool and slow, where an arrival is warm and quick: the two can happen at the
+ * same moment, and a player has to be able to tell them apart without being
+ * told which is which.
+ * ------------------------------------------------------------------------ */
+.bubble--hinted > circle:first-of-type {
+    animation: nudge 1.6s ease-in-out infinite;
+}
+
+@keyframes nudge {
+    0%, 100% { stroke: #5aa9cc; stroke-width: 4; }
+    50%      { stroke: #d8f3ff; stroke-width: 9; }
+}
+
+/* The ring, outside the gauge so the two never sit on one another. */
+.bubble circle.nudge {
+    fill: none;
+    stroke: #8ecae6;
+    stroke-width: 3;
+    /* The bubbles' own shadow under one of these buys nothing. */
+    filter: none;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: nudge-ring 1.6s ease-in-out infinite;
+}
+
+@keyframes nudge-ring {
+    0%, 100% { opacity: 0.3; transform: scale(0.94); }
+    50%      { opacity: 0.95; transform: scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Still marked, just not breathing. */
+    .bubble--hinted > circle:first-of-type {
+        animation: none;
+        stroke: #d8f3ff;
+        stroke-width: 7;
+    }
+
+    .bubble circle.nudge {
+        animation: none;
+        opacity: 0.8;
+    }
+}

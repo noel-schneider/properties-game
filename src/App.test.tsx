@@ -108,7 +108,7 @@ test('naming a category the selected concepts do not share is rejected', async (
   );
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
 });
 
 test('a correct answer keeps the found concepts on the board and scores a point', async () => {
@@ -139,7 +139,7 @@ test('a wrong answer leaves the board and the score alone', async () => {
   await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
   expect(screen.getByTestId('found')).toHaveTextContent('0');
   expect(screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'))).toEqual(before);
 });
@@ -171,7 +171,7 @@ test('a wrong answer keeps what you typed so it can be reworded', async () => {
   await user.type(input, 'wrong on purpose');
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
   expect(input).toHaveValue('wrong on purpose');
 });
 
@@ -201,7 +201,7 @@ test('a wrong answer unlocks nothing and stays silent', async () => {
   await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/not quite/i);
+  expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
   expect(screen.queryByRole('alert')).toBeNull();
   expect(chime).not.toHaveBeenCalled();
 });
@@ -258,7 +258,7 @@ test('muting the sound silences the next unlock, and is remembered', async () =>
   const user = userEvent.setup();
   const { unmount } = renderApp(<App playChime={chime} />);
 
-  await user.click(screen.getByRole('button', { name: /mute achievement sound/i }));
+  await user.click(screen.getByRole('button', { name: /turn sound effects off/i }));
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
@@ -270,7 +270,7 @@ test('muting the sound silences the next unlock, and is remembered', async () =>
 
   unmount();
   renderApp(<App playChime={() => {}} />);
-  expect(screen.getByRole('button', { name: /unmute achievement sound/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /turn sound effects on/i })).toBeInTheDocument();
 });
 
 
@@ -327,7 +327,7 @@ test('the controls sit where they belong: achievements low, the rest high', () =
   const bottom = document.querySelector('.corner--bottom-right')!;
 
   expect(bottom).toContainElement(screen.getByRole('button', { name: /achievements/i }));
-  for (const name of [/switch to english/i, /start over/i, /mute achievement sound/i]) {
+  for (const name of [/^language$/i, /start over/i, /turn sound effects off/i, /turn music on/i]) {
     expect(top).toContainElement(screen.getByRole('button', { name }));
   }
 });
@@ -336,4 +336,152 @@ test('the sound test button is gone', () => {
   renderApp(<App playChime={() => {}} />);
 
   expect(screen.queryByRole('button', { name: /hear the achievement sound/i })).toBeNull();
+});
+
+describe('the sound a right answer makes', () => {
+  test('it plays on a find, and climbs with the run', async () => {
+    const notes: number[] = [];
+    const user = userEvent.setup();
+    renderApp(<App playChime={() => {}} playFound={(step) => notes.push(step)} />);
+
+    const first = findSolvableTriple();
+    await select(user, first.concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    // The step given is where the player is in their run, so a run can be
+    // heard climbing without looking at the board.
+    expect(notes).toEqual([1]);
+  });
+
+  test('a wrong answer makes none', async () => {
+    const notes: number[] = [];
+    const user = userEvent.setup();
+    renderApp(<App playChime={() => {}} playFound={(step) => notes.push(step)} />);
+
+    const { concepts } = findSolvableTriple();
+    await select(user, concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
+    expect(notes).toEqual([]);
+  });
+
+  test('muted means muted, for this as well as for the unlocks', async () => {
+    const notes: number[] = [];
+    const user = userEvent.setup();
+    renderApp(<App playChime={() => {}} playFound={(step) => notes.push(step)} />);
+
+    await user.click(screen.getByRole('button', { name: /turn sound effects off/i }));
+
+    const first = findSolvableTriple();
+    await select(user, first.concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    expect(notes).toEqual([]);
+  });
+})
+
+describe('clearing the achievements', () => {
+  test('they go, and they do not come straight back', async () => {
+    // The counts behind them have to go too. Clearing only the list of earned
+    // ids would leave twenty categories still counted as found, and the
+    // achievement for finding twenty would announce itself again at once.
+    const user = userEvent.setup();
+    renderApp(<App playChime={() => {}} playFound={() => {}} />);
+
+    const first = findSolvableTriple();
+    await select(user, first.concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await screen.findAllByRole('alert');
+
+    const button = screen.getByRole('button', { name: /achievements/i });
+    const earned = () => Number(button.textContent!.match(/(\d+)\s*\//)![1]);
+    expect(earned()).toBeGreaterThan(0);
+
+    await user.click(button);
+    await user.click(screen.getByRole('button', { name: /clear the achievements/i }));
+    await user.click(screen.getByRole('button', { name: /yes, clear them/i }));
+
+    expect(earned()).toBe(0);
+  });
+
+  test('they stay gone on the next answer, not only on the screen', async () => {
+    // The danger is not the moment of clearing, it is the move after it. The
+    // counts behind an achievement live as long as the list does, so clearing
+    // the list alone leaves twenty categories still counted as found — and the
+    // one given for finding twenty announces itself again on the next answer.
+    const user = userEvent.setup();
+    localStorage.setItem('properties-game:achievements', JSON.stringify({
+      unlocked: ['collector'],
+      propertiesFound: Array.from({ length: 25 }, (_, i) => `category-${i}`),
+      conceptsFinished: 0, repeats: 0, aliasAnswers: 0, exactAnswers: 0,
+    }));
+    renderApp(<App playChime={() => {}} playFound={() => {}} />);
+
+    await user.click(screen.getByRole('button', { name: /achievements/i }));
+    await user.click(screen.getByRole('button', { name: /clear the achievements/i }));
+    await user.click(screen.getByRole('button', { name: /yes, clear them/i }));
+    await user.keyboard('{Escape}');
+
+    const first = findSolvableTriple();
+    await select(user, first.concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await screen.findAllByRole('alert');
+
+    const announced = screen.getAllByRole('alert').map((a) => a.textContent).join(' ');
+    expect(announced).not.toContain('Collector');
+  });
+
+  test('what was cleared stays cleared after a reload', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderApp(<App playChime={() => {}} playFound={() => {}} />);
+
+    const first = findSolvableTriple();
+    await select(user, first.concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await screen.findAllByRole('alert');
+
+    await user.click(screen.getByRole('button', { name: /achievements/i }));
+    await user.click(screen.getByRole('button', { name: /clear the achievements/i }));
+    await user.click(screen.getByRole('button', { name: /yes, clear them/i }));
+    unmount();
+
+    renderApp(<App playChime={() => {}} playFound={() => {}} />);
+    const button = screen.getByRole('button', { name: /achievements/i });
+    expect(Number(button.textContent!.match(/(\d+)\s*\//)![1])).toBe(0);
+  });
+})
+
+test('the new-concept mark only ever lands on a concept that just arrived', { timeout: 30_000 }, async () => {
+  // The mark is worth nothing if it can land on a bubble that was already
+  // there — a player would learn to ignore it in two answers. That it appears
+  // at all is pinned in Graph.fresh.test.tsx, where a board can be handed an
+  // arrival directly; whether a given answer deals anything in depends on how
+  // many ways the board still has, which is deliberately 2 to 4 and not fixed.
+  const user = userEvent.setup();
+  renderApp(<App playChime={() => {}} />);
+
+  for (let turn = 0; turn < 12; turn++) {
+    const before = new Set(
+        [...document.querySelectorAll('.bubble')].map((b) => b.getAttribute('aria-label')!));
+    const { concepts, property } = findSolvableTriple();
+    await select(user, concepts);
+    await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await screen.findByRole('status');
+
+    // A refused answer deals nothing, so whatever arrived on the answer before
+    // is still rightly marked — the mark is on a clock, not on a turn.
+    if (!/correct/i.test(screen.getByRole('status').textContent ?? '')) continue;
+
+    for (const bubble of document.querySelectorAll('.bubble--fresh')) {
+      expect(before.has(bubble.getAttribute('aria-label')!)).toBe(false);
+    }
+  }
 });

@@ -10,6 +10,8 @@ export type GameEvent =
           /** The answer was the property's own name rather than one of its aliases. */
           exactName: boolean;
           selection: string[];
+          /** How many concepts the group holds once this answer is in it. */
+          groupSize?: number;
       };
 
 /** Counters that outlive the tab. Persisted. */
@@ -18,6 +20,8 @@ export interface Lifetime {
     /** Concepts with every one of their properties found. */
     conceptsFinished: number;
     propertiesFound: string[];
+    /** Categories found again, after they were already known. */
+    repeats: number;
     aliasAnswers: number;
     exactAnswers: number;
 }

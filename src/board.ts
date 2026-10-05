@@ -147,13 +147,36 @@ export function isExhausted(pool: Concept[], found: Solution[]): boolean {
 }
 
 /**
- * A board to start from, holding about as many ways on as asked.
+ * The board everybody starts from.
  *
- * Starts from a handful rather than from nothing, so the opening board is a
- * scatter the player reads rather than the smallest arrangement that happens
- * to satisfy the count.
+ * Written down rather than dealt. A random first board is sometimes a wall —
+ * three obscure categories and nothing a newcomer can name — and the first
+ * thing anybody meets should not be decided by a throw.
+ *
+ * These open on nine categories and all of them are ones anybody can name:
+ * food, sweet, animal, insect, object, metal, small, cold, white. The turtle
+ * is in none of them on purpose: not everything on the board is part of an
+ * answer, and learning that on the first board is kinder than learning it on
+ * the twentieth.
+ */
+export const OPENING = [
+    'chocolate', 'honey', 'cake',
+    'ant', 'bee', 'ladybug', 'turtle',
+    'key', 'coin', 'watch',
+    'snow', 'igloo', 'glacier',
+];
+
+/**
+ * A board to start from.
+ *
+ * The written opening when the game still knows every concept in it, and a
+ * dealt one otherwise — renaming a concept must not be able to leave a new
+ * player with a board that cannot be played.
  */
 export function openingBoard(pool: Concept[], ways: number): string[] {
+    const known = new Set(pool.map((concept) => concept.name));
+    if (OPENING.every((name) => known.has(name))) return [...OPENING];
+
     const first = getNRandomElements(pool, OPENING_SCATTER).map((concept) => concept.name);
     return refill(first, pool, [], ways);
 }

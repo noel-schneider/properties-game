@@ -2,6 +2,12 @@ import { fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderApp } from './test-utils'
 import Help, { LESSONS } from './Help'
+import { saveGreeted } from './greeting'
+
+// These are about the panel a returning player meets. What somebody arriving
+// for the first time sees is pinned in HelpIntro.test.tsx.
+beforeEach(() => saveGreeted());
+afterEach(() => localStorage.clear());
 
 test('it is one button until it is asked for', () => {
   renderApp(<Help />);
@@ -52,4 +58,13 @@ test('every lesson is drawn as well as written', () => {
     expect(entry.querySelector('svg')).not.toBeNull();
     expect(entry.textContent?.trim().length).toBeGreaterThan(0);
   }
+});
+
+test('the ring around a concept is explained, since nothing else explains it', () => {
+  // It is the one mark on the board with no words anywhere near it: a player
+  // who never reads this has no way of learning what it counts.
+  renderApp(<Help />);
+  fireEvent.click(screen.getByRole('button', { name: /how to play/i }));
+
+  expect(screen.getByRole('dialog')).toHaveTextContent(/fills|ring/i);
 });

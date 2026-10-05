@@ -21,7 +21,7 @@ test('a group whose property is open for all three is accepted', () => {
 
 test('a concept serves again, for another of its properties', () => {
     const first: Solution[] = [{ property: 'biome', concepts: forest }];
-    const outcome = resolveGuess(['jungle', 'forest', 'orchard'], 'trees', { wordings, pool, found: first });
+    const outcome = resolveGuess(['jungle', 'forest', 'garden'], 'trees', { wordings, pool, found: first });
 
     expect(outcome.correct).toBe(true);
     expect(outcome.property).toBe('trees');
@@ -59,4 +59,22 @@ test('a refused guess changes nothing', () => {
     const outcome = resolveGuess(forest, 'water', { wordings, pool, found: before });
 
     expect(outcome.found).toBe(before);
+});
+
+test('a category one of the three has already used says so, rather than denying it', () => {
+  // "Not a category these three share" would be a lie here: they do share it.
+  // One of them has spent it, which is worth saying — the group that spent it
+  // is already on the board for anyone to see, so nothing is given away.
+  const found: Solution[] = [{ property: 'biome', concepts: forest }];
+  const outcome = resolveGuess(forest, 'biome', { wordings, pool, found });
+
+  expect(outcome.correct).toBe(false);
+  expect(outcome.reason).toBe('spent');
+});
+
+test('three concepts with nothing in common get no such excuse', () => {
+  const outcome = resolveGuess(['jungle', 'milk', 'piano'], 'biome', { wordings, pool, found: [] });
+
+  expect(outcome.correct).toBe(false);
+  expect(outcome.reason).toBe('no-match');
 });

@@ -2,7 +2,9 @@
 
 .input-container {
   position: absolute;
-  width: 15%;
+  /* Wider than it was, and in characters rather than a share of the screen: a
+     category name is as long as it is whatever the monitor measures. */
+  width: clamp(18rem, 26%, 30rem);
   top: 90%;
   right: 50%;
   transform: translate(50%,-50%);
@@ -47,11 +49,15 @@
 .input {
   background-color: #333;
   color: #fff;
-  padding: 10px 10px 10px 10px;
+  flex: 1 1 auto;
+  /* It takes every category name in the game, so it is sized for typing in
+     rather than for fitting under the board. */
+  min-width: 0;
+  padding: 14px 16px;
   outline: 0;
   border: 1px solid rgba(105, 105, 105, 0.397);
   border-radius: 10px;
-  font-size: medium;
+  font-size: 1.05rem;
 }
 
 .input:focus {
@@ -90,11 +96,31 @@
   background-color: #0077cc;
 }
 
+/*
+ * The answer line.
+ *
+ * A fixed two lines of room, always. The box is centred on a point, so
+ * anything that grows here pushes the input up and the hint under it down —
+ * measured at two pixels for one line of text and far more once a message
+ * wrapped, which is every message at the narrow end of the box. Reserving the
+ * room costs an empty strip and buys a board that never moves while it is
+ * being answered.
+ */
 .feedback {
   margin: 0;
-  min-height: 1.2rem;
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.8rem;
+  font-size: 0.98rem;
+  line-height: 1.3;
   text-align: center;
+  /* It leaves on its own, and leaving abruptly looks like a glitch. */
+  transition: opacity 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedback { transition: none; }
 }
 
 .feedback--correct {
@@ -103,4 +129,14 @@
 
 .feedback--wrong {
   color: #ff8f8f;
+}
+
+/* Not a wrong answer — nothing has been answered yet. Warm, not red. */
+.feedback--short {
+  color: #ffad69;
+}
+
+/* Nor is this one: the word is right, and one of the three has spent it. */
+.feedback--spent {
+  color: #ffc9a0;
 }

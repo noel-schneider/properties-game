@@ -1,0 +1,139 @@
+import { test, expect } from '@playwright/test'
+
+/**
+ * The music cannot be heard from here, so what is checked is that asking for it
+ * really builds and starts oscillators in a real browser — the part jsdom
+ * cannot answer at all, having no audio of any kind.
+ */
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    const made: number[] = [];
+    (window as unknown as { started: number[] }).started = made;
+    const create = AudioContext.prototype.createOscillator;
+    AudioContext.prototype.createOscillator = function (this: AudioContext) {
+      const oscillator = create.call(this);
+      // Recorded where the pitch is set, not where the note starts: a scheduled
+      // value has not reached .value yet when start() runs, so reading it there
+      // reports the oscillator's default 440 for every voice.
+      const schedule = oscillator.frequency.setValueAtTime.bind(oscillator.frequency);
+      oscillator.frequency.setValueAtTime = (value: number, when: number) => {
+        made.push(value);
+        return schedule(value, when);
+      };
+      return oscillator;
+    };
+  });
+});
+
+const count = (page: import('@playwright/test').Page) =>
+  page.evaluate(() => (window as unknown as { started: number[] }).started.length);
+
+const voices = (page: import('@playwright/test').Page) =>
+  page.evaluate(() => (window as unknown as { started: number[] }).started.length);
+
+test('nothing plays until the music is asked for', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.bubble').first().click();
+
+  expect(await voices(page)).toBe(0);
+});
+
+test('asking for the music starts a chord', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Turn music on' }).click();
+
+  await expect.poll(() => voices(page)).toBeGreaterThanOrEqual(4);
+});
+
+test('the chord is low and wide, which is what makes it a bed', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Turn music on' }).click();
+  await expect.poll(() => voices(page)).toBeGreaterThanOrEqual(4);
+
+  const pitches = await page.evaluate(() => (window as unknown as { started: number[] }).started);
+  for (const hz of pitches) {
+    expect(hz).toBeGreaterThan(80);
+    expect(hz).toBeLessThan(560);
+  }
+  expect(new Set(pitches).size).toBeGreaterThan(1);
+});
+
+test('stopping it starts nothing more, and the choice is remembered', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Turn music on' }).click();
+  await expect.poll(() => voices(page)).toBeGreaterThanOrEqual(4);
+
+  await page.getByRole('button', { name: 'Turn music off' }).click();
+  const after = await voices(page);
+  await page.waitForTimeout(1200);
+  expect(await voices(page)).toBe(after);
+
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Turn music on' })).toBeVisible();
+})
+
+test('an instrument that joins is heard joining, not nine seconds later', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Turn music on' }).click();
+  await page.waitForTimeout(1500);
+  const before = await count(page);
+
+  // The orchestra grows one part every twenty concepts finished, which is far
+  // more game than a test can play. This is the same call the game makes.
+  await page.evaluate(() => (window as unknown as {
+    __ambient: { setAmbientLayers: (count: number) => void };
+  }).__ambient.setAmbientLayers(3));
+  await page.waitForTimeout(800);
+
+  // A chord lasts thirteen seconds and the next starts after nine. A part that
+  // waited for that chord would add nothing at all inside this window.
+  expect(await count(page) - before).toBeGreaterThanOrEqual(5);
+})
+
+test('an instrument that leaves goes at once, not at the end of the chord', async ({ page }) => {
+  // Starting the game over drops the orchestra back to one part. The notes a
+  // part has already scheduled run for the rest of the chord, so without a
+  // fader of its own a reset kept the whole orchestra for thirteen seconds.
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Turn music on' }).click();
+
+  await page.evaluate(() => (window as unknown as {
+    __ambient: { setAmbientLayers: (count: number) => void };
+  }).__ambient.setAmbientLayers(5));
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => (window as unknown as {
+    __ambient: { faders: () => number[] };
+  }).__ambient.faders())).toEqual([1, 1, 1, 1, 1]);
+
+  await page.evaluate(() => (window as unknown as {
+    __ambient: { setAmbientLayers: (count: number) => void };
+  }).__ambient.setAmbientLayers(1));
+  await page.waitForTimeout(1800);
+
+  const after = await page.evaluate(() => (window as unknown as {
+    __ambient: { faders: () => number[] };
+  }).__ambient.faders());
+  expect(after[0]).toBe(1);
+  for (const level of after.slice(1)) expect(level).toBeLessThan(0.05);
+})
+
+test('the sunrise moves with the music, and only with it', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  const pulse = page.locator('.sky__pulse');
+
+  // Nothing is playing, so nothing swells.
+  await page.waitForTimeout(2000);
+  expect(await pulse.getAttribute('data-beat')).toBe('0');
+
+  await page.getByRole('button', { name: 'Turn music on' }).click();
+  await expect.poll(async () => Number(await pulse.getAttribute('data-beat')), { timeout: 15_000 })
+    .toBeGreaterThan(0);
+
+  // A chord every nine seconds, and the swell alternates between two identical
+  // animations so that each one actually starts rather than being ignored.
+  const first = await pulse.getAttribute('data-phase');
+  await page.waitForTimeout(10_000);
+  expect(Number(await pulse.getAttribute('data-beat'))).toBeGreaterThan(1);
+  expect(await pulse.getAttribute('data-phase')).not.toBe(first);
+})

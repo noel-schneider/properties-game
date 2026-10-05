@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { boardSettled } from './board'
+import { boardSettled, clearGame } from './board'
 import english from '../src/i18n/en.json' with { type: 'json' }
 import data from '../src/concepts.json' with { type: 'json' }
 
@@ -55,7 +55,7 @@ test('a wrong category is rejected', async ({ page }) => {
   await page.getByPlaceholder('Type a category here!').fill('not a real category at all')
   await page.getByRole('button', { name: 'Submit' }).click()
 
-  await expect(page.getByRole('status')).toHaveText(/not quite/i)
+  await expect(page.getByRole('status')).toHaveText(/not a category/i)
 })
 
 test('pressing Enter submits the guess', async ({ page }) => {
@@ -80,7 +80,7 @@ test('a found group stays on the board, tied and named, and its concepts carry o
   // Start from a clean record, then read the board that comes with it.
   await page.goto('/')
   await boardSettled(page)
-  await page.evaluate(() => localStorage.clear())
+  await clearGame(page)
   await page.reload()
   await boardSettled(page)
   await expect(page.getByTestId('found')).toHaveText('0')
@@ -133,7 +133,12 @@ test('a concept can be dropped onto a category already found', async ({ page }) 
     const host = names.slice(0, 3)
     await page.goto('/')
     await page.evaluate(
-      ([key, group]) => localStorage.setItem(key as string, JSON.stringify([group])),
+      ([key, group]) => {
+        localStorage.setItem(key as string, JSON.stringify([group]))
+        // The board is kept between visits now, so a seeded game has to clear
+        // it or the last one is restored over the top.
+        localStorage.removeItem('properties-game:board')
+      },
       ['properties-game:found', { property, concepts: host }] as const,
     )
     await page.reload()
@@ -161,12 +166,16 @@ test('a concept can be dropped onto a category already found', async ({ page }) 
     }
   }
 
-  // Joining adds a member to a group, so the count of groups found does not
-  // move. What moves is the joiner: one more of its properties is spent.
+  // What moves: the joiner spends one more of its properties, and the tally of
+  // answers got right goes up by one. That tally used to count groups alone,
+  // so this move — twelve per cent of the answers in a game — landed with
+  // nothing on screen to show for it.
   const spent = async () => Number(
     (await page.locator(`.bubble[aria-label="${label(joiner)}"]`).getAttribute('data-progress'))!.split('/')[0],
   )
+  const finds = async () => Number(await page.getByTestId('found').textContent())
   const before = await spent()
+  const findsBefore = await finds()
 
   const from = await middleOf([joiner])
   await page.mouse.move(from.x, from.y)
@@ -208,4 +217,5 @@ test('a concept can be dropped onto a category already found', async ({ page }) 
 
   await expect(page.getByRole('status')).toHaveText(/correct/i)
   await expect.poll(spent).toBe(before + 1)
+  await expect.poll(finds).toBe(findsBefore + 1)
 })

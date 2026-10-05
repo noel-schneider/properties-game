@@ -25,6 +25,9 @@ const styles: Record<string, CSSProperties> = {
         top: '1.25rem',
         left: '1.25rem',
         zIndex: 9000,
+        // Read, never pressed — and it sits over a corner of the board, so a
+        // bubble underneath it could not be clicked at all.
+        pointerEvents: 'none',
         maxWidth: '17rem',
         padding: '0.6rem 0.75rem',
         borderRadius: '0.6rem',
