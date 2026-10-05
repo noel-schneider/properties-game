@@ -16,6 +16,12 @@ test('nothing moves while the box is being answered', async ({ page }) => {
   for (const width of [1280, 820]) {
     await page.setViewportSize({ width, height: 800 })
     await page.goto('/')
+    // Measured only once the webfont has arrived: Poppins swapping in changes
+    // the height of the input by six pixels, and whichever measurement happens
+    // to straddle that moment disagrees with the others for no reason the
+    // layout is to blame for.
+    await page.evaluate(() => document.fonts.ready)
+
     const where = async () => ({
       input: Math.round((await page.locator('.input').boundingBox())!.y),
       hint: Math.round((await page.locator('.press-enter-wrapper').boundingBox())!.y),
