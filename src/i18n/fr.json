@@ -496,7 +496,8 @@
         "support.yes": "Offrir un café",
         "support.no": "Non merci",
         "summary.support": "Si ça valait ta soirée, tu peux offrir un café au jeu.",
-        "music.volume": "Volume de la musique"
+        "music.volume": "Volume de la musique",
+        "hint.ask": "Indice"
     },
     "achievements": {
         "first-light": {

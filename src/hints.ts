@@ -1,17 +1,16 @@
 import type { Solution } from './hand'
 
 /**
- * The nudge for a player who has stalled.
+ * How long a nudge stays lit.
  *
- * How long the board waits before saying anything, how long it waits between
- * nudges after that, and how long a nudge stays lit. Six and a half seconds
- * for the last of those: a player whose eyes are on the other side of the
- * board needs time to come back and still find it there. Forty-five seconds
- * because a player scanning twenty bubbles thinks for twenty without being
- * stuck, and a hint arriving mid-thought is noise rather than help.
+ * Six and a half seconds: a player whose eyes are on the other side of the
+ * board needs time to come back and still find it there, and a mark that
+ * outstays that stops reading as an answer to the question they asked.
+ *
+ * There is no wait before it any more. The board used to speak up by itself
+ * after forty-five seconds and every twenty-five after that; it is asked now,
+ * which is the only version a player can read as help rather than as a lesson.
  */
-export const HINT_FIRST = 45_000;
-export const HINT_AGAIN = 25_000;
 export const HINT_SHOWN = 6_500;
 
 /**

@@ -464,3 +464,14 @@ test('escape puts the selection back, for a hand already on the keyboard', async
   await expect(bubble).toHaveAttribute('aria-checked', 'false')
 })
 
+test('a hint is given when it is asked for, and never otherwise', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  // The board used to light two concepts by itself after forty-five seconds.
+  await expect(page.locator('.bubble--hinted')).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Hint' }).click()
+
+  await expect(page.locator('.bubble--hinted')).toHaveCount(2)
+})

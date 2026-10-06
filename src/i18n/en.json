@@ -497,7 +497,8 @@
         "support.yes": "Buy a coffee",
         "support.no": "No thanks",
         "summary.support": "If it was worth your evening, you can buy the game a coffee.",
-        "music.volume": "Music volume"
+        "music.volume": "Music volume",
+        "hint.ask": "Hint"
     },
     "achievements": {
         "first-light": {

@@ -5,6 +5,7 @@ import Answers from "./Answers";
 import Form from "./Form";
 import Graph from "./Graph";
 import Help from "./Help";
+import Hint from "./Hint";
 import Scoreboard from "./Scoreboard";
 import Sky from "./Sky";
 import Summary from "./Summary";
@@ -30,7 +31,7 @@ import {
 } from "./ambient";
 import MusicBench from "./MusicBench";
 import BoardBench from "./BoardBench";
-import { HINT_AGAIN, HINT_FIRST, HINT_SHOWN, hintPair } from "./hints";
+import { HINT_SHOWN, hintPair } from "./hints";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
 import { formableGroups, isExhausted, openingBoard, refill, waysWanted } from "./board";
@@ -407,33 +408,36 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
         [found],
     );
     /**
-     * The nudge for a player who has stalled.
+     * The board changed, so a nudge given for the old one has nothing to say.
      *
-     * The clock restarts whenever the board changes — a right answer, or a
-     * concept dropped into a group — and runs on through a wrong one, which is
-     * the whole point: a player guessing and missing is exactly who this is
-     * for. Each nudge lights two concepts for a few seconds and the next one
-     * points somewhere else.
+     * The count goes with it: the next hint on a fresh board should start from
+     * its first pair rather than wherever the last board had got to.
      */
     useEffect(() => {
-        let next: ReturnType<typeof setTimeout>;
-        let clear: ReturnType<typeof setTimeout>;
         nudges.current = 0;
         setHinted([]);
-
-        const nudge = () => {
-            const pair = hintPair(formableGroups(board, pool, found), nudges.current++);
-            if (pair) setHinted(pair);
-            clear = setTimeout(() => setHinted([]), HINT_SHOWN);
-            next = setTimeout(nudge, HINT_AGAIN);
-        };
-
-        next = setTimeout(nudge, HINT_FIRST);
-        return () => {
-            clearTimeout(next);
-            clearTimeout(clear);
-        };
     }, [found, board]);
+
+    // A nudge leaves on its own. Nothing else takes it away, since the player
+    // asked for it and may well be looking somewhere else when it lands.
+    useEffect(() => {
+        if (hinted.length === 0) return;
+
+        const timer = setTimeout(() => setHinted([]), HINT_SHOWN);
+        return () => clearTimeout(timer);
+    }, [hinted]);
+
+    /**
+     * Two of a trio that can be made, because the player asked.
+     *
+     * Each press points somewhere else — a different group where there is one,
+     * and otherwise a different two of the same group. A button that lights the
+     * same pair twice reads as broken rather than as insistent.
+     */
+    const askForHint = () => {
+        const pair = hintPair(formableGroups(board, pool, found), nudges.current++);
+        if (pair) setHinted(pair);
+    };
 
     // The orchestra grows with the game: one more part every twenty concepts
     // finished, up to five. Set here rather than inside the player, which has
@@ -508,6 +512,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
           <SoundNote muted={muted} />
           <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} properties={namedSoFar} />
           <div className="corner corner--top-right">
+              <Hint available={left > 0} onAsk={askForHint} />
               <Help />
               <LanguageToggle />
               <Reset onReset={playAgain} />
