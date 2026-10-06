@@ -127,6 +127,7 @@
         "location": "lieu",
         "machine": "machine",
         "metal": "métal",
+        "money": "argent",
         "music": "musique",
         "night": "nuit",
         "object": "objet",
@@ -162,13 +163,16 @@
             "vol",
             "dans les airs",
             "aérien",
-            "ciel"
+            "ciel",
+            "volant",
+            "qui vole"
         ],
         "animal": [
             "créature",
             "bête",
             "faune",
-            "être vivant"
+            "être vivant",
+            "animaux"
         ],
         "art": [
             "artistique",
@@ -177,7 +181,8 @@
         ],
         "astronomy": [
             "ciel",
-            "cosmos"
+            "cosmos",
+            "astres"
         ],
         "big": [
             "gros",
@@ -206,7 +211,8 @@
             "gelé",
             "glace",
             "hiver",
-            "frais"
+            "frais",
+            "polaire"
         ],
         "colors": [
             "multicolores",
@@ -239,7 +245,8 @@
             "aliment",
             "comestible",
             "manger",
-            "repas"
+            "repas",
+            "cuisine"
         ],
         "game": [
             "jouer",
@@ -254,7 +261,8 @@
             "chaud",
             "brûlant",
             "feu",
-            "chaleureux"
+            "chaleureux",
+            "chaude"
         ],
         "insect": [
             "bestiole",
@@ -284,7 +292,15 @@
         ],
         "metal": [
             "métallique",
-            "en métal"
+            "en métal",
+            "métaux",
+            "métallurgie"
+        ],
+        "money": [
+            "monnaie",
+            "richesse",
+            "fortune",
+            "fric"
         ],
         "music": [
             "musical",
@@ -337,7 +353,8 @@
         "small": [
             "minuscule",
             "petite chose",
-            "menu"
+            "menu",
+            "petite"
         ],
         "sound": [
             "bruit",
@@ -359,7 +376,8 @@
             "sucre",
             "dessert",
             "douceur",
-            "friandise"
+            "friandise",
+            "sucrée"
         ],
         "technology": [
             "techno",
@@ -369,13 +387,15 @@
         "time": [
             "heure",
             "mesure du temps",
-            "horloge"
+            "horloge",
+            "durée"
         ],
         "trees": [
             "arbre",
             "végétation",
             "bois",
-            "verdure"
+            "verdure",
+            "boisé"
         ],
         "underground": [
             "sous terre",
@@ -385,7 +405,8 @@
         ],
         "vehicle": [
             "engin",
-            "moyen de transport"
+            "moyen de transport",
+            "transport"
         ],
         "water": [
             "aquatique",
@@ -394,12 +415,14 @@
         "weather": [
             "temps qu'il fait",
             "climat",
-            "intempéries"
+            "intempéries",
+            "météorologie"
         ],
         "white": [
             "blancheur",
             "pâle",
-            "couleur blanche"
+            "couleur blanche",
+            "blanche"
         ],
         "wind": [
             "venteux",

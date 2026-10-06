@@ -109,7 +109,8 @@
     "casino": [
         "location",
         "entertainment",
-        "game"
+        "game",
+        "money"
     ],
     "cave": [
         "shelter",
@@ -149,7 +150,8 @@
     "coin": [
         "metal",
         "object",
-        "small"
+        "small",
+        "money"
     ],
     "compass": [
         "exploration",
@@ -324,7 +326,8 @@
         "accessory",
         "object",
         "metal",
-        "small"
+        "small",
+        "money"
     ],
     "nest": [
         "shelter",

@@ -32,7 +32,7 @@ nowhere else.
 
 ## The data
 
-A hundred concepts, forty-nine categories, 304 tags between them — three on
+A hundred concepts, fifty categories, 307 tags between them — three on
 average. It is in [`src/concepts.json`](src/concepts.json), with the two
 languages in [`src/i18n`](src/i18n).
 
