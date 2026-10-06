@@ -496,7 +496,8 @@
         "support.invite": "Enjoying this? It is free and always will be — a coffee keeps it going.",
         "support.yes": "Buy a coffee",
         "support.no": "No thanks",
-        "summary.support": "If it was worth your evening, you can buy the game a coffee."
+        "summary.support": "If it was worth your evening, you can buy the game a coffee.",
+        "music.volume": "Music volume"
     },
     "achievements": {
         "first-light": {

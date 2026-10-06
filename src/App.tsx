@@ -15,15 +15,19 @@ import LanguageToggle from "./LanguageToggle";
 import Reset from "./Reset";
 import SoundToggle from "./SoundToggle";
 import MusicToggle from "./MusicToggle";
+import MusicVolume from "./MusicVolume";
 import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
 import { playFoundNote, playUnlockChime } from "./achievements/chime";
 import {
-    emptyRunStats, loadBoard, loadFound, loadLifetime, loadMuted, loadMusic, loadRunStats,
-    saveBoard, saveFound, saveLifetime, saveMuted, saveMusic, saveRunStats,
+    emptyRunStats, loadBoard, loadFound, loadLifetime, loadMuted, loadMusic, loadMusicVolume,
+    loadRunStats, saveBoard, saveFound, saveLifetime, saveMuted, saveMusic, saveMusicVolume,
+    saveRunStats,
 } from "./achievements/storage";
-import { ambientPlaying, layersFor, setAmbientLayers, startAmbient, stopAmbient } from "./ambient";
+import {
+    ambientPlaying, layersFor, setAmbientLayers, setAmbientVolume, startAmbient, stopAmbient,
+} from "./ambient";
 import MusicBench from "./MusicBench";
 import BoardBench from "./BoardBench";
 import { HINT_AGAIN, HINT_FIRST, HINT_SHOWN, hintPair } from "./hints";
@@ -103,6 +107,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
     const [muted, setMuted] = useState(loadMuted);
     const [music, setMusic] = useState(loadMusic);
+    const [musicVolume, setMusicVolume] = useState(loadMusicVolume);
     // Dev only: the orchestra forced to a size. A part arrives every twenty
     // concepts finished — the fifth at the eighty-sixth answer of a game, which
     // is no way to judge whether it belongs in the piece.
@@ -118,6 +123,8 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
      * left it on last time gets it back on their first click rather than on
      * arrival — which is also the polite order.
      */
+    useEffect(() => setAmbientVolume(musicVolume), [musicVolume]);
+
     useEffect(() => {
         if (!music) {
             stopAmbient();
@@ -138,6 +145,11 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
 
     // Stopped when the game goes, or it outlives the page it belongs to.
     useEffect(() => stopAmbient, []);
+
+    const changeMusicVolume = (level: number) => {
+        saveMusicVolume(level);
+        setMusicVolume(level);
+    };
 
     const toggleMusic = () => {
         setMusic((playing) => {
@@ -470,6 +482,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />
               <MusicToggle playing={music} onToggle={toggleMusic} />
+              <MusicVolume level={musicVolume} playing={music} onChange={changeMusicVolume} />
           </div>
           <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} onToggle={toggleConcept} onDropInto={dropInto} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />

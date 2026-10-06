@@ -495,7 +495,8 @@
         "support.invite": "Ça te plaît ? C’est gratuit et ça le restera — un café et ça continue.",
         "support.yes": "Offrir un café",
         "support.no": "Non merci",
-        "summary.support": "Si ça valait ta soirée, tu peux offrir un café au jeu."
+        "summary.support": "Si ça valait ta soirée, tu peux offrir un café au jeu.",
+        "music.volume": "Volume de la musique"
     },
     "achievements": {
         "first-light": {

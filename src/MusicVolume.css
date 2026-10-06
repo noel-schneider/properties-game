@@ -1,0 +1,66 @@
+/*
+ * The music fader, sized to sit in the row of controls without becoming the
+ * widest thing in it. Drawn by hand in both engines, because a native range
+ * input is a pale blue bar on a dark board.
+ */
+.volume {
+    width: 4.5rem;
+    height: 2.1rem;
+    margin: 0;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.volume:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.volume::-webkit-slider-runnable-track {
+    height: 3px;
+    border-radius: 2px;
+    background: #40405c;
+}
+
+.volume::-moz-range-track {
+    height: 3px;
+    border-radius: 2px;
+    background: #40405c;
+}
+
+.volume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0.7rem;
+    height: 0.7rem;
+    /* Half the thumb's height above the track, so it rides the line. */
+    margin-top: -0.3rem;
+    border: none;
+    border-radius: 50%;
+    background: #c9c9db;
+}
+
+.volume::-moz-range-thumb {
+    width: 0.7rem;
+    height: 0.7rem;
+    border: none;
+    border-radius: 50%;
+    background: #c9c9db;
+}
+
+.volume:hover:not(:disabled)::-webkit-slider-thumb {
+    background: #ffad69;
+}
+
+.volume:hover:not(:disabled)::-moz-range-thumb {
+    background: #ffad69;
+}
+
+.volume:focus-visible {
+    outline: 2px solid #ffad69;
+    outline-offset: 2px;
+    border-radius: 0.3rem;
+}

@@ -352,6 +352,48 @@ export function setAmbientLayers(count: number): void {
 }
 
 let bus: GainNode | null = null;
+
+/**
+ * How loud the bed is, as a fraction of the gain the parts were written for.
+ *
+ * Held here rather than inside the player because it outlives it: somebody who
+ * turned the music down, switched it off and switched it on again means to get
+ * it back where they left it, not at full.
+ */
+let volume = 1;
+
+/** How long the master fader takes to reach a new level. */
+const VOLUME_SECONDS = 0.25;
+
+/** The level the bed is set to play at. */
+export function ambientVolume(): number {
+    return volume;
+}
+
+/**
+ * Sets how loud the bed is.
+ *
+ * Ramped rather than set: a gain that jumps mid-chord clicks, because the
+ * waveform it is scaling does not stop at zero to be scaled.
+ */
+export function setAmbientVolume(level: number): void {
+    if (!Number.isFinite(level)) return;
+    volume = Math.max(0, Math.min(1, level));
+
+    if (!bus) return;
+
+    try {
+        const ctx = audioContext();
+        if (!ctx) return;
+
+        bus.gain.cancelScheduledValues(ctx.currentTime);
+        bus.gain.setValueAtTime(bus.gain.value, ctx.currentTime);
+        bus.gain.linearRampToValueAtTime(volume, ctx.currentTime + VOLUME_SECONDS);
+    } catch {
+        // Music is a garnish.
+    }
+}
+
 /** One fader per part, so a part can be taken out without waiting for a chord. */
 let channels: GainNode[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
@@ -416,7 +458,7 @@ export function startAmbient(): void {
         gain.gain.setValueAtTime(0, ctx.currentTime);
         // Faded in over four seconds: music that arrives at full volume on a
         // click startles, which is the opposite of the point.
-        gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 4);
+        gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + 4);
 
         gain.connect(ctx.destination);
         channels = LAYERS.map(() => {
