@@ -78,6 +78,14 @@ interface GraphProps {
     hinted?: string[];
     onToggle: (name: string) => void;
     /**
+     * Asked for when a click lands on the board rather than on a concept.
+     *
+     * The board is the one place on the page where "nothing" is a thing a
+     * player can point at, which makes it the obvious way to put a selection
+     * back — and the first thing a tester reached for.
+     */
+    onClear?: () => void;
+    /**
      * Dropping a concept onto a category already found. The index is into
      * `found`; whether it is a right answer is settled by the game, not here.
      */
@@ -131,7 +139,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, arriving = [], hinted = [], onToggle, onDropInto }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, arriving = [], hinted = [], onToggle, onDropInto, onClear }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -368,6 +376,12 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
             viewBox={`${-VIEW_WIDTH / 2} ${-VIEW_HEIGHT / 2} ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
             role="group"
             aria-label={t('graph.label')}
+            onClick={(event) => {
+                // Only a click on the board itself. Every click on a bubble
+                // bubbles up to here on its way out, and acting on those would
+                // undo each pick with its own event.
+                if (event.target === event.currentTarget) onClear?.();
+            }}
         >
             <defs>
                 {/* The loops take their colours from the sunrise behind the

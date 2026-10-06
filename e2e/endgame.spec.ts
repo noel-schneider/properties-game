@@ -99,7 +99,7 @@ test('finding the last group ends the run and offers a fresh one', async ({ page
   for (const name of last.concepts) {
     await page.getByRole('checkbox', { name, exact: true }).click()
   }
-  await page.getByPlaceholder('Type a category here!').fill(last.property)
+  await page.locator('.input').fill(last.property)
   await page.getByRole('button', { name: 'Submit' }).click()
 
   const summary = page.getByRole('dialog', { name: /run complete/i })
@@ -117,7 +117,7 @@ test('keeping on playing leaves the finished game intact', async ({ page }) => {
   for (const name of last.concepts) {
     await page.getByRole('checkbox', { name, exact: true }).click()
   }
-  await page.getByPlaceholder('Type a category here!').fill(last.property)
+  await page.locator('.input').fill(last.property)
   await page.getByRole('button', { name: 'Submit' }).click()
   await page.getByRole('button', { name: 'Keep playing' }).click()
 

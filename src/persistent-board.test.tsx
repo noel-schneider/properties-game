@@ -17,7 +17,7 @@ async function solve(user: ReturnType<typeof userEvent.setup>, group: { property
   for (const name of group.concepts) {
     await user.click(screen.getByRole('checkbox', { name }));
   }
-  await user.type(screen.getByPlaceholderText(/type a category here/i), group.property);
+  await user.type(screen.getByRole('textbox'), group.property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
   await screen.findByRole('status');
 }
@@ -65,7 +65,7 @@ test('naming a category one of the three has already spent is refused', async ()
   for (const name of group.concepts) {
     await user.click(screen.getByRole('checkbox', { name }));
   }
-  await user.type(screen.getByPlaceholderText(/type a category here/i), group.property);
+  await user.type(screen.getByRole('textbox'), group.property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   // Not "they share nothing" — they share it; one of them has used it up, and

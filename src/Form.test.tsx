@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
 import { renderApp } from './test-utils';
 import userEvent from '@testing-library/user-event';
 import Form, { VERDICT_SECONDS } from './Form';
@@ -10,13 +10,15 @@ test('submit stays disabled until three concepts and a category are given', asyn
   const submit = screen.getByRole('button', { name: /submit/i });
   expect(submit).toBeDisabled();
 
-  await user.type(screen.getByPlaceholderText(/type a category here/i), 'biome');
-  expect(submit).toBeDisabled();
-
+  // Nothing can be typed yet — the box is read only until three are picked —
+  // so the two halves of the condition are met in the order a player meets them.
   rerender(<Form selected={['forest', 'desert']} feedback="none" onSubmit={() => true} />);
   expect(submit).toBeDisabled();
 
   rerender(<Form selected={['forest', 'desert', 'jungle']} feedback="none" onSubmit={() => true} />);
+  expect(submit).toBeDisabled();
+
+  await user.type(screen.getByRole('textbox'), 'biome');
   expect(submit).toBeEnabled();
 });
 
@@ -24,7 +26,7 @@ test('whitespace alone is not a category', async () => {
   const user = userEvent.setup();
   renderApp(<Form selected={['forest', 'desert', 'jungle']} feedback="none" onSubmit={() => true} />);
 
-  await user.type(screen.getByPlaceholderText(/type a category here/i), '   ');
+  await user.type(screen.getByRole('textbox'), '   ');
   expect(screen.getByRole('button', { name: /submit/i })).toBeDisabled();
 });
 
@@ -35,7 +37,7 @@ describe('reaching the input with the keyboard', () => {
 
     await user.keyboard('{Enter}');
 
-    expect(screen.getByPlaceholderText(/type a category here/i)).toHaveFocus();
+    expect(screen.getByRole('textbox')).toHaveFocus();
   });
 
   test('enter in the box still submits, rather than only refocusing it', async () => {
@@ -49,7 +51,7 @@ describe('reaching the input with the keyboard', () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText(/type a category here/i);
+    const input = screen.getByRole('textbox');
     await user.click(input);
     await user.type(input, 'insect{Enter}');
 
@@ -69,28 +71,48 @@ describe('reaching the input with the keyboard', () => {
 
     await user.keyboard('{Enter}');
 
-    expect(screen.getByPlaceholderText(/type a category here/i)).not.toHaveFocus();
+    expect(screen.getByRole('textbox')).not.toHaveFocus();
   });
 });
 
-test('typing with too few concepts picked says what is missing', async () => {
-  // The submit button goes grey, which says "no" without ever saying why.
-  const user = userEvent.setup();
-  renderApp(<Form selected={['bee']} feedback="none" onSubmit={() => true} />);
+describe('the box below three concepts', () => {
+  test('it cannot be typed in, and says so where the typing would go', () => {
+    // A box that takes a category nobody can submit is a box that lies. Read
+    // only rather than disabled: it still takes the focus, which is what the
+    // enter shortcut and a keyboard player both need.
+    const { rerender } = renderApp(
+        <Form selected={['bee', 'ant']} feedback="none" onSubmit={() => true} />);
 
-  await user.type(screen.getByPlaceholderText(/type a category here/i), 'in');
+    const box = screen.getByRole('textbox');
+    expect(box).toHaveAttribute('readonly');
+    expect(box).toHaveAttribute('placeholder', expect.stringMatching(/three concepts/i));
 
-  expect(screen.getByRole('status')).toHaveTextContent(/at least three/i);
-});
+    rerender(<Form selected={['bee', 'ant', 'beetle']} feedback="none" onSubmit={() => true} />);
+    expect(screen.getByRole('textbox')).not.toHaveAttribute('readonly');
+    expect(screen.getByRole('textbox')).toHaveAttribute('placeholder', expect.stringMatching(/type a category/i));
+  });
 
-test('the reminder goes once the third concept is picked', () => {
-  const { rerender } = renderApp(
-      <Form selected={['bee', 'ant']} feedback="none" onSubmit={() => true} />);
-  fireEvent.change(screen.getByPlaceholderText(/type a category here/i), { target: { value: 'insect' } });
-  expect(screen.getByRole('status')).toHaveTextContent(/at least three/i);
+  test('what was typed before the third went is kept, not thrown away', async () => {
+    // Somebody types "insect", looks up, and unpicks a bubble to swap it. The
+    // word they wrote is still the word they meant.
+    const user = userEvent.setup();
+    const { rerender } = renderApp(
+        <Form selected={['bee', 'ant', 'beetle']} feedback="none" onSubmit={() => true} />);
 
-  rerender(<Form selected={['bee', 'ant', 'beetle']} feedback="none" onSubmit={() => true} />);
-  expect(screen.getByRole('status')).not.toHaveTextContent(/at least three/i);
+    await user.type(screen.getByRole('textbox'), 'insect');
+    rerender(<Form selected={['bee', 'ant']} feedback="none" onSubmit={() => true} />);
+
+    expect(screen.getByRole('textbox')).toHaveValue('insect');
+  });
+
+  test('it still takes the focus, so the enter shortcut is not lost', async () => {
+    const user = userEvent.setup();
+    renderApp(<Form selected={['bee']} feedback="none" onSubmit={() => true} />);
+
+    await user.keyboard('{Enter}');
+
+    expect(screen.getByRole('textbox')).toHaveFocus();
+  });
 });
 
 test('an empty box is not nagged at', () => {
@@ -121,14 +143,14 @@ test('a verdict clears itself, so nothing hangs over the next answer', () => {
 
 test('the reminder is not on a clock, because the thing it describes is not', () => {
   // "Pick three concepts" stops being true the moment a third is picked, and
-  // stays true until then however long that takes.
+  // stays true until then however long that takes. Only verdicts expire.
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
   try {
     renderApp(<Form selected={['bee']} feedback="none" onSubmit={() => true} />);
-    fireEvent.change(screen.getByPlaceholderText(/type a category here/i), { target: { value: 'in' } });
 
     act(() => { vi.advanceTimersByTime(VERDICT_SECONDS * 1000 + 5_000); });
-    expect(screen.getByRole('status')).toHaveTextContent(/at least three/i);
+    expect(screen.getByRole('textbox'))
+        .toHaveAttribute('placeholder', expect.stringMatching(/three concepts/i));
   } finally {
     vi.useRealTimers();
   }

@@ -29,8 +29,10 @@ test('nothing moves while the box is being answered', async ({ page }) => {
 
     const idle = await where()
 
+    // One concept picked: the box goes grey and swaps its placeholder for the
+    // reminder, which is the moment the layout used to shift.
     await page.locator('.bubble').first().click()
-    await page.locator('.input').fill('x')
+    await expect(page.locator('.input')).toHaveAttribute('readonly', '')
     const short = await where()
 
     const dealt = await page.getByRole('checkbox').evaluateAll((n) => n.map((e) => e.getAttribute('aria-label')!))

@@ -227,6 +227,37 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
         setAnnouncing((current) => current.filter((achievement) => achievement.id !== id));
     };
 
+    /**
+     * Puts the whole selection back.
+     *
+     * Two ways in, because a tester asked for both without knowing they were
+     * the same thing: a click on the empty board, and the escape key. Nothing
+     * is recorded — dropping a selection is not a move, and the achievement
+     * that counts pokes at bubbles should not be fed by undoing them.
+     */
+    const clearSelection = () => {
+        setSelected((current) => (current.length === 0 ? current : []));
+    };
+
+    /**
+     * Escape clears the selection, unless something modal wants the key.
+     *
+     * The rules card on arrival, the confirmation before starting over and the
+     * help sheet all close on escape, and a key answered twice is one of the
+     * two answers going wrong. Whatever is open gets it; the board gets it
+     * when nothing is.
+     */
+    useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== 'Escape') return;
+            if (document.querySelector('[role="dialog"]')) return;
+            clearSelection();
+        };
+
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, []);
+
     const toggleConcept = (name: string) => {
         setFeedback('none');
         setSelected((current) =>
@@ -484,7 +515,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
               <MusicToggle playing={music} onToggle={toggleMusic} />
               <MusicVolume level={musicVolume} playing={music} onChange={changeMusicVolume} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} onToggle={toggleConcept} onDropInto={dropInto} />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} onToggle={toggleConcept} onDropInto={dropInto} onClear={clearSelection} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-left">
               <Signature />

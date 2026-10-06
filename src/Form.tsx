@@ -51,11 +51,20 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
     const enough = selected.length >= MIN_SELECTED_CONCEPTS;
     const isSubmitEnabled = enough && inputValue.trim().length > 0;
 
-    // The grey submit button says no without ever saying why. Said only once
-    // somebody starts naming a category: picking one bubble and stopping is a
-    // normal thing to do, and nagging at it would be nagging at play.
-    const short = !enough && inputValue.trim().length > 0;
-    const says = short ? t('form.needThree') : (stale ? '' : message[feedback]);
+    /*
+     * Below three, the box goes grey and says what it is waiting for.
+     *
+     * Read only rather than disabled: a disabled input cannot take the focus,
+     * and the enter shortcut — press it anywhere to start typing — would land
+     * nowhere at all for a player who has picked one bubble. This way the box
+     * can still be reached and still refuses what cannot be answered.
+     *
+     * The reminder lives in the placeholder rather than on the answer line
+     * below. The line is where the game replies to a guess; a state of the
+     * board is not a reply, and putting it there made every grey box look
+     * like a wrong answer.
+     */
+    const says = stale ? '' : message[feedback];
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -133,12 +142,14 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
             <div className="input-and-submit-container">
                 <input ref={input} id="category-input" className="input" type="text" value={inputValue}
                        onChange={handleChange}
-                       placeholder={t('form.placeholder')}/>
+                       readOnly={!enough}
+                       aria-disabled={!enough}
+                       placeholder={enough ? t('form.placeholder') : t('form.needThree')}/>
                 <button className="submit" type="submit" disabled={!isSubmitEnabled}>
                     {t('form.submit')}
                 </button>
             </div>
-            <p className={`feedback feedback--${short ? 'short' : feedback}`} role="status">
+            <p className={`feedback feedback--${feedback}`} role="status">
                 {says}
             </p>
             <div className="press-enter-wrapper">

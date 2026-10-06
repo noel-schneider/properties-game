@@ -434,7 +434,7 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Tape une catégorie ici !",
-        "form.needThree": "Sélectionne au moins trois concepts.",
+        "form.needThree": "Choisis trois concepts",
         "form.spent": "L’un des trois a déjà utilisé cette catégorie.",
         "form.submit": "Valider",
         "form.correct": "Correct !",
