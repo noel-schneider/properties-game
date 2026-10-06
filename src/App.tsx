@@ -6,6 +6,7 @@ import Form from "./Form";
 import Graph from "./Graph";
 import Help from "./Help";
 import Hint from "./Hint";
+import PropertySheet from "./PropertySheet";
 import Scoreboard from "./Scoreboard";
 import Sky from "./Sky";
 import Summary from "./Summary";
@@ -510,7 +511,8 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
               />
           )}
           <SoundNote muted={muted} />
-          <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} properties={namedSoFar} />
+          <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} />
+          <PropertySheet rows={namedSoFar} />
           <div className="corner corner--top-right">
               <Hint available={left > 0} onAsk={askForHint} />
               <Help />

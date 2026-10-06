@@ -22,8 +22,10 @@ interface AnswersProps {
 const styles: Record<string, CSSProperties> = {
     panel: {
         position: 'fixed',
-        top: '1.25rem',
-        left: '1.25rem',
+        // Below the scoreboard and beside the categories column, which now
+        // lives down the left margin: this used to be in that corner itself.
+        top: '5.25rem',
+        left: '13.5rem',
         zIndex: 9000,
         // Read, never pressed — and it sits over a corner of the board, so a
         // bubble underneath it could not be clicked at all.
