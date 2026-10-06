@@ -315,6 +315,51 @@ test('tabbing to a concept reveals its kin, clicking one does not', async ({ pag
   await expect(page.locator('.bubble--kin')).toHaveCount(solved.concepts.length)
 })
 
+test('the cursor is painted in its own colours, not in silence', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  // A data URI the browser cannot read falls back to the system arrow without
+  // a word; one whose colours it cannot read is painted solid black, which on
+  // a near-black board is nearly the same thing with none of the warning. The
+  // escaping was wrong for both the fill and the outline, and the only way to
+  // see it is to paint the thing and read the pixels back.
+  const painted = await page.locator('.graph').evaluate(async (graph) => {
+    const uri = getComputedStyle(graph).cursor.match(/url\("([^"]+)"\)/)?.[1]
+    if (!uri) return null
+
+    const image = new Image()
+    await new Promise((done) => { image.onload = done; image.onerror = done; image.src = uri })
+
+    const canvas = document.createElement('canvas')
+    canvas.width = image.width
+    canvas.height = image.height
+    const pen = canvas.getContext('2d')!
+    pen.drawImage(image, 0, 0)
+    const body = pen.getImageData(Math.round(image.width / 2), Math.round(image.height * 0.28), 1, 1).data
+
+    return { size: image.width, body: [body[0], body[1], body[2]] }
+  })
+
+  expect(painted).not.toBeNull()
+  expect(painted!.size).toBeGreaterThanOrEqual(32)
+  expect(painted!.body).toEqual([244, 239, 230])
+})
+
+test('a concept under the pointer lights the cursor up', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  const overBoard = await page.locator('.graph').evaluate((g) => getComputedStyle(g).cursor)
+
+  const bubble = page.getByRole('checkbox').first()
+  await bubble.hover()
+  const overBubble = await bubble.evaluate((b) => getComputedStyle(b).cursor)
+
+  expect(overBubble).not.toBe(overBoard)
+  expect(overBubble).toContain('grab')
+})
+
 test('the board has a cursor of its own, and it actually draws', async ({ page }) => {
   await page.goto('/')
   await boardSettled(page)
