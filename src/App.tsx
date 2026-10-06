@@ -35,7 +35,7 @@ import BoardBench from "./BoardBench";
 import { HINT_SHOWN, hintPair } from "./hints";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
-import { formableGroups, isExhausted, openingBoard, refill, waysWanted } from "./board";
+import { formableGroups, isExhausted, openingBoard, refill, topUp, waysWanted } from "./board";
 import { getAllConcepts } from "./concepts";
 import { countFinds, isFinished, isSpent } from "./game";
 import { propertyTally } from "./properties";
@@ -181,13 +181,17 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     }, [arriving]);
 
     /**
-     * Refills the board and marks what that brought in.
+     * Deals in what a find has earned, and marks what that brought in.
+     *
+     * One concept per find, which is the reward: a board that does not change
+     * when you answer gives you nothing to feel. `topUp` is what holds the
+     * floor under that — see it for why one is not always enough.
      *
      * Worked out here and not inside a setBoard updater: an updater has to be
      * pure, and React runs it twice in development to prove it.
      */
     const deal = (current: string[], groups: Solution[]) => {
-        const next = refill(current, pool, groups, waysWanted());
+        const next = topUp(current, pool, groups);
         setArriving(next.filter((name) => !current.includes(name)));
         setBoard(next);
     };
