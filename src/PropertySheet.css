@@ -24,6 +24,12 @@
     pointer-events: none;
 }
 
+/* The dev tools take the same edge while the game is being built. Dev only:
+   nothing in a shipped game ever puts this class on the body. */
+body.dev-panel-open .sheet {
+    left: 15rem;
+}
+
 .sheet__heading {
     margin: 0;
     font-size: 0.7rem;

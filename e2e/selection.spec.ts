@@ -245,8 +245,7 @@ test('pointing at a concept shows what it shares, once something is found', asyn
 
   // Play the one group the dev panel hands over, then point at a member.
   const solved = await page.evaluate(() => {
-    const panel = [...document.querySelectorAll('div')]
-      .find((d) => /answers \(dev only\)/i.test(d.textContent ?? '') && d.children.length < 30)
+    const panel = document.querySelector('[data-testid="answers"]')
     const lines = (panel as HTMLElement).innerText.split('\n').map((l) => l.trim()).filter(Boolean)
     const i = lines.findIndex((l) => l.includes('·'))
     return { property: lines[i - 1], concepts: lines[i].split('·').map((c) => c.trim()) }
@@ -274,8 +273,7 @@ test('tabbing to a concept reveals its kin, clicking one does not', async ({ pag
   await boardSettled(page)
 
   const solved = await page.evaluate(() => {
-    const panel = [...document.querySelectorAll('div')]
-      .find((d) => /answers \(dev only\)/i.test(d.textContent ?? '') && d.children.length < 30)
+    const panel = document.querySelector('[data-testid="answers"]')
     const lines = (panel as HTMLElement).innerText.split('\n').map((l) => l.trim()).filter(Boolean)
     const i = lines.findIndex((l) => l.includes('·'))
     return { property: lines[i - 1], concepts: lines[i].split('·').map((c) => c.trim()) }
@@ -439,8 +437,7 @@ test.describe('on a touchscreen', () => {
 
     // Play one group, so there is kinship to reveal at all.
     const solved = await page.evaluate(() => {
-      const panel = [...document.querySelectorAll('div')]
-        .find((d) => /answers \(dev only\)/i.test(d.textContent ?? '') && d.children.length < 30)
+      const panel = document.querySelector('[data-testid="answers"]')
       const lines = (panel as HTMLElement).innerText.split('\n').map((l) => l.trim()).filter(Boolean)
       const i = lines.findIndex((l) => l.includes('·'))
       return { property: lines[i - 1], concepts: lines[i].split('·').map((c) => c.trim()) }
@@ -490,7 +487,25 @@ test('a click on the empty board puts the whole selection back', async ({ page }
   await bubbles.nth(1).click()
   await expect(bubbles.nth(0)).toHaveAttribute('aria-checked', 'true')
 
-  await page.locator('.graph').click({ position: { x: 4, y: 4 } })
+  // A point on the board with nothing on it — found rather than assumed. The
+  // corner used to do, until the dev tools took that edge of the window.
+  const empty = await page.locator('.graph').evaluate((graph) => {
+    const board = graph.getBoundingClientRect()
+    const taken = [...document.querySelectorAll('g.bubble')].map((b) => b.getBoundingClientRect())
+
+    for (let y = board.top + 20; y < board.bottom - 20; y += 20) {
+      for (let x = board.left + 20; x < board.right - 20; x += 20) {
+        const clear = taken.every((box) =>
+          x < box.left - 8 || x > box.right + 8 || y < box.top - 8 || y > box.bottom + 8)
+        // Whatever is actually on top at that point, tools and toasts included.
+        if (clear && document.elementFromPoint(x, y) === graph) return { x, y }
+      }
+    }
+    return null
+  })
+  expect(empty).not.toBeNull()
+
+  await page.mouse.click(empty!.x, empty!.y)
 
   await expect(bubbles.nth(0)).toHaveAttribute('aria-checked', 'false')
   await expect(bubbles.nth(1)).toHaveAttribute('aria-checked', 'false')

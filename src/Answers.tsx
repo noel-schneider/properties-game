@@ -19,22 +19,11 @@ interface AnswersProps {
 // Styles live here rather than in a stylesheet. A CSS import is a side effect
 // that survives tree-shaking, so a built game would carry the rules for a panel
 // it never renders. This way the whole thing is one file to delete.
+//
+// It sat fixed over a corner of the board until every dev tool was gathered
+// into one column; in there it is simply a block among the others.
 const styles: Record<string, CSSProperties> = {
     panel: {
-        position: 'fixed',
-        // Below the scoreboard and beside the categories column, which now
-        // lives down the left margin: this used to be in that corner itself.
-        top: '5.25rem',
-        left: '13.5rem',
-        zIndex: 9000,
-        // Read, never pressed — and it sits over a corner of the board, so a
-        // bubble underneath it could not be clicked at all.
-        pointerEvents: 'none',
-        maxWidth: '17rem',
-        padding: '0.6rem 0.75rem',
-        borderRadius: '0.6rem',
-        border: '1px dashed #5a5a7d',
-        background: 'rgba(31, 33, 53, 0.85)',
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
         fontSize: '0.72rem',
         color: '#9a9ab0',
@@ -74,8 +63,8 @@ function Answers({ board, pool, found, enabled }: AnswersProps) {
         .map(([property, names]) => ({ property, concepts: names.slice(0, 3), found: false }));
 
     return (
-        <div style={styles.panel} data-testid="answers">
-            <p style={styles.title}>answers (dev only)</p>
+        <div className="answers" style={styles.panel} data-testid="answers">
+            <p className="answers__title" style={styles.title}>answers (dev only)</p>
             <ul style={styles.list}>
                 {groups.map((group) => (
                     <li

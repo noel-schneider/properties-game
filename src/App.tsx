@@ -32,6 +32,7 @@ import {
 } from "./ambient";
 import MusicBench from "./MusicBench";
 import BoardBench from "./BoardBench";
+import DevPanel from "./DevPanel";
 import { HINT_SHOWN, hintPair } from "./hints";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
@@ -478,9 +479,12 @@ function App({
   return (
       <>
           <Sky />
-          {/* Debugging aid. Folded away in a built game, import and all. */}
-          {import.meta.env.DEV && <Answers board={board} pool={pool} found={found} enabled />}
+          {/* Every tool in one column, folded away in a built game, imports
+              and all. */}
           {import.meta.env.DEV && (
+          <DevPanel>
+          <Answers board={board} pool={pool} found={found} enabled />
+          {(
               <BoardBench
                   finished={board.filter((name) => {
                       const concept = byName.get(name);
@@ -520,7 +524,7 @@ function App({
                   }}
               />
           )}
-          {import.meta.env.DEV && (
+          {(
               <MusicBench
                   forced={forcedLayers}
                   onPick={(count) => {
@@ -528,6 +532,8 @@ function App({
                       if (!music) toggleMusic();
                   }}
               />
+          )}
+          </DevPanel>
           )}
           <SoundNote muted={muted} />
           <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} />
