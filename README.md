@@ -4,7 +4,7 @@ A word game about what things have in common.
 
 The board deals you concepts — a crocodile, an igloo, a bell. Pick three that
 share a category and name it: *reptile*, *cold*, *metal*. Get it right and the
-three are tied together on the board, and the game deals more in.
+three are tied together on the board, and one more concept is dealt in.
 
 The catch is that every concept has several categories. A crocodile is a
 reptile, an animal, a danger and a creature of the water, and each of those can

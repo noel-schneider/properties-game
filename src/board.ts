@@ -114,6 +114,42 @@ export function refill(
     return trim(next, byName, found, pool);
 }
 
+/**
+ * Deals one concept in, because something was just found.
+ *
+ * One, every time, visibly: a find that changes nothing on the board gives a
+ * player nothing to feel. Topping up to a number of moves available — which is
+ * what `refill` does, and still does for a board being built from nothing —
+ * meant a find often dealt no concept at all, because the board already had
+ * enough ways on it.
+ *
+ * With a floor under it, though. The old rule counted concepts and measured
+ * the wrong thing: fifteen taken at random hold 2.4 findable groups on average
+ * and sometimes none, so a board could be full and unplayable. So one concept
+ * for the find, and then as many as it takes to leave at least one move on the
+ * board. The floor is almost never reached; when it is, it is the difference
+ * between a game and a wall.
+ */
+export function topUp(board: string[], pool: Concept[], found: Solution[]): string[] {
+    const byName = new Map(pool.map((concept) => [concept.name, concept]));
+    const next = [...board];
+    const present = new Set(next);
+    let dealt = 0;
+
+    // Walked once, and no further: late in a game there may be nothing useful
+    // left at all, and the answer then is the board as it stands rather than a
+    // search for a move that does not exist.
+    for (const concept of stillUseful(pool, found, present)) {
+        if (dealt >= 1 && formableGroups(next, pool, found).length > 0) break;
+
+        next.push(concept.name);
+        present.add(concept.name);
+        dealt++;
+    }
+
+    return trim(next, byName, found, pool);
+}
+
 /** Drops the finished concepts that have been sitting there longest. */
 function trim(
     board: string[],
