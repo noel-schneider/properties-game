@@ -22,16 +22,22 @@ test('a find brings in one concept, and only one', () => {
 });
 
 test('and more than one when one would leave nothing to do', () => {
-  // These three share nothing but biome, and biome has just been spent by all
-  // three of them: one concept dealt in cannot make a trio on its own.
-  const found: Solution[] = [{ property: 'biome', concepts: ['jungle', 'desert', 'forest'] }];
-  const board = ['jungle', 'desert', 'forest'];
-  expect(waysOn(board, found)).toBe(0);
+  // Written against a pool of its own, because what is dealt is shuffled: on
+  // the real one, a board with no trio on it is often one concept away from
+  // having several, and this would then be a test that passed most of the
+  // time. Here nothing but a third member can make a trio, whichever two of
+  // the three are drawn first.
+  const trio: Concept[] = [
+    { name: 'a', properties: ['x', 'y'] },
+    { name: 'b', properties: ['x', 'y'] },
+    { name: 'c', properties: ['x', 'y'] },
+  ];
+  expect(waysOn(['a'], [], trio)).toBe(0);
 
-  const next = topUp(board, pool, found);
+  const next = topUp(['a'], trio, []);
 
-  expect(next.length).toBeGreaterThan(board.length + 1);
-  expect(waysOn(next, found)).toBeGreaterThan(0);
+  expect(next).toHaveLength(3);
+  expect(waysOn(next, [], trio)).toBeGreaterThan(0);
 });
 
 test('nothing is dealt twice, and nothing finished is dealt at all', () => {
