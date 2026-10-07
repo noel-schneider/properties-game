@@ -25,6 +25,10 @@ Play it: https://properties-game-exzu4z6w2-noelschneiders-projects.vercel.app
 - **Drag a concept onto a category you have found** to add it there, which is
   how the last few are placed once no trio can be made.
 - **The ring around a concept fills** as you find the categories it belongs to.
+- **Click the empty board** — or press Escape — to put a whole selection back.
+- **Ask for a hint** when you are stuck: two concepts that go together light up,
+  and naming what they share is left to you. Nothing is ever volunteered.
+- **The categories you have named** are listed down the left for the whole game.
 
 Nothing is sent anywhere. What you have found, the board you left, your
 achievements and your settings live in your browser's local storage, and
@@ -49,8 +53,8 @@ npm run dev        # http://localhost:3000
 ```
 
 ```sh
-npm test           # 396 unit tests
-npm run test:e2e   # 48 end-to-end tests, in a real browser
+npm test           # 417 unit tests
+npm run test:e2e   # 52 end-to-end tests, in a real browser
 npm run typecheck
 npm run build
 ```

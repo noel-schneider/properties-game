@@ -1,76 +1,57 @@
 /*
- * The record of what has been named, under the scoreboard it belongs to.
+ * The record of what has been named: a column down the left, open for the
+ * whole game.
  *
- * Shut by default: fifty categories listed over the board would be the loudest
- * thing on it, and the player's work is underneath.
+ * Down the side rather than under the scoreboard, where it used to drop from a
+ * hover. Fifty categories listed over the middle of the board would be the
+ * loudest thing on it; fifty listed in a narrow column beside it are a margin
+ * note, which is what this is.
  */
 .sheet {
-    position: relative;
+    position: fixed;
+    /* Clear of the controls in the corners, and of the scoreboard above. */
+    top: 5.25rem;
+    left: 1.25rem;
+    z-index: 8000;
+    width: 11rem;
+    max-height: calc(100vh - 12rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-family: 'Poppins', system-ui, sans-serif;
+    /* Read, never pressed — and it lies over a corner of the board, where a
+       bubble underneath it could not be clicked at all. */
+    pointer-events: none;
 }
 
-.sheet__button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.15rem;
-    padding: 0;
-    border: none;
-    background: none;
-    color: inherit;
-    font-family: inherit;
-    font-size: inherit;
-    cursor: pointer;
-}
-
-.sheet__button:disabled {
-    cursor: default;
-    opacity: 0.5;
-}
-
-.sheet__button--on,
-.sheet__button:hover:not(:disabled) {
-    color: #e2dcde;
-}
-
-.sheet__arrow {
-    margin-left: 0.3rem;
+.sheet__heading {
+    margin: 0;
     font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6f6a85;
 }
 
-.sheet__drop {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9500;
-    padding-top: 0.5rem;
+.sheet__tally {
+    color: #e2dcde;
+    font-weight: 600;
 }
 
 .sheet__list {
     margin: 0;
-    padding: 0.5rem;
+    padding: 0;
     list-style: none;
-    width: max-content;
-    min-width: 13rem;
-    max-width: min(26rem, 90vw);
-    max-height: 60vh;
     overflow-y: auto;
-    border-radius: 0.6rem;
-    border: 1px solid #40405c;
-    background: rgba(28, 30, 48, 0.97);
-    box-shadow: 0 14px 30px rgba(8, 8, 16, 0.45);
-    /* Two columns once there are more than a handful, or fifty of these is a
-       column taller than the window. */
-    columns: 2;
-    column-gap: 1.1rem;
+    /* Its own scrollbar is the one thing in here a pointer may need. */
+    pointer-events: auto;
 }
 
 .sheet__row {
     display: flex;
     justify-content: space-between;
-    gap: 0.9rem;
-    padding: 0.18rem 0.3rem;
-    break-inside: avoid;
-    font-size: 0.78rem;
+    gap: 0.6rem;
+    padding: 0.1rem 0;
+    font-size: 0.76rem;
     color: #8f8aa6;
 }
 
@@ -78,7 +59,31 @@
     color: #ffad69;
 }
 
+.sheet__name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .sheet__count {
     font-variant-numeric: tabular-nums;
     opacity: 0.8;
+}
+
+/*
+ * On a phone the board has the whole width and cannot spare a column, so this
+ * becomes a short list in the corner rather than a tall one: the last few
+ * found, with the rest a scroll away.
+ */
+@media (max-width: 700px) {
+    .sheet {
+        top: 4.5rem;
+        left: 0.75rem;
+        width: 7.5rem;
+        max-height: 30vh;
+    }
+
+    .sheet__row {
+        font-size: 0.68rem;
+    }
 }

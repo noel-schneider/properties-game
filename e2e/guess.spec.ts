@@ -220,3 +220,27 @@ test('a concept can be dropped onto a category already found', async ({ page }) 
   await expect.poll(finds).toBe(findsBefore + 1)
 })
 
+test('a category found joins a list that stays on screen', async ({ page }) => {
+  await page.goto('/')
+  await clearGame(page)
+  await page.reload()
+  await boardSettled(page)
+
+  // Nothing named yet, so there is nothing to list.
+  await expect(page.locator('.sheet')).toHaveCount(0)
+
+  const dealt = await page.getByRole('checkbox').evaluateAll((nodes) =>
+    nodes.map((n) => n.getAttribute('aria-label')!),
+  )
+  const { names, property } = findSolvableTriple(dealt)
+  for (const name of names) {
+    await page.getByRole('checkbox', { name, exact: true }).click()
+  }
+  await page.locator('.input').fill(property)
+  await page.getByRole('button', { name: 'Submit' }).click()
+
+  // And it is open from then on, without being asked for.
+  await expect(page.locator('.sheet')).toBeVisible()
+  await expect(page.locator('.sheet__row')).toHaveCount(1)
+  await expect(page.getByTestId('properties-done')).toHaveText('0 / 1')
+})
