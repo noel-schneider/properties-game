@@ -27,8 +27,9 @@ test('selecting three concepts in the browser enables submit', async ({ page }) 
   const submit = page.getByRole('button', { name: 'Submit' })
   await expect(submit).toBeDisabled()
 
-  await page.getByPlaceholder('Type a category here!').fill('biome')
-  await expect(submit).toBeDisabled()
+  // Nothing can be typed until three are picked: the box is read only, and
+  // says as much where the typing would go.
+  await expect(page.locator('.input')).toHaveAttribute('readonly', '')
 
   // The board is dealt to a number of moves available, not a number of
   // concepts, so how many bubbles that takes is not fixed.
@@ -40,6 +41,10 @@ test('selecting three concepts in the browser enables submit', async ({ page }) 
     await expect(bubbles.nth(i)).toHaveAttribute('aria-checked', 'true')
   }
 
+  await expect(page.locator('.input')).not.toHaveAttribute('readonly', '')
+  await expect(submit).toBeDisabled()
+
+  await page.locator('.input').fill('biome')
   await expect(submit).toBeEnabled()
 })
 
@@ -161,7 +166,7 @@ test('starting over asks first, and keeps the achievements', async ({ page }) =>
   for (const name of names) {
     await page.getByRole('checkbox', { name, exact: true }).click()
   }
-  await page.getByPlaceholder('Type a category here!').fill(property)
+  await page.locator('.input').fill(property)
   await page.getByRole('button', { name: 'Submit' }).click()
   await expect(page.getByTestId('found')).toHaveText('1')
 
@@ -202,7 +207,7 @@ test('enter puts the cursor in the box, without disturbing the board', async ({ 
 
   await page.keyboard.press('Enter')
 
-  await expect(page.getByPlaceholder(/type a category here/i)).toBeFocused()
+  await expect(page.locator('.input')).toBeFocused()
   await expect(bubble).toHaveAttribute('aria-checked', 'true')
 })
 
@@ -225,7 +230,7 @@ test('a bubble reached with the keyboard keeps the enter key for itself', async 
   await page.keyboard.press('Enter')
 
   await expect(page.locator(`.bubble[aria-label="${name}"]`)).toHaveAttribute('aria-checked', 'true')
-  await expect(page.getByPlaceholder(/type a category here/i)).not.toBeFocused()
+  await expect(page.locator('.input')).not.toBeFocused()
 })
 
 test('pointing at a concept shows what it shares, once something is found', async ({ page }) => {
@@ -249,7 +254,7 @@ test('pointing at a concept shows what it shares, once something is found', asyn
   for (const name of solved.concepts) {
     await page.locator(`.bubble[aria-label="${name}"]`).click({ force: true })
   }
-  await page.getByPlaceholder(/type a category here/i).fill(solved.property)
+  await page.locator('.input').fill(solved.property)
   await page.keyboard.press('Enter')
   await boardSettled(page)
 
@@ -278,7 +283,7 @@ test('tabbing to a concept reveals its kin, clicking one does not', async ({ pag
   for (const name of solved.concepts) {
     await page.locator(`.bubble[aria-label="${name}"]`).click({ force: true })
   }
-  await page.getByPlaceholder(/type a category here/i).fill(solved.property)
+  await page.locator('.input').fill(solved.property)
   await page.keyboard.press('Enter')
   await boardSettled(page)
 
@@ -399,7 +404,7 @@ test.describe('on a touchscreen', () => {
       await page.locator(`.bubble[aria-label="${name}"]`)
         .evaluate((bubble) => bubble.dispatchEvent(new MouseEvent('click', { bubbles: true })))
     }
-    await page.getByPlaceholder(/type a category here/i).fill(solved.property)
+    await page.locator('.input').fill(solved.property)
     await page.keyboard.press('Enter')
     await boardSettled(page)
 
@@ -426,4 +431,47 @@ test.describe('on a touchscreen', () => {
     })
     await expect(page.locator('.bubble--kin')).toHaveCount(0)
   })
+})
+
+test('a click on the empty board puts the whole selection back', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  // Pinned in a real browser because this is a question about hit testing: the
+  // outlines drawn around found groups lie between the bubbles, and a click
+  // landing on one of those strokes instead of on the board would do nothing.
+  const bubbles = page.getByRole('checkbox')
+  await bubbles.nth(0).click()
+  await bubbles.nth(1).click()
+  await expect(bubbles.nth(0)).toHaveAttribute('aria-checked', 'true')
+
+  await page.locator('.graph').click({ position: { x: 4, y: 4 } })
+
+  await expect(bubbles.nth(0)).toHaveAttribute('aria-checked', 'false')
+  await expect(bubbles.nth(1)).toHaveAttribute('aria-checked', 'false')
+})
+
+test('escape puts the selection back, for a hand already on the keyboard', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  const bubble = page.getByRole('checkbox').first()
+  await bubble.click()
+  await expect(bubble).toHaveAttribute('aria-checked', 'true')
+
+  await page.keyboard.press('Escape')
+
+  await expect(bubble).toHaveAttribute('aria-checked', 'false')
+})
+
+test('a hint is given when it is asked for, and never otherwise', async ({ page }) => {
+  await page.goto('/')
+  await boardSettled(page)
+
+  // The board used to light two concepts by itself after forty-five seconds.
+  await expect(page.locator('.bubble--hinted')).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Hint' }).click()
+
+  await expect(page.locator('.bubble--hinted')).toHaveCount(2)
 })

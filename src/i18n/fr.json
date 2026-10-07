@@ -434,7 +434,7 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Tape une catégorie ici !",
-        "form.needThree": "Sélectionne au moins trois concepts.",
+        "form.needThree": "Choisis trois concepts",
         "form.spent": "L’un des trois a déjà utilisé cette catégorie.",
         "form.submit": "Valider",
         "form.correct": "Correct !",
@@ -495,7 +495,9 @@
         "support.invite": "Ça te plaît ? C’est gratuit et ça le restera — un café et ça continue.",
         "support.yes": "Offrir un café",
         "support.no": "Non merci",
-        "summary.support": "Si ça valait ta soirée, tu peux offrir un café au jeu."
+        "summary.support": "Si ça valait ta soirée, tu peux offrir un café au jeu.",
+        "music.volume": "Volume de la musique",
+        "hint.ask": "Indice"
     },
     "achievements": {
         "first-light": {

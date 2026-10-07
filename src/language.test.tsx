@@ -46,7 +46,8 @@ test('the board shows French names when playing in French', () => {
 test('the interface speaks French too', () => {
   renderIn('fr', <App playChime={() => {}} />);
 
-  expect(screen.getByPlaceholderText(words.fr.ui['form.placeholder'])).toBeInTheDocument();
+  // Nothing is picked, so the box is showing what it is waiting for — in French.
+  expect(screen.getByRole('textbox')).toHaveAttribute('placeholder', words.fr.ui['form.needThree']);
   expect(screen.getByRole('button', { name: words.fr.ui['form.submit'] })).toBeInTheDocument();
   expect(screen.getByText(words.fr.ui['score.found'], { exact: false })).toBeInTheDocument();
 });
@@ -62,7 +63,7 @@ test('a category answered in French is accepted', async () => {
     const label = (words.fr.concepts as Record<string, string>)[concept.name];
     await user.click(screen.getByRole('checkbox', { name: label }));
   }
-  await user.type(screen.getByPlaceholderText(words.fr.ui['form.placeholder']), frenchName);
+  await user.type(screen.getByRole('textbox'), frenchName);
   await user.click(screen.getByRole('button', { name: words.fr.ui['form.submit'] }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(words.fr.ui['form.correct']);
@@ -83,7 +84,7 @@ test('the English name of a category is not what French play expects', async () 
       screen.getByRole('checkbox', { name: (words.fr.concepts as Record<string, string>)[concept.name] }),
     );
   }
-  await user.type(screen.getByPlaceholderText(words.fr.ui['form.placeholder']), englishName);
+  await user.type(screen.getByRole('textbox'), englishName);
   await user.click(screen.getByRole('button', { name: words.fr.ui['form.submit'] }));
 
   // It may still be accepted as a French alias, but it is never the exact term.
@@ -109,7 +110,7 @@ test('switching language mid-run keeps what has been found', async () => {
   for (const concept of triple) {
     await user.click(screen.getByRole('checkbox', { name: concept.name }));
   }
-  await user.type(screen.getByPlaceholderText(words.en.ui['form.placeholder']), property);
+  await user.type(screen.getByRole('textbox'), property);
   await user.click(screen.getByRole('button', { name: words.en.ui['form.submit'] }));
   await screen.findByRole('status');
 
@@ -123,7 +124,8 @@ test('switching language mid-run keeps what has been found', async () => {
   expect(screen.getByTestId('found')).toHaveTextContent(scoreBefore!);
   expect(screen.getByRole('button', { name: new RegExp(words.fr.ui['panel.open']) }))
     .toHaveTextContent(earnedBefore!.replace('Achievements', words.fr.ui['panel.open']));
-  expect(screen.getByPlaceholderText(words.fr.ui['form.placeholder'])).toBeInTheDocument();
+  // The answer cleared the selection, so the box is back to asking for three.
+  expect(screen.getByRole('textbox')).toHaveAttribute('placeholder', words.fr.ui['form.needThree']);
 });
 
 test('the chosen language is remembered', async () => {
@@ -148,7 +150,7 @@ test('a board started in one language can be finished in the other', async () =>
     );
   }
   await user.type(
-    screen.getByPlaceholderText(words.fr.ui['form.placeholder']),
+    screen.getByRole('textbox'),
     (words.fr.properties as Record<string, string>)[property],
   );
   await user.click(screen.getByRole('button', { name: words.fr.ui['form.submit'] }));
@@ -164,7 +166,7 @@ test('a board started in one language can be finished in the other', async () =>
     await user.click(screen.getByRole('checkbox', { name }));
   }
   await user.type(
-    screen.getByPlaceholderText(words.en.ui['form.placeholder']),
+    screen.getByRole('textbox'),
     (words.en.properties as Record<string, string>)[next.property],
   );
   await user.click(screen.getByRole('button', { name: words.en.ui['form.submit'] }));

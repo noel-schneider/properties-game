@@ -34,7 +34,7 @@ test('naming the shared category is accepted', async ({ page }) => {
   for (const name of names) {
     await page.getByRole('checkbox', { name, exact: true }).click()
   }
-  await page.getByPlaceholder('Type a category here!').fill(property)
+  await page.locator('.input').fill(property)
   await page.getByRole('button', { name: 'Submit' }).click()
 
   await expect(page.getByRole('status')).toHaveText(/correct/i)
@@ -52,7 +52,7 @@ test('a wrong category is rejected', async ({ page }) => {
   for (const name of names) {
     await page.getByRole('checkbox', { name, exact: true }).click()
   }
-  await page.getByPlaceholder('Type a category here!').fill('not a real category at all')
+  await page.locator('.input').fill('not a real category at all')
   await page.getByRole('button', { name: 'Submit' }).click()
 
   await expect(page.getByRole('status')).toHaveText(/not a category/i)
@@ -70,8 +70,8 @@ test('pressing Enter submits the guess', async ({ page }) => {
   for (const name of names) {
     await page.getByRole('checkbox', { name, exact: true }).click()
   }
-  await page.getByPlaceholder('Type a category here!').fill(property)
-  await page.getByPlaceholder('Type a category here!').press('Enter')
+  await page.locator('.input').fill(property)
+  await page.locator('.input').press('Enter')
 
   await expect(page.getByRole('status')).toHaveText(/correct/i)
 })
@@ -93,7 +93,7 @@ test('a found group stays on the board, tied and named, and its concepts carry o
   for (const name of names) {
     await page.getByRole('checkbox', { name, exact: true }).click()
   }
-  await page.getByPlaceholder('Type a category here!').fill(property)
+  await page.locator('.input').fill(property)
   await page.getByRole('button', { name: 'Submit' }).click()
 
   await expect(page.getByRole('status')).toHaveText(/correct/i)
@@ -106,7 +106,7 @@ test('a found group stays on the board, tied and named, and its concepts carry o
   }
   await expect(page.locator('.found__loop')).toHaveCount(1)
   await expect(page.locator('.found__label')).toHaveText(property)
-  await expect(page.getByPlaceholder('Type a category here!')).toHaveValue('')
+  await expect(page.locator('.input')).toHaveValue('')
 })
 
 test('a concept can be dropped onto a category already found', async ({ page }) => {
@@ -219,3 +219,4 @@ test('a concept can be dropped onto a category already found', async ({ page }) 
   await expect.poll(spent).toBe(before + 1)
   await expect.poll(finds).toBe(findsBefore + 1)
 })
+

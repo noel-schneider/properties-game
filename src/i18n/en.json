@@ -435,7 +435,7 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Type a category here!",
-        "form.needThree": "Pick at least three concepts.",
+        "form.needThree": "Pick three concepts",
         "form.spent": "One of the three has already used that category.",
         "form.submit": "Submit",
         "form.correct": "Correct!",
@@ -496,7 +496,9 @@
         "support.invite": "Enjoying this? It is free and always will be — a coffee keeps it going.",
         "support.yes": "Buy a coffee",
         "support.no": "No thanks",
-        "summary.support": "If it was worth your evening, you can buy the game a coffee."
+        "summary.support": "If it was worth your evening, you can buy the game a coffee.",
+        "music.volume": "Music volume",
+        "hint.ask": "Hint"
     },
     "achievements": {
         "first-light": {

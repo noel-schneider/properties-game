@@ -1,7 +1,11 @@
-import { act } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { renderApp } from './test-utils'
 import App from './App'
-import { HINT_AGAIN, HINT_FIRST, HINT_SHOWN } from './hints'
+import { SKIP_KEY } from './greeting'
+import { HINT_SHOWN } from './hints'
+
+beforeEach(() => localStorage.setItem(SKIP_KEY, 'true'));
 
 afterEach(() => {
   vi.useRealTimers();
@@ -19,48 +23,60 @@ function lit(): string[] {
       .sort();
 }
 
-test('a board that sits untouched says nothing for the first three quarters of a minute', () => {
+function ask(): HTMLElement {
+  return screen.getByRole('button', { name: /hint/i });
+}
+
+test('a board left alone is left alone, however long it sits', () => {
+  // It used to light two concepts after forty-five seconds, and again every
+  // twenty-five after that. A board that keeps pointing at things nobody asked
+  // about reads as a tutorial rather than as a game.
   freezeClock();
   renderApp(<App playChime={() => {}} />);
 
-  act(() => { vi.advanceTimersByTime(HINT_FIRST - 1_000); });
+  act(() => { vi.advanceTimersByTime(5 * 60_000); });
+
   expect(lit()).toEqual([]);
 });
 
-test('then two concepts light up, and go again shortly after', () => {
+test('asking for a hint lights two concepts that go together', async () => {
+  const user = userEvent.setup();
+  renderApp(<App playChime={() => {}} />);
+
+  await user.click(ask());
+
+  const pair = lit();
+  expect(pair).toHaveLength(2);
+
+  // Both are still playable: a nudge towards a concept with nothing left in it
+  // would be a nudge towards a dead end.
+  for (const name of pair) {
+    expect(document.querySelector(`.bubble[aria-label="${name}"]`))
+        .toHaveAttribute('data-found', 'false');
+  }
+});
+
+test('the hint goes by itself, so the board is not left marked', () => {
   freezeClock();
   renderApp(<App playChime={() => {}} />);
 
-  act(() => { vi.advanceTimersByTime(HINT_FIRST); });
+  act(() => { ask().click(); });
   expect(lit()).toHaveLength(2);
 
   act(() => { vi.advanceTimersByTime(HINT_SHOWN); });
   expect(lit()).toEqual([]);
 });
 
-test('the next nudge points somewhere else', () => {
+test('asking again points somewhere else', () => {
   freezeClock();
   renderApp(<App playChime={() => {}} />);
 
-  act(() => { vi.advanceTimersByTime(HINT_FIRST); });
+  act(() => { ask().click(); });
   const first = lit();
 
-  act(() => { vi.advanceTimersByTime(HINT_AGAIN); });
-  const second = lit();
+  act(() => { vi.advanceTimersByTime(HINT_SHOWN); });
+  act(() => { ask().click(); });
 
-  expect(second).toHaveLength(2);
-  expect(second).not.toEqual(first);
-});
-
-test('the two lit always share a category nobody has named yet', () => {
-  freezeClock();
-  renderApp(<App playChime={() => {}} />);
-
-  act(() => { vi.advanceTimersByTime(HINT_FIRST); });
-  const [a, b] = lit().map((name) => document.querySelector(`.bubble[aria-label="${name}"]`)!);
-
-  // Both are still playable: a nudge towards a concept with nothing left in it
-  // would be a nudge towards a dead end.
-  expect(a.getAttribute('data-found')).toBe('false');
-  expect(b.getAttribute('data-found')).toBe('false');
+  expect(lit()).toHaveLength(2);
+  expect(lit()).not.toEqual(first);
 });

@@ -96,6 +96,10 @@
        be read is a thicket, and reading which concepts share a category is the
        pointer's job now — these are texture, a record of work done. */
     fill: none;
+    /* Texture, so it is not in the way: a click on the board clears the
+       selection, and a loop's stroke lying between two bubbles would otherwise
+       swallow some of those clicks. */
+    pointer-events: none;
     stroke: url(#found-loop);
     stroke-width: 7;
     stroke-linejoin: round;

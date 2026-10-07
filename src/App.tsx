@@ -5,6 +5,7 @@ import Answers from "./Answers";
 import Form from "./Form";
 import Graph from "./Graph";
 import Help from "./Help";
+import Hint from "./Hint";
 import Scoreboard from "./Scoreboard";
 import Sky from "./Sky";
 import Summary from "./Summary";
@@ -15,18 +16,22 @@ import LanguageToggle from "./LanguageToggle";
 import Reset from "./Reset";
 import SoundToggle from "./SoundToggle";
 import MusicToggle from "./MusicToggle";
+import MusicVolume from "./MusicVolume";
 import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
 import { playFoundNote, playUnlockChime } from "./achievements/chime";
 import {
-    emptyRunStats, loadBoard, loadFound, loadLifetime, loadMuted, loadMusic, loadRunStats,
-    saveBoard, saveFound, saveLifetime, saveMuted, saveMusic, saveRunStats,
+    emptyRunStats, loadBoard, loadFound, loadLifetime, loadMuted, loadMusic, loadMusicVolume,
+    loadRunStats, saveBoard, saveFound, saveLifetime, saveMuted, saveMusic, saveMusicVolume,
+    saveRunStats,
 } from "./achievements/storage";
-import { ambientPlaying, layersFor, setAmbientLayers, startAmbient, stopAmbient } from "./ambient";
+import {
+    ambientPlaying, layersFor, setAmbientLayers, setAmbientVolume, startAmbient, stopAmbient,
+} from "./ambient";
 import MusicBench from "./MusicBench";
 import BoardBench from "./BoardBench";
-import { HINT_AGAIN, HINT_FIRST, HINT_SHOWN, hintPair } from "./hints";
+import { HINT_SHOWN, hintPair } from "./hints";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
 import { formableGroups, isExhausted, openingBoard, refill, waysWanted } from "./board";
@@ -103,6 +108,7 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     const [unlocked, setUnlocked] = useState<string[]>(() => progress.current!.lifetime.unlocked);
     const [muted, setMuted] = useState(loadMuted);
     const [music, setMusic] = useState(loadMusic);
+    const [musicVolume, setMusicVolume] = useState(loadMusicVolume);
     // Dev only: the orchestra forced to a size. A part arrives every twenty
     // concepts finished — the fifth at the eighty-sixth answer of a game, which
     // is no way to judge whether it belongs in the piece.
@@ -118,6 +124,8 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
      * left it on last time gets it back on their first click rather than on
      * arrival — which is also the polite order.
      */
+    useEffect(() => setAmbientVolume(musicVolume), [musicVolume]);
+
     useEffect(() => {
         if (!music) {
             stopAmbient();
@@ -138,6 +146,11 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
 
     // Stopped when the game goes, or it outlives the page it belongs to.
     useEffect(() => stopAmbient, []);
+
+    const changeMusicVolume = (level: number) => {
+        saveMusicVolume(level);
+        setMusicVolume(level);
+    };
 
     const toggleMusic = () => {
         setMusic((playing) => {
@@ -214,6 +227,37 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
     const dismissAnnouncement = (id: string) => {
         setAnnouncing((current) => current.filter((achievement) => achievement.id !== id));
     };
+
+    /**
+     * Puts the whole selection back.
+     *
+     * Two ways in, because a tester asked for both without knowing they were
+     * the same thing: a click on the empty board, and the escape key. Nothing
+     * is recorded — dropping a selection is not a move, and the achievement
+     * that counts pokes at bubbles should not be fed by undoing them.
+     */
+    const clearSelection = () => {
+        setSelected((current) => (current.length === 0 ? current : []));
+    };
+
+    /**
+     * Escape clears the selection, unless something modal wants the key.
+     *
+     * The rules card on arrival, the confirmation before starting over and the
+     * help sheet all close on escape, and a key answered twice is one of the
+     * two answers going wrong. Whatever is open gets it; the board gets it
+     * when nothing is.
+     */
+    useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== 'Escape') return;
+            if (document.querySelector('[role="dialog"]')) return;
+            clearSelection();
+        };
+
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, []);
 
     const toggleConcept = (name: string) => {
         setFeedback('none');
@@ -364,33 +408,36 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
         [found],
     );
     /**
-     * The nudge for a player who has stalled.
+     * The board changed, so a nudge given for the old one has nothing to say.
      *
-     * The clock restarts whenever the board changes — a right answer, or a
-     * concept dropped into a group — and runs on through a wrong one, which is
-     * the whole point: a player guessing and missing is exactly who this is
-     * for. Each nudge lights two concepts for a few seconds and the next one
-     * points somewhere else.
+     * The count goes with it: the next hint on a fresh board should start from
+     * its first pair rather than wherever the last board had got to.
      */
     useEffect(() => {
-        let next: ReturnType<typeof setTimeout>;
-        let clear: ReturnType<typeof setTimeout>;
         nudges.current = 0;
         setHinted([]);
-
-        const nudge = () => {
-            const pair = hintPair(formableGroups(board, pool, found), nudges.current++);
-            if (pair) setHinted(pair);
-            clear = setTimeout(() => setHinted([]), HINT_SHOWN);
-            next = setTimeout(nudge, HINT_AGAIN);
-        };
-
-        next = setTimeout(nudge, HINT_FIRST);
-        return () => {
-            clearTimeout(next);
-            clearTimeout(clear);
-        };
     }, [found, board]);
+
+    // A nudge leaves on its own. Nothing else takes it away, since the player
+    // asked for it and may well be looking somewhere else when it lands.
+    useEffect(() => {
+        if (hinted.length === 0) return;
+
+        const timer = setTimeout(() => setHinted([]), HINT_SHOWN);
+        return () => clearTimeout(timer);
+    }, [hinted]);
+
+    /**
+     * Two of a trio that can be made, because the player asked.
+     *
+     * Each press points somewhere else — a different group where there is one,
+     * and otherwise a different two of the same group. A button that lights the
+     * same pair twice reads as broken rather than as insistent.
+     */
+    const askForHint = () => {
+        const pair = hintPair(formableGroups(board, pool, found), nudges.current++);
+        if (pair) setHinted(pair);
+    };
 
     // The orchestra grows with the game: one more part every twenty concepts
     // finished, up to five. Set here rather than inside the player, which has
@@ -465,13 +512,15 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
           <SoundNote muted={muted} />
           <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} properties={namedSoFar} />
           <div className="corner corner--top-right">
+              <Hint available={left > 0} onAsk={askForHint} />
               <Help />
               <LanguageToggle />
               <Reset onReset={playAgain} />
               <SoundToggle muted={muted} onToggle={toggleMute} />
               <MusicToggle playing={music} onToggle={toggleMusic} />
+              <MusicVolume level={musicVolume} playing={music} onChange={changeMusicVolume} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} onToggle={toggleConcept} onDropInto={dropInto} />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} onToggle={toggleConcept} onDropInto={dropInto} onClear={clearSelection} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-left">
               <Signature />

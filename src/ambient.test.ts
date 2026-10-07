@@ -1,6 +1,6 @@
 import {
-    CHORD_SECONDS, CHORDS, chordAt, chordTone, LAYER_EVERY, LAYERS, layersFor,
-    pluckPhrase, STRING_SWELL, stringTop, voicesOf,
+    ambientVolume, CHORD_SECONDS, CHORDS, chordAt, chordTone, LAYER_EVERY, LAYERS, layersFor,
+    pluckPhrase, setAmbientVolume, STRING_SWELL, stringTop, voicesOf,
 } from './ambient'
 
 test('the progression comes back round, so a long game never runs out', () => {
@@ -132,4 +132,22 @@ test('neither part floods the chord, however sophisticated it gets', () => {
   for (let step = 0; step < 8; step++) {
     expect(pluckPhrase(step).length).toBeLessThanOrEqual(9);
   }
+});
+
+test('the volume is a fraction, whatever it is handed', () => {
+  // The slider cannot send anything else, but a stored preference can: this is
+  // the last place a bad number could reach the master fader.
+  setAmbientVolume(0.3);
+  expect(ambientVolume()).toBe(0.3);
+
+  setAmbientVolume(4);
+  expect(ambientVolume()).toBe(1);
+
+  setAmbientVolume(-2);
+  expect(ambientVolume()).toBe(0);
+
+  setAmbientVolume(Number.NaN);
+  expect(ambientVolume()).toBe(0);
+
+  setAmbientVolume(1);
 });

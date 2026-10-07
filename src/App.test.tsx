@@ -51,7 +51,6 @@ test('clicking three bubbles selects them and enables submit', async () => {
   expect(bubbles.length).toBeGreaterThanOrEqual(3);
 
   const submit = screen.getByRole('button', { name: /submit/i });
-  await user.type(screen.getByPlaceholderText(/type a category here/i), 'biome');
   expect(submit).toBeDisabled();
 
   for (const bubble of bubbles.slice(0, 3)) {
@@ -61,6 +60,9 @@ test('clicking three bubbles selects them and enables submit', async () => {
   for (const bubble of bubbles.slice(0, 3)) {
     expect(bubble).toHaveAttribute('aria-checked', 'true');
   }
+  // Three picked opens the box; a category typed into it is the other half.
+  expect(submit).toBeDisabled();
+  await user.type(screen.getByRole('textbox'), 'biome');
   expect(submit).toBeEnabled();
 });
 
@@ -90,7 +92,7 @@ test('naming the category the selected concepts share is accepted', async () => 
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+  await user.type(screen.getByRole('textbox'), property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
@@ -103,7 +105,7 @@ test('naming a category the selected concepts do not share is rejected', async (
   const { concepts } = findSolvableTriple();
   await select(user, concepts);
   await user.type(
-    screen.getByPlaceholderText(/type a category here/i),
+    screen.getByRole('textbox'),
     'definitely not a real category',
   );
   await user.click(screen.getByRole('button', { name: /submit/i }));
@@ -117,7 +119,7 @@ test('a correct answer keeps the found concepts on the board and scores a point'
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+  await user.type(screen.getByRole('textbox'), property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
@@ -136,7 +138,7 @@ test('a wrong answer leaves the board and the score alone', async () => {
   const before = screen.getAllByRole('checkbox').map((b) => b.getAttribute('aria-label'));
   const { concepts } = findSolvableTriple();
   await select(user, concepts);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
+  await user.type(screen.getByRole('textbox'), 'not a category');
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
@@ -150,7 +152,7 @@ test('a correct answer clears the selection and the input', async () => {
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
-  const input = screen.getByPlaceholderText(/type a category here/i);
+  const input = screen.getByRole('textbox');
   await user.type(input, property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -167,7 +169,7 @@ test('a wrong answer keeps what you typed so it can be reworded', async () => {
 
   const { concepts } = findSolvableTriple();
   await select(user, concepts);
-  const input = screen.getByPlaceholderText(/type a category here/i);
+  const input = screen.getByRole('textbox');
   await user.type(input, 'wrong on purpose');
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -182,7 +184,7 @@ test('the first category found unlocks First Light, with the chime', async () =>
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+  await user.type(screen.getByRole('textbox'), property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   // Quickdraw lands too: the test answers well within ten seconds.
@@ -198,7 +200,7 @@ test('a wrong answer unlocks nothing and stays silent', async () => {
 
   const { concepts } = findSolvableTriple();
   await select(user, concepts);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
+  await user.type(screen.getByRole('textbox'), 'not a category');
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
@@ -212,7 +214,7 @@ test('an achievement earned before is not announced again on a later run', async
 
   const first = findSolvableTriple();
   await select(user, first.concepts);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+  await user.type(screen.getByRole('textbox'), first.property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
   expect((await screen.findAllByRole('alert')).map((a) => a.textContent).join(' ')).toContain('First Light');
   unmount();
@@ -222,7 +224,7 @@ test('an achievement earned before is not announced again on a later run', async
   for (const name of again.concepts) {
     await user.click(screen.getByRole('checkbox', { name }));
   }
-  await user.type(screen.getByPlaceholderText(/type a category here/i), again.property);
+  await user.type(screen.getByRole('textbox'), again.property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
@@ -246,7 +248,7 @@ test('the achievements button counts what has been earned', async () => {
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+  await user.type(screen.getByRole('textbox'), property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   await screen.findAllByRole('alert');
@@ -262,7 +264,7 @@ test('muting the sound silences the next unlock, and is remembered', async () =>
 
   const { concepts, property } = findSolvableTriple();
   await select(user, concepts);
-  await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+  await user.type(screen.getByRole('textbox'), property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   await screen.findAllByRole('alert');
@@ -288,7 +290,7 @@ test('starting over clears what was found and keeps the achievements', async () 
   for (const name of group.concepts) {
     await user.click(screen.getByRole('checkbox', { name }));
   }
-  await user.type(screen.getByPlaceholderText(/type a category here/i), group.property);
+  await user.type(screen.getByRole('textbox'), group.property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
   await screen.findByRole('status');
 
@@ -310,7 +312,7 @@ test('backing out of starting over leaves the game alone', async () => {
   for (const name of group.concepts) {
     await user.click(screen.getByRole('checkbox', { name }));
   }
-  await user.type(screen.getByPlaceholderText(/type a category here/i), group.property);
+  await user.type(screen.getByRole('textbox'), group.property);
   await user.click(screen.getByRole('button', { name: /submit/i }));
   await screen.findByRole('status');
 
@@ -346,7 +348,7 @@ describe('the sound a right answer makes', () => {
 
     const first = findSolvableTriple();
     await select(user, first.concepts);
-    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.type(screen.getByRole('textbox'), first.property);
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     // The step given is where the player is in their run, so a run can be
@@ -361,7 +363,7 @@ describe('the sound a right answer makes', () => {
 
     const { concepts } = findSolvableTriple();
     await select(user, concepts);
-    await user.type(screen.getByPlaceholderText(/type a category here/i), 'not a category');
+    await user.type(screen.getByRole('textbox'), 'not a category');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     expect(await screen.findByRole('status')).toHaveTextContent(/not a category/i);
@@ -377,7 +379,7 @@ describe('the sound a right answer makes', () => {
 
     const first = findSolvableTriple();
     await select(user, first.concepts);
-    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.type(screen.getByRole('textbox'), first.property);
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     expect(notes).toEqual([]);
@@ -394,7 +396,7 @@ describe('clearing the achievements', () => {
 
     const first = findSolvableTriple();
     await select(user, first.concepts);
-    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.type(screen.getByRole('textbox'), first.property);
     await user.click(screen.getByRole('button', { name: /submit/i }));
     await screen.findAllByRole('alert');
 
@@ -429,7 +431,7 @@ describe('clearing the achievements', () => {
 
     const first = findSolvableTriple();
     await select(user, first.concepts);
-    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.type(screen.getByRole('textbox'), first.property);
     await user.click(screen.getByRole('button', { name: /submit/i }));
     await screen.findAllByRole('alert');
 
@@ -443,7 +445,7 @@ describe('clearing the achievements', () => {
 
     const first = findSolvableTriple();
     await select(user, first.concepts);
-    await user.type(screen.getByPlaceholderText(/type a category here/i), first.property);
+    await user.type(screen.getByRole('textbox'), first.property);
     await user.click(screen.getByRole('button', { name: /submit/i }));
     await screen.findAllByRole('alert');
 
@@ -472,7 +474,7 @@ test('the new-concept mark only ever lands on a concept that just arrived', { ti
         [...document.querySelectorAll('.bubble')].map((b) => b.getAttribute('aria-label')!));
     const { concepts, property } = findSolvableTriple();
     await select(user, concepts);
-    await user.type(screen.getByPlaceholderText(/type a category here/i), property);
+    await user.type(screen.getByRole('textbox'), property);
     await user.click(screen.getByRole('button', { name: /submit/i }));
     await screen.findByRole('status');
 

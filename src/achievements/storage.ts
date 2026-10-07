@@ -110,6 +110,37 @@ export function saveMusic(playing: boolean): void {
     }
 }
 
+/**
+ * How loud the bed plays, under its own key beside the switch.
+ *
+ * Full unless it has been turned down. Anything that is not a fraction — a
+ * record written by hand, or by a version that stored something else here — is
+ * thrown away rather than handed to a gain node.
+ */
+export const MUSIC_VOLUME_KEY = 'properties-game:music-volume';
+
+export function loadMusicVolume(): number {
+    let raw: string | null = null;
+    try {
+        raw = localStorage.getItem(MUSIC_VOLUME_KEY);
+    } catch {
+        return 1;
+    }
+    if (raw === null) return 1;
+
+    const level = Number(raw);
+    if (raw.trim() === '' || !Number.isFinite(level) || level < 0 || level > 1) return 1;
+    return level;
+}
+
+export function saveMusicVolume(level: number): void {
+    try {
+        localStorage.setItem(MUSIC_VOLUME_KEY, String(level));
+    } catch {
+        // A preference is not worth a crash.
+    }
+}
+
 export function loadMuted(): boolean {
     try {
         return localStorage.getItem(MUTED_KEY) === 'true';

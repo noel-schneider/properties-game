@@ -1,4 +1,4 @@
-import { hintPair, HINT_FIRST, HINT_AGAIN, HINT_SHOWN } from './hints'
+import { hintPair, HINT_SHOWN } from './hints'
 import type { Solution } from './hand'
 
 const groups: Solution[] = [
@@ -45,8 +45,10 @@ test('the one group left can still be hinted at, twice over', () => {
   expect(hintPair(only, 0)!.every((name) => only[0].concepts.includes(name))).toBe(true);
 });
 
-test('the waits are the ones that were agreed, and the glow is brief', () => {
-  expect(HINT_FIRST).toBe(45_000);
-  expect(HINT_AGAIN).toBe(25_000);
-  expect(HINT_SHOWN).toBeLessThan(HINT_AGAIN);
+test('the glow lasts long enough to be found and not long enough to be read as the board', () => {
+  // A player whose eyes are on the other side of the board needs time to come
+  // back and still find it there; a mark that outstays that reads as a state
+  // of the board rather than as an answer to a question they asked.
+  expect(HINT_SHOWN).toBeGreaterThan(3_000);
+  expect(HINT_SHOWN).toBeLessThan(15_000);
 });
