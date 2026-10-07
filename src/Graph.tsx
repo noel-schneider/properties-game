@@ -102,6 +102,17 @@ interface GraphProps {
  * The members are taken in the order they sit around the middle, or the shape
  * crosses itself whenever the simulation moves one past another.
  */
+/**
+ * About how wide one character of a category's name is drawn.
+ *
+ * Poppins semibold at 19px with 0.04em of tracking. An estimate rather than a
+ * measurement because the names have to be spread on every frame while the
+ * board settles, and measuring text means a layout pass for each one. It is
+ * used to decide whether two names overlap, where being a few pixels out costs
+ * nothing.
+ */
+const CHARACTER_WIDTH = 11.5;
+
 export function groupOutline(places: Point[], centre: Point): string {
     const corners = [...places].sort(
         (a, b) => Math.atan2(a.y - centre.y, a.x - centre.x) - Math.atan2(b.y - centre.y, b.x - centre.x),
@@ -354,19 +365,36 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
         names.filter((name) => index.has(name)).map(at);
 
     /**
-     * Which groups say their name.
+     * Which groups say their name: the ones the player is pointing at, and
+     * nothing else.
      *
-     * While a concept is being read, all of its own — showing which concepts
-     * share something without ever saying what was half an answer. Otherwise
-     * the one just found, because twenty names drawn at once is a heap nobody
-     * reads.
+     * Naming them all was tried. A name that left as soon as the next find
+     * arrived did throw away the record of a player's own work — but keeping
+     * every one of them put the record on top of the board instead. The layout
+     * pulls a found group's members together, so the names gather exactly where
+     * there is least room for them: ten of them already stack over the bubbles
+     * they belong to, and a whole game reaches close to forty, more words than
+     * there are bubbles.
+     *
+     * The record lives in the column down the left, where it costs the board
+     * nothing. Here, a name answers a question that was asked.
+     *
+     * One per category even so: a property can be found again with different
+     * members, and a concept in both would otherwise say the same word twice.
      */
     const named = useMemo(() => {
-        if (kin.size > 0 && hovered !== null) {
-            return live.filter(({ group }) => group.concepts.includes(hovered));
+        if (hovered === null) return [];
+
+        const its = settledOf.get(hovered) ?? [];
+        if (its.length === 0) return [];
+
+        const perProperty = new Map<string, { group: Solution; where: number }>();
+        for (const entry of live) {
+            if (its.includes(entry.group.property)) perProperty.set(entry.group.property, entry);
         }
-        return live.slice(-1);
-    }, [live, kin, hovered]);
+
+        return [...perProperty.values()];
+    }, [live, hovered, settledOf]);
 
     return (
         <svg
@@ -564,17 +592,11 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
             })()}
 
             {/*
-              * The name of the group just found, in its middle and over the
+              * The categories of the concept being pointed at, named over the
               * bubbles.
               *
-              * In the middle because that is the thing being named, and the
-              * outline has a hole there once a group grows past three. Over
-              * the bubbles because a tight group would otherwise hide its own
-              * name behind them.
-              *
-              * Still only the latest: at twenty groups every name drawn is an
-              * unreadable heap. Which group is which, for the rest, is what
-              * the offer under a dragged concept answers.
+              * Over them because a tight group would otherwise hide its own
+              * name behind its members.
               */}
             {spreadLabels(
                 named.map(({ group }) => {
@@ -584,18 +606,21 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                         y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
                     };
                 }),
-            ).map((middle, i) => (
-                <text
-                    key={`name-${named[i].where}`}
-                    className="found__label"
-                    x={middle.x}
-                    y={middle.y}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                >
-                    {propertyName(named[i].group.property)}
-                </text>
-            ))}
+                named.map(({ group }) => propertyName(group.property).length * CHARACTER_WIDTH),
+            ).map((middle, i) => {
+                return (
+                    <text
+                        key={`name-${named[i].group.property}`}
+                        className="found__label"
+                        x={middle.x}
+                        y={middle.y}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                    >
+                        {propertyName(named[i].group.property)}
+                    </text>
+                );
+            })}
 
             {/*
               * The names of the spent concepts, drawn after every bubble.

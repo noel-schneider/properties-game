@@ -161,22 +161,24 @@ test('a found group is drawn as one outline around its members', () => {
 });
 
 
-test('the group just found says what it was', () => {
+test('a group says what it was while one of its concepts is pointed at', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
+  fireEvent.pointerEnter(screen.getByLabelText('concept-0'));
 
   expect(screen.getByText('thing')).toBeInTheDocument();
 });
 
-test('older groups keep their ties but drop their name', () => {
+test('the other groups keep their loops without saying anything', () => {
   const older = { property: 'pair-3', concepts: ['concept-3', 'concept-8', 'concept-13'] };
   renderApp(
     <Graph concepts={concepts} selected={[]} found={[older, foundGroup]} onToggle={() => {}} />,
   );
+  fireEvent.pointerEnter(screen.getByLabelText('concept-3'));
 
-  // Twenty groups of labels pile into an unreadable heap, so only the latest
-  // is named; every loop is still drawn.
-  expect(screen.queryByText('pair-3')).toBeNull();
-  expect(screen.getByText('thing')).toBeInTheDocument();
+  // A name answers a question that was asked. Naming every group at once put
+  // the record of the game on top of the board it was a record of.
+  expect(screen.getByText('pair-3')).toBeInTheDocument();
+  expect(screen.queryByText('thing')).toBeNull();
   expect(document.querySelectorAll('.found__loop')).toHaveLength(2);
 });
 
@@ -238,6 +240,7 @@ test('the name of a found group stays inside the frame, wherever the group lands
   const everything = { property: 'thing', concepts: concepts.map((c) => c.name) };
   renderApp(<Graph concepts={concepts} selected={[]} found={[everything]} onToggle={() => {}} />);
   runFrames(600);
+  fireEvent.pointerEnter(screen.getByLabelText('concept-0'));
 
   const label = document.querySelector('.found__label')!;
   const y = Number(label.getAttribute('y'));
@@ -356,6 +359,7 @@ test('the outline takes its corners in the order they sit around the middle', ()
 test('a found group is named in its middle, over the bubbles', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
   runFrames(600);
+  fireEvent.pointerEnter(screen.getByLabelText('concept-0'));
 
   const places = foundGroup.concepts.map((name) => {
     const [x, y] = screen.getByLabelText(name).getAttribute('transform')!

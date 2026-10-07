@@ -8,6 +8,9 @@ const concepts: Concept[] = [
   { name: 'ant', properties: ['insect', 'small', 'underground'] },
   { name: 'bee', properties: ['insect', 'small'] },
   { name: 'moth', properties: ['insect'] },
+  { name: 'wasp', properties: ['insect'] },
+  { name: 'fly', properties: ['insect'] },
+  { name: 'gnat', properties: ['insect'] },
   { name: 'coin', properties: ['small', 'metal'] },
   { name: 'key', properties: ['small', 'metal'] },
   { name: 'mole', properties: ['underground', 'small'] },
@@ -16,49 +19,71 @@ const concepts: Concept[] = [
   { name: 'pin', properties: ['small'] },
 ];
 
-// ant belongs to three of these; the last one found is `metal`, which it is
-// not part of.
+// ant belongs to two of these; the last one found is `metal`, which it is not
+// part of.
 const found: Solution[] = [
   { property: 'insect', concepts: ['ant', 'bee', 'moth'] },
   { property: 'underground', concepts: ['ant', 'mole', 'bat'] },
   { property: 'metal', concepts: ['coin', 'key', 'bee'] },
 ];
 
-function board() {
-  return renderApp(<Graph concepts={concepts} selected={[]} found={found} onToggle={() => {}} />);
+function board(groups: Solution[] = found) {
+  return renderApp(<Graph concepts={concepts} selected={[]} found={groups} onToggle={() => {}} />);
 }
 
 function named() {
   return [...document.querySelectorAll('.found__label')].map((label) => label.textContent);
 }
 
-test('at rest, only the group just found says what it was', () => {
-  // Twenty names drawn at once is an unreadable heap, which is why they are
-  // not all drawn all the time.
+test('nothing is named while nobody is pointing at anything', () => {
+  // Every category found, named at once, was a heap: ten of them already piled
+  // over the bubbles they belonged to, and a whole game reaches close to forty.
+  // What a player has named is kept in the column down the left, where it costs
+  // the board nothing.
   board();
 
-  expect(named()).toEqual(['metal']);
+  expect(named()).toEqual([]);
 });
 
 test('pointing at a concept names every category it is in', () => {
-  // The whole point of the reveal was undercut by showing which concepts
-  // share something without ever saying what.
   board();
   fireEvent.pointerEnter(screen.getByLabelText('ant'));
 
   expect(named().sort()).toEqual(['insect', 'underground']);
 });
 
-test('the group just found steps aside while a concept is being read', () => {
+test('and nothing it is not in', () => {
+  // metal is the last group found, and ant is no part of it.
   board();
   fireEvent.pointerEnter(screen.getByLabelText('ant'));
 
   expect(named()).not.toContain('metal');
 });
 
-test('a concept in nothing yet leaves the board as it was', () => {
+test('the names go when the pointer does', () => {
+  board();
+  const ant = screen.getByLabelText('ant');
+  fireEvent.pointerEnter(ant);
+  fireEvent.pointerLeave(ant);
+
+  expect(named()).toEqual([]);
+});
+
+test('a category found twice is named once', () => {
+  // A property can be found again with different members, and two copies of one
+  // word says nothing the first did not.
+  board([
+    { property: 'insect', concepts: ['ant', 'bee', 'moth'] },
+    { property: 'insect', concepts: ['ant', 'wasp', 'fly'] },
+  ]);
+  fireEvent.pointerEnter(screen.getByLabelText('ant'));
+
+  expect(named()).toEqual(['insect']);
+});
+
+test('a concept in nothing yet names nothing', () => {
   board();
   fireEvent.pointerEnter(screen.getByLabelText('pin'));
 
-  expect(named()).toEqual(['metal']);
+  expect(named()).toEqual([]);
 });

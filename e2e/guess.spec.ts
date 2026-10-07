@@ -57,7 +57,7 @@ test('pressing Enter submits the guess', async ({ page }) => {
   await expect(page.getByRole('status')).toHaveText(/correct/i)
 })
 
-test('a found group stays on the board, tied and named, and its concepts carry on', async ({ page }) => {
+test('a found group stays on the board, tied, and its concepts carry on', async ({ page }) => {
   // Start from a clean record, then read the board that comes with it.
   await page.goto('/')
   await boardSettled(page)
@@ -86,6 +86,10 @@ test('a found group stays on the board, tied and named, and its concepts carry o
     await expect(page.getByLabel(name, { exact: true })).toBeVisible()
   }
   await expect(page.locator('.found__loop')).toHaveCount(1)
+  // The loop stays; the name is asked for rather than kept, which names.spec.ts
+  // pins on its own.
+  await expect(page.locator('.found__label')).toHaveCount(0)
+  await page.getByRole('checkbox', { name: names[0], exact: true }).hover()
   await expect(page.locator('.found__label')).toHaveText(property)
   await expect(page.locator('.input')).toHaveValue('')
 })
