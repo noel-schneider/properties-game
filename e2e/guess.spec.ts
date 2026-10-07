@@ -1,26 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { boardSettled, clearGame } from './board'
+import { conceptProperties as properties, findSolvableTriple } from './triples'
 import english from '../src/i18n/en.json' with { type: 'json' }
-import data from '../src/concepts.json' with { type: 'json' }
-
-
-const properties = data as Record<string, string[]>
-
-/** Three concepts on screen that share a property, plus that property. */
-function findSolvableTriple(dealt: string[]): { names: string[]; property: string } {
-  for (let a = 0; a < dealt.length; a++) {
-    for (let b = a + 1; b < dealt.length; b++) {
-      for (let c = b + 1; c < dealt.length; c++) {
-        const triple = [dealt[a], dealt[b], dealt[c]]
-        const property = properties[triple[0]].find((p) =>
-          triple.every((name) => properties[name].includes(p)),
-        )
-        if (property) return { names: triple, property }
-      }
-    }
-  }
-  throw new Error('the dealt hand has no solvable triple, which dealHand should prevent')
-}
 
 test('naming the shared category is accepted', async ({ page }) => {
   await page.goto('/')
