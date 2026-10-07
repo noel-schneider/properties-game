@@ -87,8 +87,8 @@ export function noteFor(step: number): number {
 }
 
 /** Quieter than the unlock chime, which is a reward rather than a reply. */
-const FOUND_GAIN = 0.09;
-const FOUND_DECAY = 0.32;
+export const FOUND_GAIN = 0.09;
+export const FOUND_DECAY = 0.32;
 
 /**
  * The reply to a right answer.
@@ -124,6 +124,47 @@ export function playFoundNote(step: number): void {
             oscillator.start(at);
             oscillator.stop(at + FOUND_DECAY);
         }
+    } catch {
+        // Audio is a garnish. Never let it interrupt play.
+    }
+}
+
+/**
+ * The third concept picked: a door unlocking, not a prize.
+ *
+ * Quieter and shorter than the note that answers a right guess, and below the
+ * scale that note climbs, so the two can never be mistaken for one another.
+ * This one says the box can be typed in now — which is worth saying, because
+ * the box going from grey to live is easy to miss while the eyes are on the
+ * board — and nothing more than that.
+ */
+export const READY_GAIN = 0.045;
+export const READY_DECAY = 0.12;
+
+/** Under the bottom of the scale a run climbs, so it is never heard as one. */
+const READY_NOTE = 330;
+
+export function playReadyTick(): void {
+    const ctx = audioContext();
+    if (!ctx) return;
+
+    try {
+        if (ctx.state === 'suspended') void ctx.resume();
+
+        const at = ctx.currentTime;
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(READY_NOTE, at);
+
+        gain.gain.setValueAtTime(0, at);
+        gain.gain.linearRampToValueAtTime(READY_GAIN, at + 0.006);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + READY_DECAY);
+
+        oscillator.connect(gain).connect(ctx.destination);
+        oscillator.start(at);
+        oscillator.stop(at + READY_DECAY);
     } catch {
         // Audio is a garnish. Never let it interrupt play.
     }

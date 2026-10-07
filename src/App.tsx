@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import "./App.css";
 import "./controls.css";
 import Answers from "./Answers";
-import Form from "./Form";
+import Form, { MIN_SELECTED_CONCEPTS } from "./Form";
 import Graph from "./Graph";
 import Help from "./Help";
 import Hint from "./Hint";
@@ -21,7 +21,7 @@ import MusicVolume from "./MusicVolume";
 import Panel from "./achievements/Panel";
 import Toast from "./achievements/Toast";
 import { emptyLifetime, emptyProgress, recordEvent } from "./achievements";
-import { playFoundNote, playUnlockChime } from "./achievements/chime";
+import { playFoundNote, playReadyTick, playUnlockChime } from "./achievements/chime";
 import {
     emptyRunStats, loadBoard, loadFound, loadLifetime, loadMuted, loadMusic, loadMusicVolume,
     loadRunStats, saveBoard, saveFound, saveLifetime, saveMuted, saveMusic, saveMusicVolume,
@@ -61,9 +61,15 @@ interface AppProps {
     playChime?: () => void;
     /** Injected too, so the tests can listen without making a sound. */
     playFound?: (step: number) => void;
+    /** And the tick that says the box can be typed in now. */
+    playReady?: () => void;
 }
 
-function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProps) {
+function App({
+    playChime = playUnlockChime,
+    playFound = playFoundNote,
+    playReady = playReadyTick,
+}: AppProps) {
 
     const { wordings } = useTranslator();
     const [lifetimeAtStart] = useState(loadLifetime);
@@ -266,11 +272,20 @@ function App({ playChime = playUnlockChime, playFound = playFoundNote }: AppProp
 
     const toggleConcept = (name: string) => {
         setFeedback('none');
-        setSelected((current) =>
-            current.includes(name)
-                ? current.filter((n) => n !== name)
-                : [...current, name]
-        );
+
+        const next = selected.includes(name)
+            ? selected.filter((n) => n !== name)
+            : [...selected, name];
+
+        // The third pick is the one that turns the box from grey to live, and
+        // a player whose eyes are on the board misses that. Said on the way up
+        // only: a fourth concept changes nothing, and nor does coming back down
+        // to three from above.
+        const unlocked =
+            selected.length < MIN_SELECTED_CONCEPTS && next.length === MIN_SELECTED_CONCEPTS;
+        if (unlocked && !muted) playReady();
+
+        setSelected(next);
         record({ type: 'concept-toggled', name });
     };
 
