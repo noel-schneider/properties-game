@@ -127,6 +127,7 @@
         "location": "location",
         "machine": "machine",
         "metal": "metal",
+        "money": "money",
         "music": "music",
         "night": "night",
         "object": "object",
@@ -297,6 +298,12 @@
         "metal": [
             "metallic",
             "made of metal"
+        ],
+        "money": [
+            "cash",
+            "wealth",
+            "currency",
+            "riches"
         ],
         "music": [
             "musical",
