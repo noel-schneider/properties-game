@@ -525,6 +525,16 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                                 }
                             />
                         )}
+                        {/*
+                          * The tick: this one has given everything it had.
+                          *
+                          * Small and pale said nothing — a tester read those
+                          * dots as bubbles sitting behind the board rather
+                          * than as finished ones. A tick is the one mark
+                          * nobody has to be taught, and it fits where a name
+                          * never could.
+                          */}
+                        {isDone && <path className="done-tick" d="M-7 0 l5 5 l9 -11" />}
                         {!isDone && (
                             <text textAnchor="middle" dominantBaseline="middle">
                                 {conceptName(concept.name)}

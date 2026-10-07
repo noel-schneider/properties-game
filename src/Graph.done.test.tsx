@@ -29,6 +29,32 @@ function asideNameOf(name: string) {
     .find((label) => label.textContent === name) as SVGTextElement | undefined;
 }
 
+test('a concept with nothing left to find is ticked, so the state is read not guessed', () => {
+  // Small and pale said nothing to a tester: they read the dot as a bubble
+  // sitting behind the board rather than as one that had given everything it
+  // had. A tick is the one mark nobody has to be taught.
+  board();
+
+  const spent = screen.getByLabelText('a');
+  const live = screen.getByLabelText('d');
+
+  expect(spent.querySelector('.done-tick')).not.toBeNull();
+  expect(live.querySelector('.done-tick')).toBeNull();
+});
+
+test('the tick is drawn inside the dot it belongs to', () => {
+  // Outside it, it would read as a mark on the board rather than on the
+  // concept — and these dots sit a few pixels from their neighbours.
+  board();
+
+  const tick = screen.getByLabelText('a').querySelector('.done-tick')!;
+  const reach = Math.max(
+    ...tick.getAttribute('d')!.match(/-?\d+\.?\d*/g)!.map((n) => Math.abs(Number(n))),
+  );
+
+  expect(reach).toBeLessThan(FINISHED_RADIUS);
+});
+
 test('a concept with nothing left to find keeps its name', () => {
   // The name is no use for forming a group — nothing shrunken can join one —
   // but it is what reminds the player which categories are in play.

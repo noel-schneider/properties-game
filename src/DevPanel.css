@@ -1,0 +1,98 @@
+/*
+ * Dev only: one column down the left holding every tool, and it folds away.
+ * The whole file goes when the game ships.
+ */
+.dev {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 9500;
+    width: 13.5rem;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px dashed #40405c;
+    background: rgba(20, 21, 34, 0.94);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: #8f8aa6;
+}
+
+/*
+ * Folded: a strip holding the button that unfolds it, and nothing else that a
+ * pointer can hit. The strip lies over the left edge of the board, and while
+ * it caught clicks it was swallowing them from the bubbles underneath.
+ */
+.dev--shut {
+    width: 1.6rem;
+    background: none;
+    border-right-color: transparent;
+    pointer-events: none;
+}
+
+.dev--shut .dev__fold {
+    pointer-events: auto;
+    border-bottom: none;
+    background: rgba(20, 21, 34, 0.75);
+    border-radius: 0 0 0.3rem 0;
+}
+
+.dev__fold {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.45rem;
+    border: none;
+    border-bottom: 1px dashed #40405c;
+    background: none;
+    color: #6f6f8a;
+    font-family: inherit;
+    font-size: 0.72rem;
+    cursor: pointer;
+}
+
+.dev__fold:hover {
+    color: #c9c9db;
+}
+
+.dev__title {
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.dev__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem 0.55rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+/*
+ * The tools inside it: each was its own fixed box in its own corner, and in
+ * here they are simply blocks in a column. The rules that placed them live
+ * with each tool; these are what undo that placement.
+ */
+.dev__body .board-bench,
+.dev__body .music-bench,
+.dev__body .answers {
+    position: static;
+    inset: auto;
+    width: auto;
+    max-width: none;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.dev__body .board-bench,
+.dev__body .music-bench {
+    align-items: flex-start;
+}
+
+.dev__body .board-bench__label,
+.dev__body .music-bench__label,
+.dev__body .answers__title {
+    width: 100%;
+    margin-bottom: 0.15rem;
+}

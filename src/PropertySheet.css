@@ -18,10 +18,37 @@
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+    padding: 0.5rem 0.6rem;
+    /*
+     * On its own ground rather than straight onto the board.
+     *
+     * The left margin is empty for the first half of a game and the list sat
+     * in it happily; by the middle the board has grown into that margin, and
+     * bare text over nine bubbles is neither a list nor a board — measured at
+     * nine, on a board forty-eight answers in. The panel keeps it legible
+     * whatever ends up behind it.
+     */
+    border-radius: 0.6rem;
+    border: 1px solid rgba(64, 64, 92, 0.6);
+    background: rgba(22, 23, 36, 0.86);
+    backdrop-filter: blur(3px);
     font-family: 'Poppins', system-ui, sans-serif;
     /* Read, never pressed — and it lies over a corner of the board, where a
        bubble underneath it could not be clicked at all. */
     pointer-events: none;
+}
+
+/*
+ * The dev tools take the left margin while the game is being built, so this
+ * moves to the other one. Beside the panel rather than past it was worse than
+ * either: the board is full width and its bubbles are centred, so anything
+ * between the two margins lands on top of them.
+ *
+ * Dev only: nothing in a shipped game ever puts this class on the body.
+ */
+body.dev-panel-open .sheet {
+    left: auto;
+    right: 1.25rem;
 }
 
 .sheet__heading {

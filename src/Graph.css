@@ -168,14 +168,29 @@
     cursor: default;
 }
 
-/* Faded on the dot rather than on the whole group, so the name beside it can
-   be legible while the dot stays quiet. */
+/*
+ * Dark and solid rather than faded, and wearing a tick.
+ *
+ * It was translucent, which did two things at once: it made the dot read as
+ * something sitting behind the board, and it let the outline of a found group
+ * run visibly across it — a tester saw the ties passing in front. Opaque and
+ * dark keeps it quiet without burying it, and the tick is what says finished.
+ */
 .bubble--done circle {
-    fill: #8f8aa6;
+    fill: #4a4766;
     stroke: #5a5a7d;
     stroke-width: 2;
-    opacity: 0.35;
-    transition: opacity 0.4s ease;
+    transition: fill 0.4s ease;
+}
+
+/* The one warm thing on a spent concept, in the colour every other reward on
+   this board is drawn in. */
+.bubble--done .done-tick {
+    fill: none;
+    stroke: #ffad69;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 /*
@@ -205,7 +220,7 @@
 }
 
 .bubble--done:hover circle {
-    fill: #8f8aa6;
+    fill: #4a4766;
 }
 
 /*

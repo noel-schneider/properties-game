@@ -17,7 +17,13 @@ export default defineConfig({
       cookies: [],
       origins: [{
         origin: 'http://localhost:3000',
-        localStorage: [{ name: 'properties-game:skip-intro', value: 'true' }],
+        localStorage: [
+          { name: 'properties-game:skip-intro', value: 'true' },
+          // The dev tools are a column down the left edge, over that edge of
+          // the board. These tests are about the game, and a click near the
+          // left of the board would land on the tools instead.
+          { name: 'properties-game:dev-panel', value: 'false' },
+        ],
       }],
     },
   },
