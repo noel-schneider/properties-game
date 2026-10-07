@@ -11,9 +11,24 @@
      *
      * The hotspot is the middle of the spark, which is also the dot at its
      * centre: what the player aims with is the thing they can see.
+     *
+     * Three of them, because a cursor that never changes says nothing about
+     * what is under it: cream over the board, lit over a concept, and wearing
+     * a ring while one is held.
+     *
+     * The colours carry one layer of percent-escaping, not two. They had two,
+     * which decoded to `fill='%23f4efe6'` — not a colour at all — so every one
+     * of these was painted solid black on a near-black board, with its outline
+     * dropped for the same reason. Measured by painting the data URI onto a
+     * canvas and reading the pixels back: 0,0,0. That is what "the cursor looks
+     * pixelated" turned out to mean.
+     *
+     * Thirty-two across rather than twenty-six: at the old size the waist of
+     * the spark fell on a pixel and a half and came out jagged.
      */
-    --spark: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2726%27%20height%3D%2726%27%20viewBox%3D%270%200%2026%2026%27%3E%3Cpath%20d%3D%27M13%201.5%20C14.2%208.6%2017.4%2011.8%2024.5%2013%20C17.4%2014.2%2014.2%2017.4%2013%2024.5%20C11.8%2017.4%208.6%2014.2%201.5%2013%20C8.6%2011.8%2011.8%208.6%2013%201.5%20Z%27%20fill%3D%27%2523f4efe6%27%20stroke%3D%27%25231b1b1b%27%20stroke-width%3D%271.6%27%20stroke-linejoin%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2713%27%20cy%3D%2713%27%20r%3D%271.6%27%20fill%3D%27%2523ffad69%27%2F%3E%3C%2Fsvg%3E") 13 13, crosshair;
-    --spark-held: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2726%27%20height%3D%2726%27%20viewBox%3D%270%200%2026%2026%27%3E%3Cpath%20d%3D%27M13%201.5%20C14.2%208.6%2017.4%2011.8%2024.5%2013%20C17.4%2014.2%2014.2%2017.4%2013%2024.5%20C11.8%2017.4%208.6%2014.2%201.5%2013%20C8.6%2011.8%2011.8%208.6%2013%201.5%20Z%27%20fill%3D%27%2523ffad69%27%20stroke%3D%27%25231b1b1b%27%20stroke-width%3D%271.6%27%20stroke-linejoin%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2713%27%20cy%3D%2713%27%20r%3D%271.6%27%20fill%3D%27%2523fff6ec%27%2F%3E%3C%2Fsvg%3E") 13 13, grabbing;
+    --spark: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2732%27%20height%3D%2732%27%20viewBox%3D%270%200%2032%2032%27%3E%3Cpath%20d%3D%27M16%201.85%20C17.48%2010.58%2021.42%2014.52%2030.15%2016%20C21.42%2017.48%2017.48%2021.42%2016%2030.15%20C14.52%2021.42%2010.58%2017.48%201.85%2016%20C10.58%2014.52%2014.52%2010.58%2016%201.85%20Z%27%20fill%3D%27%23f4efe6%27%20stroke%3D%27%231b1b1b%27%20stroke-width%3D%272%27%20stroke-linejoin%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2716%27%20r%3D%272%27%20fill%3D%27%23ffad69%27%2F%3E%3C%2Fsvg%3E") 16 16, crosshair;
+    --spark-over: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2732%27%20height%3D%2732%27%20viewBox%3D%270%200%2032%2032%27%3E%3Cpath%20d%3D%27M16%201.85%20C17.48%2010.58%2021.42%2014.52%2030.15%2016%20C21.42%2017.48%2017.48%2021.42%2016%2030.15%20C14.52%2021.42%2010.58%2017.48%201.85%2016%20C10.58%2014.52%2014.52%2010.58%2016%201.85%20Z%27%20fill%3D%27%23ffad69%27%20stroke%3D%27%231b1b1b%27%20stroke-width%3D%272%27%20stroke-linejoin%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2716%27%20r%3D%272%27%20fill%3D%27%23fff6ec%27%2F%3E%3C%2Fsvg%3E") 16 16, grab;
+    --spark-held: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2732%27%20height%3D%2732%27%20viewBox%3D%270%200%2032%2032%27%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2716%27%20r%3D%2714%27%20fill%3D%27none%27%20stroke%3D%27%23ffad69%27%20stroke-width%3D%271.6%27%20opacity%3D%270.9%27%2F%3E%3Cpath%20d%3D%27M16%201.85%20C17.48%2010.58%2021.42%2014.52%2030.15%2016%20C21.42%2017.48%2017.48%2021.42%2016%2030.15%20C14.52%2021.42%2010.58%2017.48%201.85%2016%20C10.58%2014.52%2014.52%2010.58%2016%201.85%20Z%27%20fill%3D%27%23ffad69%27%20stroke%3D%27%231b1b1b%27%20stroke-width%3D%272%27%20stroke-linejoin%3D%27round%27%2F%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2716%27%20r%3D%272%27%20fill%3D%27%23fff6ec%27%2F%3E%3C%2Fsvg%3E") 16 16, grabbing;
 
     cursor: var(--spark);
 }
@@ -36,6 +51,10 @@
      * still scrolls everywhere else.
      */
     touch-action: none;
+}
+
+.bubble:hover {
+    cursor: var(--spark-over);
 }
 
 .bubble:active {
