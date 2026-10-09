@@ -12,7 +12,7 @@ only be used once by that crocodile. So a concept you have already used comes
 back, waiting for different company. The game is over when all hundred of them
 have given everything they have.
 
-Play it: https://properties-game-exzu4z6w2-noelschneiders-projects.vercel.app
+Play it: https://properties.noel-schneider.eu
 
 ## Playing
 
