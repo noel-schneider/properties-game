@@ -125,6 +125,62 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * Something large going past, a long way off.
+ *
+ * Barely darker than the water it crosses, because that is what distance
+ * does to a thing in water, and slow enough that you are never quite sure
+ * you saw it. Once every four minutes or so: a wonder that turns up on
+ * schedule stops being one.
+ *
+ * One element and one animation. It is off screen for nine tenths of its
+ * cycle, which costs nothing to be.
+ * ------------------------------------------------------------------------ */
+.sky__passer {
+    position: absolute;
+    /*
+     * High, and above the board rather than across it. Two earlier places
+     * were wrong for two different reasons: down in the deep the silhouette
+     * and the water are the same colour and it crossed unseen, and at a
+     * quarter down it passed behind the bubbles, where the only part of it
+     * anybody saw was the tail.
+     */
+    top: 8%;
+    left: 0;
+    width: 215px;
+    height: 79px;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform;
+    background-repeat: no-repeat;
+    background-size: contain;
+    /* A whale, more or less: a long body, a notch for the tail, no detail at
+       all. Anything more precise would be a picture of a fish rather than
+       the shape of one too far away to make out. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 70'%3E%3Cpath fill='%23040d14' d='M8 36 C34 10 96 6 128 22 C140 28 150 33 160 33 L186 18 L178 36 L186 54 L160 39 C150 39 140 44 128 50 C96 66 34 62 8 36 Z'/%3E%3C/svg%3E");
+    animation: passing 247s linear infinite;
+}
+
+/*
+ * Across in about half a minute, then four minutes of nothing. The fade is
+ * inside the crossing, so it is never seen to arrive at an edge or stop at
+ * one.
+ */
+@keyframes passing {
+    0%    { transform: translate3d(-18vw, 0, 0) scaleX(1); opacity: 0; }
+    2%    { opacity: 0.55; }
+    10%   { opacity: 0.55; }
+    12%   { transform: translate3d(118vw, 0, 0) scaleX(1); opacity: 0; }
+    100%  { transform: translate3d(118vw, 0, 0) scaleX(1); opacity: 0; }
+}
+
+.sky[data-still="true"] .sky__passer {
+    /* Not stilled — gone. A silhouette parked in the middle of the board is
+       not a still version of something swimming past, it is a smudge nobody
+       can explain. */
+    display: none;
+}
+
+/* ---------------------------------------------------------------------------
  * The shafts: light coming down from a surface a long way up.
  *
  * Each one leans its own way and sways on its own cycle. The cycles do not
@@ -294,5 +350,9 @@
     .sky__caustics,
     .sky__mote {
         animation: none !important;
+    }
+
+    .sky__passer {
+        display: none;
     }
 }

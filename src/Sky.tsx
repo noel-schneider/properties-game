@@ -128,6 +128,15 @@ function Sky({ risen = 0 }: SkyProps) {
             <div className="sky__caustics" />
 
             {/*
+              * Something large, a long way off, every few minutes.
+              *
+              * Never explained and never acknowledged by the game. It costs
+              * one element and one very slow animation, and it is the detail
+              * people tell each other about.
+              */}
+            <div className="sky__passer" />
+
+            {/*
               * The swell alternates between two identical animations rather
               * than restarting one: a CSS animation ignores a request to start
               * again while it is running, and remounting the shafts instead

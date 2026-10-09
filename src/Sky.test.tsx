@@ -93,3 +93,23 @@ test('and it stops listening once it is gone', () => {
 
   expect(() => fireEvent.pointerMove(window, { clientX: 5, clientY: 5 })).not.toThrow();
 });
+
+test('something large goes past now and then, a long way off', () => {
+  // Rare and far and never explained. The detail people tell each other
+  // about, and the cheapest one in the whole background.
+  render(<Sky />);
+
+  expect(document.querySelectorAll('.sky__passer')).toHaveLength(1);
+});
+
+test('it is too far off to be in anybody way', () => {
+  render(<Sky />);
+
+  expect(getComputedStyle(document.querySelector('.sky__passer')!).pointerEvents).toBe('none');
+});
+
+test('and it stays away entirely from a player who asked for less motion', () => {
+  // A silhouette parked in the middle of the board is not a still version of
+  // something swimming past; it is a smudge nobody can explain.
+  expect(css).toMatch(/\.sky\[data-still="true"\][^{]*\.sky__passer\s*\{[^}]*display:\s*none/);
+});
