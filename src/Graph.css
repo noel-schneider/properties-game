@@ -322,14 +322,21 @@
     100% { transform: scale(1); }
 }
 
-/* The outline closes around them rather than appearing already closed. */
+/*
+ * The outline draws itself from end to end rather than appearing drawn.
+ *
+ * `pathLength` normalises the whole outline to one, sides fanned apart and
+ * all, so a dash from nothing to everything works the same on a triangle as
+ * on a group of six.
+ */
 .found__loop--latest {
-    animation: tighten 0.5s ease-out both;
+    animation: tighten 0.62s ease-out both;
 }
 
 @keyframes tighten {
-    from { opacity: 0; stroke-width: 16; }
-    to   { opacity: 0.8; stroke-width: 9; }
+    from { opacity: 0; stroke-width: 16; stroke-dasharray: 0 1; }
+    40%  { opacity: 0.8; }
+    to   { opacity: 0.8; stroke-width: 9; stroke-dasharray: 1 1; }
 }
 
 /* And the name arrives under its own weight. */
@@ -618,4 +625,63 @@
            whether or not anything is allowed to move. */
         stroke: #ffc38c;
     }
+}
+
+/* ---------------------------------------------------------------------------
+ * The wake of a find.
+ *
+ * One ring out from the middle of the group, and a stream of air let go by
+ * each of the three concepts. Drawn before the bubbles so it passes behind
+ * them: a wave in front of the board would be a wave in front of the water.
+ *
+ * Every piece of it is a transform or an opacity, and the whole thing is
+ * gone in a second and a half.
+ * ------------------------------------------------------------------------ */
+.wake {
+    pointer-events: none;
+}
+
+.shock {
+    fill: none;
+    stroke: rgba(201, 240, 243, 0.6);
+    stroke-width: 2.5;
+    /*
+     * Scaling a circle scales the line it is drawn with, and this one is
+     * scaled by nine hundred: without this the ring leaves as a hairline and
+     * arrives as a wall. The first version did exactly that, invisibly,
+     * because it faded out before anyone could see how thick it had become.
+     */
+    vector-effect: non-scaling-stroke;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: shock 1.15s cubic-bezier(0.16, 0.82, 0.3, 1) both;
+}
+
+/* Out fast, and gone before it reaches the far corner. A ring of one unit
+   has to reach nine hundred to cross a board sixteen hundred wide. */
+@keyframes shock {
+    from { transform: scale(1); opacity: 0.75; }
+    to   { transform: scale(900); opacity: 0; }
+}
+
+.spout__air {
+    fill: rgba(214, 245, 247, 0.5);
+    animation: let-go 1.5s ease-in var(--spout-delay) both;
+}
+
+/* Each of the three leaves at its own moment and wanders its own way, or the
+   board lets go of nine bubbles in one breath. */
+.spout__air--1 { animation-delay: calc(var(--spout-delay) + 0.02s); --wander: -14px; }
+.spout__air--2 { animation-delay: calc(var(--spout-delay) + 0.22s); --wander: 11px; }
+.spout__air--3 { animation-delay: calc(var(--spout-delay) + 0.44s); --wander: -5px; }
+
+@keyframes let-go {
+    from { transform: translate(0, 0) scale(0.4); opacity: 0; }
+    18%  { opacity: 0.6; }
+    to   { transform: translate(var(--wander), -120px) scale(1); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shock { animation: none; opacity: 0; }
+    .spout__air { animation: none; opacity: 0; }
 }

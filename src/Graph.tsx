@@ -504,6 +504,30 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
         }));
     }, [live, index, points]);
 
+    /**
+     * The group found last, and where it sits — for the ring the find sends
+     * out through the water.
+     *
+     * Nothing at all before the first find, and nothing for a group whose
+     * members have all left the board: a wave out of an empty corner is a
+     * wave from nowhere.
+     */
+    const latestFind = useMemo(() => {
+        const latest = found[found.length - 1];
+        if (!latest) return null;
+
+        const places = placesOf(latest.concepts);
+        if (places.length === 0) return null;
+
+        return {
+            places,
+            middle: {
+                x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
+                y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
+            },
+        };
+    }, [found, index, points]);
+
     return (
         <svg
             ref={svg}
@@ -539,6 +563,9 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                         <path
                             className={latest ? 'found__loop found__loop--latest' : 'found__loop'}
                             d={d}
+                            // So the outline can draw itself from end to end
+                            // whatever its actual length: see `tighten`.
+                            pathLength={1}
                             data-hue={hue}
                             data-near={hue ? String(near.has(group.property)) : undefined}
                             style={hue ? ({ '--hue': hue } as React.CSSProperties) : undefined}
@@ -546,6 +573,44 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                     </g>
                 );
             })}
+
+            {/*
+              * What the last find did to the water: one ring out from the
+              * middle of the group, and a stream of air let go by each of
+              * the three concepts.
+              *
+              * Keyed on which find it belongs to, so React replaces the
+              * elements rather than keeping the ones it has — a running
+              * animation ignores a request to start again, and the second
+              * find would land in silence.
+              *
+              * Drawn before the bubbles, so the ring passes behind them: a
+              * wave that crosses in front of the board would be a wave in
+              * front of the water.
+              */}
+            {latestFind && (
+                <g className="wake" key={`wake-${found.length}`} data-find={String(found.length)}>
+                    <circle
+                        className="shock"
+                        data-find={String(found.length)}
+                        cx={latestFind.middle.x}
+                        cy={latestFind.middle.y}
+                        r={1}
+                    />
+                    {latestFind.places.map((place, where) => (
+                        <g
+                            key={`spout-${where}`}
+                            className="spout"
+                            style={{ '--spout-delay': `${where * 0.12}s` } as React.CSSProperties}
+                            transform={`translate(${place.x}, ${place.y})`}
+                        >
+                            <circle className="spout__air spout__air--1" r={3} />
+                            <circle className="spout__air spout__air--2" r={2} />
+                            <circle className="spout__air spout__air--3" r={2.6} />
+                        </g>
+                    ))}
+                </g>
+            )}
 
             {concepts.map((concept, i) => {
                 const { x, y } = points[i] ?? { x: 0, y: 0 };
