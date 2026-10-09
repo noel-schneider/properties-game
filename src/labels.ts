@@ -1,7 +1,7 @@
 import type { Point } from './useBubbleLayout'
 
 /** The least room two names need between them to be read as two. */
-export const LABEL_CLEARANCE = 24;
+export const LABEL_CLEARANCE = 30;
 
 /**
  * Pushes names apart that would otherwise land on one another.

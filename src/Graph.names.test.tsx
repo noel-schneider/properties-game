@@ -35,6 +35,11 @@ function named() {
   return [...document.querySelectorAll('.found__label')].map((label) => label.textContent);
 }
 
+/** Whether a name is one of the pointed concept's own, or some other corner. */
+function nearness(property: string) {
+  return document.querySelector(`.found__label[data-property="${property}"]`)?.getAttribute('data-near');
+}
+
 test('nothing is named while nobody is pointing at anything', () => {
   // Every category found, named at once, was a heap: ten of them already piled
   // over the bubbles they belonged to, and a whole game reaches close to forty.
@@ -45,19 +50,24 @@ test('nothing is named while nobody is pointing at anything', () => {
   expect(named()).toEqual([]);
 });
 
-test('pointing at a concept names every category it is in', () => {
+test('pointing at a concept names every category still on the board', () => {
+  // A colour with no word against it is a colour nobody can read, and every
+  // loop on the board is coloured while a concept is pointed at.
   board();
   fireEvent.pointerEnter(screen.getByLabelText('ant'));
 
-  expect(named().sort()).toEqual(['insect', 'underground']);
+  expect(named().sort()).toEqual(['insect', 'metal', 'underground']);
 });
 
-test('and nothing it is not in', () => {
-  // metal is the last group found, and ant is no part of it.
+test('and says which of them the concept is in', () => {
+  // metal is found, and ant is no part of it: named, but not in the weight
+  // the two it belongs to are given.
   board();
   fireEvent.pointerEnter(screen.getByLabelText('ant'));
 
-  expect(named()).not.toContain('metal');
+  expect(nearness('insect')).toBe('true');
+  expect(nearness('underground')).toBe('true');
+  expect(nearness('metal')).toBe('false');
 });
 
 test('the names go when the pointer does', () => {

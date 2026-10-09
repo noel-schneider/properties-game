@@ -53,8 +53,8 @@ npm run dev        # http://localhost:3000
 ```
 
 ```sh
-npm test           # 441 unit tests
-npm run test:e2e   # 54 end-to-end tests, in a real browser
+npm test           # 485 unit tests
+npm run test:e2e   # 57 end-to-end tests, in a real browser
 npm run typecheck
 npm run build
 ```

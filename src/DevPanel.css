@@ -76,6 +76,7 @@
  */
 .dev__body .board-bench,
 .dev__body .music-bench,
+.dev__body .reveal-bench,
 .dev__body .answers {
     position: static;
     inset: auto;
@@ -86,12 +87,14 @@
 }
 
 .dev__body .board-bench,
-.dev__body .music-bench {
+.dev__body .music-bench,
+.dev__body .reveal-bench {
     align-items: flex-start;
 }
 
 .dev__body .board-bench__label,
 .dev__body .music-bench__label,
+.dev__body .reveal-bench__label,
 .dev__body .answers__title {
     width: 100%;
     margin-bottom: 0.15rem;

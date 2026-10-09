@@ -1,7 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react'
 import { renderApp } from './test-utils'
 import { act } from 'react'
-import Graph, { groupOutline } from './Graph'
+import Graph from './Graph'
 import { BUBBLE_GAP, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Concept } from './types'
 
@@ -168,17 +168,17 @@ test('a group says what it was while one of its concepts is pointed at', () => {
   expect(screen.getByText('thing')).toBeInTheDocument();
 });
 
-test('the other groups keep their loops without saying anything', () => {
+test('the other groups keep their loops, named in their own right', () => {
   const older = { property: 'pair-3', concepts: ['concept-3', 'concept-8', 'concept-13'] };
   renderApp(
     <Graph concepts={concepts} selected={[]} found={[older, foundGroup]} onToggle={() => {}} />,
   );
   fireEvent.pointerEnter(screen.getByLabelText('concept-3'));
 
-  // A name answers a question that was asked. Naming every group at once put
-  // the record of the game on top of the board it was a record of.
+  // Every loop takes a colour while a concept is pointed at, so every loop
+  // says what it is: an unnamed colour is one nobody can read.
   expect(screen.getByText('pair-3')).toBeInTheDocument();
-  expect(screen.queryByText('thing')).toBeNull();
+  expect(screen.getByText('thing')).toBeInTheDocument();
   expect(document.querySelectorAll('.found__loop')).toHaveLength(2);
 });
 
@@ -341,20 +341,6 @@ test('the group just found keeps a bright loop, and the older ones step back', (
   expect(loops).toHaveLength(2);
 });
 
-
-test('the outline takes its corners in the order they sit around the middle', () => {
-  // Fed in any other order the shape crosses itself, which is what happens
-  // every time the simulation moves one member past another.
-  const corners = [{ x: 0, y: -100 }, { x: -87, y: 50 }, { x: 87, y: 50 }];
-  const centre = { x: 0, y: 0 };
-
-  const path = groupOutline(corners, centre);
-  const n = path.match(/-?\d+\.?\d*/g)!.map(Number);
-  const angles = [];
-  for (let i = 0; i < n.length; i += 2) angles.push(Math.atan2(n[i + 1], n[i]));
-
-  expect([...angles].sort((a, b) => a - b)).toEqual(angles);
-});
 
 test('a found group is named in its middle, over the bubbles', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);

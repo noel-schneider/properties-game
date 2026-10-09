@@ -151,7 +151,7 @@
 }
 
 .bubble--found {
-    cursor: default;
+    cursor: none;
 }
 
 .bubble--found circle {
@@ -165,7 +165,7 @@
 
 /* A concept with nothing left to find: small, faded, out of the way. */
 .bubble--done {
-    cursor: default;
+    cursor: none;
 }
 
 /*
@@ -444,4 +444,77 @@
         animation: none;
         opacity: 0.8;
     }
+}
+
+/* ---------------------------------------------------------------------------
+ * The colour code of a reveal.
+ *
+ * Pointing at a concept names every category it is in, and those names arrive
+ * together — two of them within a few pixels, because two groups sharing that
+ * concept share most of their middle too. Colour is what tells one from the
+ * next, and what ties each word to the three bubbles it is about.
+ *
+ * Only while someone is pointing. A board that held fifty colours at rest
+ * would be a colour code nobody could hold in their head, and the categories
+ * found are already listed down the left in words.
+ * ------------------------------------------------------------------------ */
+
+/* Written on the element itself, so the gradient every other loop wears has
+   nothing to fight: this rule only exists where a colour was handed out. */
+.found__loop[data-hue] {
+    stroke: var(--hue);
+    opacity: 0.85;
+}
+
+/*
+ * Two tiers, where the whole board is coloured: the categories the pointed
+ * concept is in, and the rest. Without the difference the board answers a
+ * question nobody asked as loudly as the one they did — the colours untangle
+ * the loops, and the weight says which of them is about the bubble under the
+ * pointer.
+ */
+.found__loop[data-near='true'] {
+    opacity: 0.95;
+    stroke-width: 9;
+}
+
+.found__loop[data-near='false'] {
+    opacity: 0.5;
+    stroke-width: 5;
+}
+
+.found__label[data-hue] {
+    fill: var(--hue);
+}
+
+/* A name about some other corner of the board: there to be matched to its
+   colour, not to be read first. */
+.found__label[data-near='false'] {
+    font-size: 15px;
+    opacity: 0.75;
+}
+
+/*
+ * The marks around a bubble: one slice of a ring per category in `arcs`, one
+ * whole ring per category in `rings`. Both start outside the gauge and the
+ * nudge, which are rings around the same bubble and mean other things.
+ */
+.bubble circle.hue-arc,
+.bubble circle.hue-ring {
+    fill: none;
+    stroke: var(--hue);
+    stroke-width: 5;
+    stroke-linecap: round;
+    /* The bubbles' own shadow under one of these per category buys nothing. */
+    filter: none;
+    pointer-events: none;
+}
+
+/* The slices start at the top, as the gauge does, rather than at three
+   o'clock where SVG would start them. fill-box, or the rotation pivots on the
+   viewBox origin and throws the ring off the board. */
+.bubble circle.hue-arc {
+    transform: rotate(-90deg);
+    transform-box: fill-box;
+    transform-origin: center;
 }

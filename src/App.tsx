@@ -33,6 +33,8 @@ import {
 import MusicBench from "./MusicBench";
 import BoardBench from "./BoardBench";
 import DevPanel from "./DevPanel";
+import RevealBench from "./RevealBench";
+import type { Reveal } from "./reveal";
 import { HINT_SHOWN, hintPair } from "./hints";
 import type { RunTally } from "./achievements/storage";
 import { CATALOGUE } from "./achievements";
@@ -121,6 +123,10 @@ function App({
     // concepts finished — the fifth at the eighty-sixth answer of a game, which
     // is no way to judge whether it belongs in the piece.
     const [forcedLayers, setForcedLayers] = useState<number | null>(null);
+    // Dev only: which marks a reveal wears, so the four ways of tying a
+    // category's name to its three bubbles can be swapped between on a board
+    // that has enough found on it for the difference to show.
+    const [reveal, setReveal] = useState<Reveal>('all-arcs');
 
     // Dev only: what the board looks like once every finished concept has gone.
     const [swept, setSwept] = useState<string[]>([]);
@@ -525,6 +531,9 @@ function App({
               />
           )}
           {(
+              <RevealBench reveal={reveal} onPick={setReveal} />
+          )}
+          {(
               <MusicBench
                   forced={forcedLayers}
                   onPick={(count) => {
@@ -547,7 +556,7 @@ function App({
               <MusicToggle playing={music} onToggle={toggleMusic} />
               <MusicVolume level={musicVolume} playing={music} onChange={changeMusicVolume} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} onToggle={toggleConcept} onDropInto={dropInto} onClear={clearSelection} />
+          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} reveal={reveal} onToggle={toggleConcept} onDropInto={dropInto} onClear={clearSelection} />
           <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
           <div className="corner corner--bottom-left">
               <Signature />

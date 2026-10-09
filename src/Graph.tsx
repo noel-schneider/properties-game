@@ -6,6 +6,9 @@ import { useTranslator } from './i18n'
 import { donePropertiesOf, isSpent, liveProperties, progressOf } from './game'
 import { groupUnderPointer } from './drop'
 import { spreadLabels } from './labels'
+import { aroundTheMiddle, fannedSides, pathOf } from './loops'
+import { arcDash, coloursEverything, huesFor, MARK_START, marksOf, ringRadius } from './reveal'
+import type { Reveal } from './reveal'
 import type { Solution } from './hand'
 import type { Concept } from './types'
 
@@ -76,6 +79,12 @@ interface GraphProps {
     arriving?: string[];
     /** Two concepts the board is nudging a stalled player towards. */
     hinted?: string[];
+    /**
+     * Which marks the reveal wears while a concept is pointed at. Several of
+     * them exist to be compared side by side before one is kept; the switch
+     * is in the developer panel and goes with it.
+     */
+    reveal?: Reveal;
     onToggle: (name: string) => void;
     /**
      * Asked for when a click lands on the board rather than on a concept.
@@ -113,14 +122,6 @@ interface GraphProps {
  */
 const CHARACTER_WIDTH = 11.5;
 
-export function groupOutline(places: Point[], centre: Point): string {
-    const corners = [...places].sort(
-        (a, b) => Math.atan2(a.y - centre.y, a.x - centre.x) - Math.atan2(b.y - centre.y, b.x - centre.x),
-    );
-
-    const steps = corners.map((corner) => `L ${corner.x.toFixed(2)} ${corner.y.toFixed(2)}`);
-    return `M ${corners[0].x.toFixed(2)} ${corners[0].y.toFixed(2)} ${steps.slice(1).join(' ')} Z`;
-}
 
 /**
  * Takes or gives back the pointer, without letting a refusal end the gesture.
@@ -150,7 +151,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, arriving = [], hinted = [], onToggle, onDropInto, onClear }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, arriving = [], hinted = [], reveal = 'all-arcs', onToggle, onDropInto, onClear }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -396,6 +397,79 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
         return [...perProperty.values()];
     }, [live, hovered, settledOf]);
 
+    /**
+     * A colour for each category being named, so the word and the three
+     * bubbles it is about can be matched by eye.
+     *
+     * Two names arrive within a few pixels of one another whenever two groups
+     * share the concept being pointed at — they share most of their middle
+     * too — and two grey words that close together are one smudge. Only the
+     * categories on show are coloured: colouring every group found would have
+     * the whole board shouting at a question about one concept.
+     */
+    const near = useMemo(() => new Set(named.map(({ group }) => group.property)), [named]);
+
+    /**
+     * Every other category still on the board, named too where the whole
+     * board is being coloured. A colour with no word against it is a colour
+     * nobody can read.
+     */
+    const alsoNamed = useMemo(() => {
+        if (!coloursEverything(reveal) || named.length === 0) return [];
+
+        const perProperty = new Map<string, { group: Solution; where: number }>();
+        for (const entry of live) {
+            if (!near.has(entry.group.property)) perProperty.set(entry.group.property, entry);
+        }
+
+        return [...perProperty.values()];
+    }, [live, named, near, reveal]);
+
+    /** Everything named, the pointed concept's own categories first. */
+    const shown = useMemo(() => [...named, ...alsoNamed], [named, alsoNamed]);
+
+    const hues = useMemo(
+        () =>
+            reveal === 'plain'
+                ? new Map<string, string>()
+                : // The pointed concept's own first: they take the colours that
+                  // are furthest apart, and the rest of the board fills in after.
+                  huesFor(shown.map(({ group }) => group.property)),
+        [shown, reveal],
+    );
+
+    /**
+     * The outline of every group still on the board, with the sides two of
+     * them share fanned out rather than drawn on top of one another.
+     *
+     * A concept belongs to several categories, so two groups often hold two
+     * of the same three members — and then one of them paints over the
+     * other's side and the board says it found one category where it found
+     * two.
+     */
+    const outlines = useMemo(() => {
+        const drawn = live
+            .map((entry) => ({
+                entry,
+                corners: aroundTheMiddle(
+                    entry.group.concepts
+                        .filter((name) => index.has(name))
+                        .map((name) => ({ name, at: at(name) })),
+                ),
+            }))
+            // One corner is a point, and a point is not a shape.
+            .filter(({ corners }) => corners.length >= 2);
+
+        return fannedSides(drawn.map(({ corners }) => corners)).map((sides, i) => ({
+            group: drawn[i].entry.group,
+            where: drawn[i].entry.where,
+            d: pathOf(sides),
+            // The group just found is drawn bright, and is the one the landing
+            // animation closes around.
+            latest: i === drawn.length - 1,
+        }));
+    }, [live, index, points]);
+
     return (
         <svg
             ref={svg}
@@ -420,24 +494,17 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                     <stop offset="100%" stopColor="#e46a92" />
                 </linearGradient>
             </defs>
-            {live.map(({ group }, groupIndex) => {
-                // The outline of the group just found is drawn bright, and is
-                // the one the landing animation closes around.
-                const latest = groupIndex === live.length - 1;
-                const places = placesOf(group.concepts);
-                // One corner is a point, and a point is not a shape.
-                if (places.length < 2) return null;
-
-                const centre = {
-                    x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
-                    y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
-                };
+            {outlines.map(({ group, where, d, latest }) => {
+                const hue = hues.get(group.property);
 
                 return (
-                    <g key={`${group.property}-${groupIndex}`} className="found" data-group={group.property}>
+                    <g key={`${group.property}-${where}`} className="found" data-group={group.property}>
                         <path
                             className={latest ? 'found__loop found__loop--latest' : 'found__loop'}
-                            d={groupOutline(places, centre)}
+                            d={d}
+                            data-hue={hue}
+                            data-near={hue ? String(near.has(group.property)) : undefined}
+                            style={hue ? ({ '--hue': hue } as React.CSSProperties) : undefined}
                         />
                     </g>
                 );
@@ -554,6 +621,57 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                             />
                         )}
                         {/*
+                          * The colours of the categories this concept shares
+                          * with the one being pointed at — one mark each, so a
+                          * bubble in two of them says so twice.
+                          *
+                          * Outside the gauge and the nudge rather than on
+                          * them: all three are rings around the same bubble,
+                          * and a player who has to work out which is which is
+                          * being asked a question about the board instead of
+                          * about the game.
+                          *
+                          * Not on a finished concept. Its dot is a third of
+                          * the size, and a mark nineteen units past its edge
+                          * would sit nearer its neighbours than itself.
+                          */}
+                        {!isDone &&
+                            marksOf(reveal) !== null &&
+                            (settledOf.get(concept.name) ?? [])
+                                .filter((property) => near.has(property))
+                                .map((property, slice, shown) => {
+                                    const hue = hues.get(property)!;
+                                    const style = { '--hue': hue } as React.CSSProperties;
+
+                                    if (marksOf(reveal) === 'rings') {
+                                        return (
+                                            <circle
+                                                key={`ring-${property}`}
+                                                className="hue-ring"
+                                                r={ringRadius(radius, slice)}
+                                                data-hue={hue}
+                                                style={style}
+                                            />
+                                        );
+                                    }
+
+                                    const r = radius + MARK_START;
+                                    const round = 2 * Math.PI * r;
+                                    const { dash, offset } = arcDash(r, shown.length, slice);
+
+                                    return (
+                                        <circle
+                                            key={`arc-${property}`}
+                                            className="hue-arc"
+                                            r={r}
+                                            data-hue={hue}
+                                            style={style}
+                                            strokeDasharray={`${dash.toFixed(2)} ${(round - dash).toFixed(2)}`}
+                                            strokeDashoffset={offset.toFixed(2)}
+                                        />
+                                    );
+                                })}
+                        {/*
                           * The tick: this one has given everything it had.
                           *
                           * Small and pale said nothing — a tester read those
@@ -599,25 +717,32 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
               * name behind its members.
               */}
             {spreadLabels(
-                named.map(({ group }) => {
+                shown.map(({ group }) => {
                     const places = placesOf(group.concepts);
                     return {
                         x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
                         y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
                     };
                 }),
-                named.map(({ group }) => propertyName(group.property).length * CHARACTER_WIDTH),
+                shown.map(({ group }) => propertyName(group.property).length * CHARACTER_WIDTH),
             ).map((middle, i) => {
+                const property = shown[i].group.property;
+                const hue = hues.get(property);
+
                 return (
                     <text
-                        key={`name-${named[i].group.property}`}
+                        key={`name-${property}`}
                         className="found__label"
                         x={middle.x}
                         y={middle.y}
                         textAnchor="middle"
                         dominantBaseline="middle"
+                        data-property={property}
+                        data-hue={hue}
+                        data-near={hue ? String(near.has(property)) : undefined}
+                        style={hue ? ({ '--hue': hue } as React.CSSProperties) : undefined}
                     >
-                        {propertyName(named[i].group.property)}
+                        {propertyName(property)}
                     </text>
                 );
             })}

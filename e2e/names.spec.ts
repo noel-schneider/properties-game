@@ -43,3 +43,24 @@ test('and says a category only while one of its concepts is pointed at', async (
   await page.getByRole('checkbox', { name: names[0], exact: true }).hover()
   await expect(page.locator('.found__label', { hasText: property })).toBeVisible()
 })
+
+test("and paints that name and its group's outline the same colour", async ({ page }) => {
+  // Every other outline on the board wears a gradient, which is a paint server
+  // rather than a colour: the hue is handed over as a custom property and only
+  // a browser can say whether it won. jsdom reads the attribute and is happy
+  // either way.
+  await page.goto('/')
+  await boardSettled(page)
+
+  const { property, names } = await nameACategory(page)
+  await boardSettled(page)
+
+  await page.getByRole('checkbox', { name: names[0], exact: true }).hover()
+
+  const label = page.locator(`.found__label[data-property="${property}"]`)
+  const loop = page.locator(`.found[data-group="${property}"] .found__loop`)
+
+  const painted = await label.evaluate((node) => getComputedStyle(node).fill)
+  expect(painted).toMatch(/^rgb/)
+  expect(await loop.evaluate((node) => getComputedStyle(node).stroke)).toBe(painted)
+})
