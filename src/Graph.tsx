@@ -486,8 +486,9 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
             }}
         >
             <defs>
-                {/* The loops take their colours from the sunrise behind the
-                    board, so a found group looks lit by the same light. */}
+                {/* Warm, where the water behind the board is cold: a group
+                    the player found is the one thing on screen giving off
+                    light of its own. */}
                 <linearGradient id="found-loop" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stopColor="#ffc38c" />
                     <stop offset="55%" stopColor="#ffad69" />

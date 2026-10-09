@@ -5,7 +5,7 @@
 /* The sky sits behind the page on its own layer, so the page itself must not
    paint over it. The colour stays on the root as the fallback underneath. */
 html {
-  background-color: #2d3047;
+  background-color: #030a10;
 }
 
 body {

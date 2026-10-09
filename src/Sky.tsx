@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import './Sky.css'
 import { onChord } from './pulse'
 
@@ -8,20 +8,42 @@ function stillSky(): boolean {
 }
 
 /**
- * The background: the game's own indigo, with a sunrise coming up behind the
- * board.
+ * How many shafts of light come down from the surface.
  *
- * Nearly still on purpose. The halo breathes on a slow CSS animation and
- * nothing else moves — the board rebuilds its whole SVG on every frame while
- * it settles, and it locked the browser up outright at 126 bubbles, so the
- * background gets no render budget at all.
+ * One is a spotlight. Three, at different widths and leaning different ways,
+ * are light coming through water from somewhere above.
+ */
+export const SHAFTS = 3;
+
+/**
+ * How many motes drift up through the water.
  *
- * The one exception is the music. When a chord lands the sunrise swells once
- * and settles, which is a single class change every nine seconds rather than
- * anything measured per frame: the game writes the music, so it is told when a
- * chord starts rather than listening for one. The swell deepens as the
- * orchestra grows, so a game played to the end is lit a little more warmly
- * than one just begun.
+ * Twenty is the number at which the eye stops counting them and starts
+ * reading the water as full of something. Each is one element the compositor
+ * holds and moves on its own; none of them touches a render.
+ */
+export const MOTES = 20;
+
+/**
+ * The background: deep water, with the surface somewhere far above the board.
+ *
+ * Nearly still on purpose. The board rebuilds its whole SVG on every frame
+ * while it settles, and it locked the browser up outright at 126 bubbles, so
+ * the background gets no render budget at all: everything here is a transform
+ * or an opacity on a layer the compositor already holds, started once and
+ * left alone.
+ *
+ * That rules out the obvious way to draw moving water. Animating the
+ * `feTurbulence` that makes the caustics would be the real thing and would
+ * also be a filter recomputed every frame — so the texture is generated once
+ * and it is the drift across it that moves.
+ *
+ * The one thing driven from the game is the music. When a chord lands the
+ * light from the surface swells once and settles, which is a single class
+ * change every nine seconds rather than anything measured per frame: the game
+ * writes the music, so it is told when a chord starts rather than listening
+ * for one. The swell deepens as the orchestra grows, so a game played to the
+ * end is lit a little more brightly than one just begun.
  */
 function Sky() {
     const [beat, setBeat] = useState(0);
@@ -32,14 +54,38 @@ function Sky() {
         setParts(playing);
     }), []);
 
+    /**
+     * Where each mote starts, how long it takes to climb and how far it
+     * wanders on the way.
+     *
+     * Settled once rather than drawn fresh: a new set on every render would
+     * have the whole water jump every time a chord lands. Spread by index
+     * rather than at random, so no two of them ever climb in formation —
+     * which is the one thing drifting plankton never does.
+     */
+    const motes = useMemo(
+        () =>
+            Array.from({ length: MOTES }, (_, i) => ({
+                left: ((i * 37) % 100) + (i % 3),
+                delay: -((i * 41) % 38),
+                rise: 18 + ((i * 7) % 23),
+                drift: (i % 2 === 0 ? 1 : -1) * (3 + (i % 5) * 2),
+                size: 1.4 + (i % 3) * 0.9,
+                dim: 0.3 + (i % 4) * 0.12,
+            })),
+        [],
+    );
+
     return (
         <div className="sky" data-still={String(stillSky())} aria-hidden="true">
+            <div className="sky__caustics" />
+
             {/*
               * The swell alternates between two identical animations rather
               * than restarting one: a CSS animation ignores a request to start
-              * again while it is running, and remounting the halos instead
-              * would restart their own slow breathing every nine seconds and
-              * leave it stuck at its opening.
+              * again while it is running, and remounting the shafts instead
+              * would restart their own slow sway every nine seconds and leave
+              * it stuck at its opening.
               */}
             <div
                 className="sky__pulse"
@@ -48,8 +94,26 @@ function Sky() {
                 data-phase={beat % 2 === 0 ? 'a' : 'b'}
                 style={{ '--swell': String(Math.min(parts, 5)) } as React.CSSProperties}
             >
-                <span className="sky__glow sky__glow--core" />
-                <span className="sky__glow sky__glow--spill" />
+                {Array.from({ length: SHAFTS }, (_, i) => (
+                    <span key={i} className={`sky__shaft sky__shaft--${i + 1}`} />
+                ))}
+            </div>
+
+            <div className="sky__drift">
+                {motes.map((mote, i) => (
+                    <span
+                        key={i}
+                        className="sky__mote"
+                        style={{
+                            '--mote-left': `${mote.left}%`,
+                            '--rise-delay': `${mote.delay}s`,
+                            '--rise-time': `${mote.rise}s`,
+                            '--mote-drift': `${mote.drift}vw`,
+                            '--mote-size': `${mote.size}px`,
+                            '--mote-dim': String(mote.dim),
+                        } as React.CSSProperties}
+                    />
+                ))}
             </div>
         </div>
     );
