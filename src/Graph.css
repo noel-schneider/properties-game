@@ -72,7 +72,13 @@
        the light used to be a sunrise off to one side and is now the surface,
        a long way overhead. */
     filter: drop-shadow(2px 11px 10px rgba(2, 10, 18, 0.55));
-    transition: fill 0.15s ease;
+    /*
+     * A concept that has given everything goes to a third of its size, and
+     * it used to get there between one frame and the next. Eased, it sinks:
+     * the one moment in the game where something leaves, and the water is
+     * the right speed for it.
+     */
+    transition: fill 0.5s ease, r 0.62s cubic-bezier(0.4, 0, 0.3, 1);
 }
 
 .bubble text {
@@ -684,4 +690,30 @@
 @media (prefers-reduced-motion: reduce) {
     .shock { animation: none; opacity: 0; }
     .spout__air { animation: none; opacity: 0; }
+}
+
+/*
+ * The older outlines stir.
+ *
+ * Every group found is a line hanging in water, and water does not hold
+ * anything still. Opacity only — nothing moves, so nothing on the board
+ * becomes harder to hit — and each one drifts on its own long cycle.
+ *
+ * Never while the reveal is on. Pointing at a concept hands the loops their
+ * colours and their weight, and a shimmer running over that would undo the
+ * one thing the reveal is for; a loop wearing a colour is left alone.
+ */
+.found__loop:not([data-hue]):not(.found__loop--latest) {
+    animation: adrift 13s ease-in-out infinite alternate;
+}
+
+@keyframes adrift {
+    from { opacity: 0.26; }
+    to   { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .found__loop:not([data-hue]):not(.found__loop--latest) {
+        animation: none;
+    }
 }

@@ -154,3 +154,35 @@
 .feedback--spent {
   color: #ffc9a0;
 }
+
+/*
+ * A refused answer rocks the box it was typed in.
+ *
+ * Short and small: the answer line below already says what was wrong, and
+ * this is the part you feel rather than read. Two identical animations,
+ * alternating, because a running one ignores a request to start again and
+ * two wrong answers in a row would otherwise be one.
+ */
+.input--refused-a { animation: refused-a 0.42s ease-in-out; }
+.input--refused-b { animation: refused-b 0.42s ease-in-out; }
+
+@keyframes refused-a {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    22%      { transform: translateX(-5px) rotate(-0.5deg); }
+    58%      { transform: translateX(4px) rotate(0.4deg); }
+    82%      { transform: translateX(-2px) rotate(-0.2deg); }
+}
+
+@keyframes refused-b {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    22%      { transform: translateX(-5px) rotate(-0.5deg); }
+    58%      { transform: translateX(4px) rotate(0.4deg); }
+    82%      { transform: translateX(-2px) rotate(-0.2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .input--refused-a,
+    .input--refused-b {
+        animation: none;
+    }
+}

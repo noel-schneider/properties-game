@@ -312,6 +312,9 @@ test('a concept dealt in arrives beside the others, without moving them', () => 
   // ones already there. Re-scattering everything would throw away the shape
   // the player has been reading.
   const props = { selected: [], found: [], onToggle: () => {} };
+  // Pinned, or the newcomer is dropped somewhere different every run and how
+  // hard it shoves its neighbours is a matter of the draw.
+  pinTheScatter();
   const { rerender } = renderApp(<Graph concepts={concepts} {...props} />);
   runFrames(400);
   const before = positions();

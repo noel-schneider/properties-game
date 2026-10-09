@@ -26,15 +26,21 @@ function Scoreboard({ finds, finished, total, remaining }: ScoreboardProps) {
         <div className="scoreboard">
             <p className="scoreboard__item">
                 {t('score.found')}{' '}
-                <span data-testid="found" className="scoreboard__value">{finds}</span>
+                {/*
+                  * Keyed on the number itself, so a count that changes
+                  * arrives as a new element and can be seen to arrive. A span
+                  * edited in place is a number that was one thing and is
+                  * now another, with nothing in between.
+                  */}
+                <span key={finds} data-testid="found" className="scoreboard__value">{finds}</span>
             </p>
             <p className="scoreboard__item">
                 {t('score.finished')}{' '}
-                <span data-testid="finished" className="scoreboard__value">{finished} / {total}</span>
+                <span key={finished} data-testid="finished" className="scoreboard__value">{finished} / {total}</span>
             </p>
             <p className="scoreboard__item">
                 {t('score.remaining')}{' '}
-                <span data-testid="remaining" className="scoreboard__value">{remaining}</span>
+                <span key={remaining} data-testid="remaining" className="scoreboard__value">{remaining}</span>
             </p>
         </div>
     );
