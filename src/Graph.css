@@ -594,3 +594,28 @@
         animation: none;
     }
 }
+
+/*
+ * One category from done.
+ *
+ * The gauge is nearly closed, and a nearly closed ring looks like every
+ * other nearly closed ring — so the last one breathes. It is the moment a
+ * concept is worth picking before it leaves the board for good.
+ */
+.bubble--brimming circle.gauge {
+    animation: brimming 2.8s ease-in-out infinite;
+}
+
+@keyframes brimming {
+    0%, 100% { stroke: #6f6a85; stroke-width: 4; }
+    50%      { stroke: #ffc38c; stroke-width: 5.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bubble--brimming circle.gauge {
+        animation: none;
+        /* The mark stays: it says the concept is nearly spent, which is true
+           whether or not anything is allowed to move. */
+        stroke: #ffc38c;
+    }
+}

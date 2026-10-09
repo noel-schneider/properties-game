@@ -566,6 +566,10 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                 // Lit for a few seconds when nothing has been found in a while.
                 const isHinted = hinted.includes(concept.name);
                 if (isHinted) classes.push('bubble--hinted');
+                // One category from done, and nothing on the board says so:
+                // the gauge is nearly closed and a nearly closed ring looks
+                // like every other nearly closed ring.
+                if (!isDone && spent > 0 && left === 1) classes.push('bubble--brimming');
                 if (kin.has(concept.name)) classes.push('bubble--kin');
                 else if (kin.size > 0) classes.push('bubble--aside');
                 // Lit while a concept is held over their group, so the offer

@@ -55,6 +55,14 @@ export type Feedback = 'none' | 'correct' | 'wrong' | 'spent';
 /** How long a newly dealt concept stays marked, in milliseconds. */
 const ARRIVAL_MARK = 2600;
 
+/**
+ * How long without a find before the hint button starts shifting its weight.
+ *
+ * A minute is a long time to be stuck on this board and no time at all to be
+ * thinking, which is why nothing is shown — only the way out is pointed at.
+ */
+const STUCK_AFTER = 60_000;
+
 
 const pool = getAllConcepts();
 const byName = new Map(pool.map((concept) => [concept.name, concept]));
@@ -130,6 +138,22 @@ function App({
 
     // Dev only: what the board looks like once every finished concept has gone.
     const [swept, setSwept] = useState<string[]>([]);
+
+    /**
+     * Nothing found in a while, so the hint button stops being furniture.
+     *
+     * Not the automatic hint coming back: that lit two concepts at a player
+     * who had not asked anything, and a tester read it as being taken by the
+     * hand. Nothing is given away here — the button merely says it is there,
+     * and pressing it is still the only way to be shown a pair.
+     */
+    const [stuck, setStuck] = useState(false);
+
+    useEffect(() => {
+        setStuck(false);
+        const waiting = setTimeout(() => setStuck(true), STUCK_AFTER);
+        return () => clearTimeout(waiting);
+    }, [found.length]);
 
     /**
      * The bed follows the switch, and nothing else touches it.
@@ -484,7 +508,7 @@ function App({
 
   return (
       <>
-          <Sky />
+          <Sky risen={finishedCount / pool.length} />
           {/* Every tool in one column, folded away in a built game, imports
               and all. */}
           {import.meta.env.DEV && (
@@ -548,7 +572,7 @@ function App({
           <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} />
           <PropertySheet rows={namedSoFar} />
           <div className="corner corner--top-right">
-              <Hint available={left > 0} onAsk={askForHint} />
+              <Hint available={left > 0} urging={stuck} onAsk={askForHint} />
               <Help />
               <LanguageToggle />
               <Reset onReset={playAgain} />

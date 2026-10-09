@@ -115,3 +115,26 @@
     stroke-width: 1.3;
     stroke-linecap: round;
 }
+
+/*
+ * A control that has been waiting a while.
+ *
+ * Only ever the hint, and only when there is something behind it: a button
+ * that asks to be pressed and then does nothing is worse than a quiet one.
+ * Slow and small, because this is an offer, not an alarm.
+ */
+.control--urging {
+    animation: urging 3.4s ease-in-out infinite;
+}
+
+@keyframes urging {
+    0%, 100% { border-color: currentColor; box-shadow: none; }
+    50%      { border-color: #ffc38c; box-shadow: 0 0 10px rgba(255, 195, 140, 0.35); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .control--urging {
+        animation: none;
+        border-color: #ffc38c;
+    }
+}

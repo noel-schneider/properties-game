@@ -45,7 +45,19 @@ export const MOTES = 20;
  * for one. The swell deepens as the orchestra grows, so a game played to the
  * end is lit a little more brightly than one just begun.
  */
-function Sky() {
+interface SkyProps {
+    /**
+     * How far the game has got, from nothing to everything, drawn as how far
+     * the surface has come down to meet it.
+     *
+     * A hundred concepts is a long game and the number at the top of the
+     * screen is a poor way to feel it. The water is a better one: you start
+     * as deep as the game goes and you finish in the light.
+     */
+    risen?: number;
+}
+
+function Sky({ risen = 0 }: SkyProps) {
     const [beat, setBeat] = useState(0);
     const [parts, setParts] = useState(0);
     const water = useRef<HTMLDivElement>(null);
@@ -103,7 +115,16 @@ function Sky() {
     );
 
     return (
-        <div className="sky" ref={water} data-still={String(stillSky())} aria-hidden="true">
+        <div
+            className="sky"
+            ref={water}
+            data-still={String(stillSky())}
+            aria-hidden="true"
+            // Clamped here rather than trusted: this is a count divided by
+            // another count, and a fraction over one reaching the gradient
+            // does nothing good to it.
+            style={{ '--risen': String(Math.min(Math.max(risen, 0), 1)) } as React.CSSProperties}
+        >
             <div className="sky__caustics" />
 
             {/*

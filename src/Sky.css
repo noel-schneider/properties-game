@@ -10,6 +10,8 @@
        its middle. Written by the component, read by the layers below. */
     --lean-x: 0;
     --lean-y: 0;
+    /* How far the game has got, and so how near the surface is. */
+    --risen: 0;
     position: fixed;
     inset: 0;
     z-index: -1;
@@ -32,6 +34,30 @@
             #040f17 79%,
             #030a10 100%),
         #030a10;
+}
+
+/*
+ * The shallows, laid over the deep and brought up by the game.
+ *
+ * A second gradient rather than one gradient interpolated: a colour that
+ * changes by a hundredth of a step per concept is not something anyone can
+ * animate by hand, and two layers with an opacity between them is something
+ * the compositor does for nothing.
+ */
+.sky::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: var(--risen);
+    background: linear-gradient(to bottom,
+        #1d6f74 0%,
+        #195f69 11%,
+        #15505d 23%,
+        #114251 36%,
+        #0e3544 50%,
+        #0b2937 64%,
+        #081e2a 79%,
+        #05141d 100%);
 }
 
 /*
@@ -122,6 +148,11 @@
        finger, which no shaft of light has. */
     -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
     mask-image: linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    /* Stronger as the surface comes down: light that has less water to cross
+       arrives with more of itself left. Through a variable, so a shaft can
+       still be dimmer than its neighbours without losing the rise. */
+    --dim: 1;
+    opacity: calc(var(--dim) * (0.75 + var(--risen) * 0.45));
     filter: blur(14px);
     /* Further off than the caustics, so it leans less: that difference is the
        whole of the depth. */
@@ -138,17 +169,17 @@
 
 .sky__shaft--2 {
     --sway: 23s;
+    --dim: 0.85;
     left: 38%;
     width: 38%;
-    opacity: 0.85;
     transform: rotate(-3deg);
 }
 
 .sky__shaft--3 {
     --sway: 31s;
+    --dim: 0.7;
     left: 72%;
     width: 22%;
-    opacity: 0.7;
     transform: rotate(7deg);
 }
 
