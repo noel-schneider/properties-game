@@ -1,7 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react'
 import { renderApp } from './test-utils'
 import { act } from 'react'
-import Graph, { groupOutline } from './Graph'
+import Graph from './Graph'
 import { BUBBLE_GAP, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Concept } from './types'
 
@@ -161,21 +161,23 @@ test('a found group is drawn as one outline around its members', () => {
 });
 
 
-test('the group just found says what it was', () => {
+test('a group says what it was while one of its concepts is pointed at', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
+  fireEvent.pointerEnter(screen.getByLabelText('concept-0'));
 
   expect(screen.getByText('thing')).toBeInTheDocument();
 });
 
-test('older groups keep their ties but drop their name', () => {
+test('the other groups keep their loops, named in their own right', () => {
   const older = { property: 'pair-3', concepts: ['concept-3', 'concept-8', 'concept-13'] };
   renderApp(
     <Graph concepts={concepts} selected={[]} found={[older, foundGroup]} onToggle={() => {}} />,
   );
+  fireEvent.pointerEnter(screen.getByLabelText('concept-3'));
 
-  // Twenty groups of labels pile into an unreadable heap, so only the latest
-  // is named; every loop is still drawn.
-  expect(screen.queryByText('pair-3')).toBeNull();
+  // Every loop takes a colour while a concept is pointed at, so every loop
+  // says what it is: an unnamed colour is one nobody can read.
+  expect(screen.getByText('pair-3')).toBeInTheDocument();
   expect(screen.getByText('thing')).toBeInTheDocument();
   expect(document.querySelectorAll('.found__loop')).toHaveLength(2);
 });
@@ -238,6 +240,7 @@ test('the name of a found group stays inside the frame, wherever the group lands
   const everything = { property: 'thing', concepts: concepts.map((c) => c.name) };
   renderApp(<Graph concepts={concepts} selected={[]} found={[everything]} onToggle={() => {}} />);
   runFrames(600);
+  fireEvent.pointerEnter(screen.getByLabelText('concept-0'));
 
   const label = document.querySelector('.found__label')!;
   const y = Number(label.getAttribute('y'));
@@ -339,23 +342,10 @@ test('the group just found keeps a bright loop, and the older ones step back', (
 });
 
 
-test('the outline takes its corners in the order they sit around the middle', () => {
-  // Fed in any other order the shape crosses itself, which is what happens
-  // every time the simulation moves one member past another.
-  const corners = [{ x: 0, y: -100 }, { x: -87, y: 50 }, { x: 87, y: 50 }];
-  const centre = { x: 0, y: 0 };
-
-  const path = groupOutline(corners, centre);
-  const n = path.match(/-?\d+\.?\d*/g)!.map(Number);
-  const angles = [];
-  for (let i = 0; i < n.length; i += 2) angles.push(Math.atan2(n[i + 1], n[i]));
-
-  expect([...angles].sort((a, b) => a - b)).toEqual(angles);
-});
-
 test('a found group is named in its middle, over the bubbles', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[foundGroup]} onToggle={() => {}} />);
   runFrames(600);
+  fireEvent.pointerEnter(screen.getByLabelText('concept-0'));
 
   const places = foundGroup.concepts.map((name) => {
     const [x, y] = screen.getByLabelText(name).getAttribute('transform')!

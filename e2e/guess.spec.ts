@@ -1,26 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { boardSettled, clearGame } from './board'
+import { conceptProperties as properties, findSolvableTriple } from './triples'
 import english from '../src/i18n/en.json' with { type: 'json' }
-import data from '../src/concepts.json' with { type: 'json' }
-
-
-const properties = data as Record<string, string[]>
-
-/** Three concepts on screen that share a property, plus that property. */
-function findSolvableTriple(dealt: string[]): { names: string[]; property: string } {
-  for (let a = 0; a < dealt.length; a++) {
-    for (let b = a + 1; b < dealt.length; b++) {
-      for (let c = b + 1; c < dealt.length; c++) {
-        const triple = [dealt[a], dealt[b], dealt[c]]
-        const property = properties[triple[0]].find((p) =>
-          triple.every((name) => properties[name].includes(p)),
-        )
-        if (property) return { names: triple, property }
-      }
-    }
-  }
-  throw new Error('the dealt hand has no solvable triple, which dealHand should prevent')
-}
 
 test('naming the shared category is accepted', async ({ page }) => {
   await page.goto('/')
@@ -76,7 +57,7 @@ test('pressing Enter submits the guess', async ({ page }) => {
   await expect(page.getByRole('status')).toHaveText(/correct/i)
 })
 
-test('a found group stays on the board, tied and named, and its concepts carry on', async ({ page }) => {
+test('a found group stays on the board, tied, and its concepts carry on', async ({ page }) => {
   // Start from a clean record, then read the board that comes with it.
   await page.goto('/')
   await boardSettled(page)
@@ -105,6 +86,10 @@ test('a found group stays on the board, tied and named, and its concepts carry o
     await expect(page.getByLabel(name, { exact: true })).toBeVisible()
   }
   await expect(page.locator('.found__loop')).toHaveCount(1)
+  // The loop stays; the name is asked for rather than kept, which names.spec.ts
+  // pins on its own.
+  await expect(page.locator('.found__label')).toHaveCount(0)
+  await page.getByRole('checkbox', { name: names[0], exact: true }).hover()
   await expect(page.locator('.found__label')).toHaveText(property)
   await expect(page.locator('.input')).toHaveValue('')
 })
