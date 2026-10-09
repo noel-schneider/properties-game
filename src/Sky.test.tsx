@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { render } from '@testing-library/react'
+import { fireEvent, render } from '@testing-library/react'
 import Sky, { MOTES, SHAFTS } from './Sky'
 
 const css = readFileSync(join(__dirname, 'Sky.css'), 'utf8');
@@ -70,4 +70,26 @@ test('and that holds for the motes too, which are the liveliest thing here', () 
   // The shafts sway by a few pixels; twenty points crossing the screen is the
   // layer someone turning motion off is actually turning off.
   expect(css).toMatch(/\.sky\[data-still="true"\][^{]*\.sky__mote\s*\{[^}]*animation:\s*none/);
+});
+
+test('the water leans away from the hand, so it has some depth to it', () => {
+  // Parallax: the only thing on this layer the player drives directly. Two
+  // custom properties written straight to the element — a render of the
+  // background per pointer move is exactly the budget it does not have.
+  render(<Sky />);
+
+  expect(sky().style.getPropertyValue('--lean-x')).toBe('');
+
+  fireEvent.pointerMove(window, { clientX: 0, clientY: 0 });
+  const left = sky().style.getPropertyValue('--lean-x');
+
+  fireEvent.pointerMove(window, { clientX: 999, clientY: 999 });
+  expect(sky().style.getPropertyValue('--lean-x')).not.toBe(left);
+});
+
+test('and it stops listening once it is gone', () => {
+  const { unmount } = render(<Sky />);
+  unmount();
+
+  expect(() => fireEvent.pointerMove(window, { clientX: 5, clientY: 5 })).not.toThrow();
 });

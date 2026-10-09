@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './Graph.css'
 import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
@@ -13,6 +13,16 @@ import type { Solution } from './hand'
 import type { Concept } from './types'
 
 const RADIUS = 62;
+
+/**
+ * How long the hand has to be still before the board decides nobody is
+ * watching and lets the water take over.
+ *
+ * Twenty seconds is past any pause inside a turn — reading the board, typing
+ * a word — and well short of the time it takes to wonder whether the page has
+ * frozen.
+ */
+export const IDLE_AFTER = 20_000;
 
 /** A concept with nothing left to find takes a third of the room. */
 export const FINISHED_RADIUS = Math.round(62 * 0.34);
@@ -213,6 +223,30 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
     }, [found]);
 
     const [hovered, setHovered] = useState<string | null>(null);
+
+    /**
+     * Whether the hand has been still long enough for the board to stop being
+     * watched.
+     *
+     * Two renders per idle spell — one in, one out — rather than anything
+     * measured while the pointer moves. What it switches on is a stronger
+     * drift in CSS; nothing here is drawn per frame.
+     */
+    const [idle, setIdle] = useState(false);
+    const stillness = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const stirred = useCallback(() => {
+        setIdle((wasIdle) => (wasIdle ? false : wasIdle));
+        if (stillness.current) clearTimeout(stillness.current);
+        stillness.current = setTimeout(() => setIdle(true), IDLE_AFTER);
+    }, []);
+
+    useEffect(() => {
+        stirred();
+        return () => {
+            if (stillness.current) clearTimeout(stillness.current);
+        };
+    }, [stirred]);
 
     // Which found group the dragged bubble is currently over, if any.
     const [over, setOver] = useState<number | null>(null);
@@ -478,6 +512,8 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
             viewBox={`${-VIEW_WIDTH / 2} ${-VIEW_HEIGHT / 2} ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
             role="group"
             aria-label={t('graph.label')}
+            data-idle={String(idle)}
+            onPointerMove={stirred}
             onClick={(event) => {
                 // Only a click on the board itself. Every click on a bubble
                 // bubbles up to here on its way out, and acting on those would
@@ -536,9 +572,30 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                 // and the thing it is offering are read in one glance.
                 if (aimedAt?.concepts.includes(concept.name)) classes.push('bubble--target');
 
+                /*
+                 * The drift, on a layer of its own around the bubble.
+                 *
+                 * Not on the bubble itself: that carries the transform the
+                 * simulation writes on every frame, and a second one here
+                 * would overwrite it and throw the concept off the board.
+                 * Every figure is worked out from the index rather than
+                 * drawn, so a concept keeps the same lazy cycle for the whole
+                 * game instead of being handed a new one on every render.
+                 */
+                const float = {
+                    '--float-time': `${7 + ((i * 5) % 7)}s`,
+                    '--float-delay': `${-((i * 13) % 19)}s`,
+                    '--drift-x': `${(i % 2 === 0 ? 1 : -1) * (4 + (i % 3) * 2.5)}px`,
+                    '--drift-y': `${(i % 3 === 0 ? -1 : 1) * (5 + (i % 4) * 2.5)}px`,
+                    '--swell': `${0.012 + (i % 3) * 0.006}`,
+                    // One concept shivers at a time, which is the difference
+                    // between water and a wave machine.
+                    '--shiver-delay': `${(i * 17) % 160}s`,
+                } as React.CSSProperties;
+
                 return (
+                    <g key={concept.name} className="bubble-float" style={float}>
                     <g
-                        key={concept.name}
                         className={classes.join(' ')}
                         transform={`translate(${x}, ${y})`}
                         data-found={String(isDone)}
@@ -687,6 +744,7 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                                 {conceptName(concept.name)}
                             </text>
                         )}
+                    </g>
                     </g>
                 );
             })}

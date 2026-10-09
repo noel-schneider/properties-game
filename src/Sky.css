@@ -6,6 +6,10 @@
  * repaint, no layout, nothing per frame that the board has to pay for.
  */
 .sky {
+    /* How far the hand has pulled the water, as a fraction of the window from
+       its middle. Written by the component, read by the layers below. */
+    --lean-x: 0;
+    --lean-y: 0;
     position: fixed;
     inset: 0;
     z-index: -1;
@@ -80,6 +84,8 @@
      */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.019 0.026' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.86  0 0 0 0 0.88  0 0 0 -3.4 1.9'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23c)'/%3E%3C/svg%3E");
     background-size: 46% 42%;
+    /* The nearest layer, so it leans the most. */
+    translate: calc(var(--lean-x) * 26px) calc(var(--lean-y) * 18px);
     /* Fades out before the floor, or the net of light goes on glowing in water
        that is supposed to be too deep for it. */
     -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 38%, transparent 100%);
@@ -117,6 +123,9 @@
     -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
     mask-image: linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
     filter: blur(14px);
+    /* Further off than the caustics, so it leans less: that difference is the
+       whole of the depth. */
+    translate: calc(var(--lean-x) * 12px) 0;
     animation: sway var(--sway) ease-in-out infinite alternate;
 }
 
@@ -211,6 +220,8 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
+    /* Hanging nearest of all, between the board and the shafts. */
+    translate: calc(var(--lean-x) * 34px) calc(var(--lean-y) * 22px);
 }
 
 .sky__mote {

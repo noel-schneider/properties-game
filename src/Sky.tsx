@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './Sky.css'
 import { onChord } from './pulse'
 
@@ -48,6 +48,32 @@ export const MOTES = 20;
 function Sky() {
     const [beat, setBeat] = useState(0);
     const [parts, setParts] = useState(0);
+    const water = useRef<HTMLDivElement>(null);
+
+    /**
+     * The water leans the other way from the hand.
+     *
+     * The one thing on this layer the player drives, and it is written
+     * straight to the element: a render of the background on every pointer
+     * move is precisely the budget it has never had. The browser already
+     * coalesces pointer moves to one per frame, so there is nothing to
+     * throttle on top.
+     *
+     * Away rather than with, and by a few pixels: that is what tells the eye
+     * the water is behind the board rather than painted on it.
+     */
+    useEffect(() => {
+        const lean = (event: PointerEvent) => {
+            const layer = water.current;
+            if (!layer) return;
+
+            layer.style.setProperty('--lean-x', String(0.5 - event.clientX / window.innerWidth));
+            layer.style.setProperty('--lean-y', String(0.5 - event.clientY / window.innerHeight));
+        };
+
+        window.addEventListener('pointermove', lean);
+        return () => window.removeEventListener('pointermove', lean);
+    }, []);
 
     useEffect(() => onChord((playing) => {
         setBeat((count) => count + 1);
@@ -77,7 +103,7 @@ function Sky() {
     );
 
     return (
-        <div className="sky" data-still={String(stillSky())} aria-hidden="true">
+        <div className="sky" ref={water} data-still={String(stillSky())} aria-hidden="true">
             <div className="sky__caustics" />
 
             {/*

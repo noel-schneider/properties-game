@@ -67,11 +67,11 @@
     /* Heavier than it was. A hairline contour reads as a diagram; a thick one
        reads as something you are meant to poke. */
     stroke-width: 3;
-    /* Thrown down and to the side and blurred, so the bubble sits above the
-       board rather than on it. Offset rather than straight down on purpose: a
-       shadow directly under a round thing says the light is overhead and
-       nowhere in particular, which reads as flat. */
-    filter: drop-shadow(5px 9px 7px rgba(12, 12, 22, 0.5));
+    /* Thrown downwards and blurred, so the bubble hangs in front of the water
+       rather than being painted on it. Nearly straight down now, and bluer:
+       the light used to be a sunrise off to one side and is now the surface,
+       a long way overhead. */
+    filter: drop-shadow(2px 11px 10px rgba(2, 10, 18, 0.55));
     transition: fill 0.15s ease;
 }
 
@@ -517,4 +517,80 @@
     transform: rotate(-90deg);
     transform-box: fill-box;
     transform-origin: center;
+}
+
+/* ---------------------------------------------------------------------------
+ * The board, hanging in water.
+ *
+ * Every concept drifts on a layer of its own, wrapped around the bubble
+ * rather than applied to it: the bubble carries the transform the simulation
+ * writes on every frame, and a second one there would overwrite it.
+ *
+ * Each cycle, lean and swell is worked out from the concept's place in the
+ * board, so no two of them rise and fall together — a board breathing in
+ * unison is one object, not twenty things floating.
+ *
+ * And it only drifts once nobody is playing. A board that never holds still
+ * is a board you have to catch: the first thing it cost was every click in
+ * the end-to-end suite, which is an automated way of saying that a target
+ * which never settles is harder to hit. So the amplitude rests at zero while
+ * there is a hand on the board and comes up when there is not — which is
+ * also exactly where the stillness was worth fixing.
+ * ------------------------------------------------------------------------ */
+.bubble-float {
+    /* How much of its drift a concept takes. Zero while the game is being
+       played; the board turns it up when nobody has moved for a while. */
+    --float-amp: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    will-change: transform;
+    animation:
+        afloat var(--float-time) ease-in-out var(--float-delay) infinite alternate,
+        shiver 160s ease-in-out var(--shiver-delay) infinite;
+    /* Eased rather than switched, and eased on the amplitude rather than by
+       restarting the animations: new keyframes would snap every concept back
+       to the top of its cycle at once, which is the one moment the whole
+       board would move as a single object. */
+    transition: --float-amp 2.8s ease-in-out;
+}
+
+@keyframes afloat {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform:
+            translate(calc(var(--drift-x) * var(--float-amp)), calc(var(--drift-y) * var(--float-amp)))
+            scale(calc(1 + var(--swell) * var(--float-amp)));
+    }
+}
+
+/*
+ * Every so often one concept stirs, as if something had passed it.
+ *
+ * On its own very long cycle with a delay spread across the board, so there
+ * is rarely more than one going at a time and never a rhythm to catch. Three
+ * seconds of movement in a hundred and sixty.
+ */
+@keyframes shiver {
+    0%, 98.6%, 100% { rotate: 0deg; }
+    99.1%           { rotate: calc(0.9deg * var(--float-amp)); }
+    99.6%           { rotate: calc(-0.7deg * var(--float-amp)); }
+}
+
+/* Nobody has moved for a while: the water takes over. */
+.graph[data-idle="true"] .bubble-float {
+    --float-amp: 1;
+}
+
+@property --float-amp {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bubble-float {
+        animation: none;
+    }
 }
