@@ -40,3 +40,32 @@ export function formableGroupsOnScreen(): FormableGroup[] {
         concepts: entry.querySelectorAll('span')[1].textContent!.split(' · '),
     }));
 }
+
+/**
+ * Pins where the bubbles start, for a test that measures the board.
+ *
+ * Every bubble is dropped at a random point and the simulation takes it from
+ * there (`huddle`, in `useBubbleLayout.ts`), so what a settled board looks
+ * like is that draw as much as it is the forces. A test comparing one board
+ * against another, or against a threshold, is then comparing two different
+ * afternoons: `finished concepts take less room` measured ratios anywhere
+ * between 0.42 and 0.69 against a limit of 0.75 — passing, until the draw
+ * that did not.
+ *
+ * Call it before each board a test lays out: it starts the same sequence
+ * again every time, which is what makes two of them comparable. Pinned rather
+ * than flattened to one spot, because bubbles all started on the same point
+ * reach four times the width of the frame before the pull to the middle wins.
+ *
+ * Restore it with `vi.restoreAllMocks()`, or the next test in the file
+ * inherits a `Math.random` that is not random.
+ */
+export function pinTheScatter(): void {
+    // A plain linear congruential generator: any fixed sequence will do, and
+    // this one is four lines rather than a dependency.
+    let seed = 0x2f6e2b1;
+    vi.spyOn(Math, 'random').mockImplementation(() => {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        return seed / 2 ** 32;
+    });
+}

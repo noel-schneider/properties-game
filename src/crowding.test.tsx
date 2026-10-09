@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react'
 import { act } from 'react'
-import { renderApp } from './test-utils'
+import { pinTheScatter, renderApp } from './test-utils'
 import Graph from './Graph'
 import { VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Solution } from './hand'
@@ -27,6 +27,9 @@ function measure(count: number, spent: number) {
     found.push({ property: 'done', concepts: [`concept-${i}`, `concept-${i + 1}`, `concept-${i + 2}`] });
   }
 
+  // The same scatter every time: what this measures is how hard a settled
+  // board presses against its frame, not which draw it got.
+  pinTheScatter();
   const { unmount } = renderApp(
     <Graph concepts={concepts} selected={[]} found={found} onToggle={() => {}} />,
   );
@@ -64,7 +67,11 @@ function measure(count: number, spent: number) {
 }
 
 beforeEach(() => vi.useFakeTimers());
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+  vi.useRealTimers();
+  // Or the next test in the file inherits a `Math.random` that is not random.
+  vi.restoreAllMocks();
+});
 
 /**
  * How deep two bubbles may bite into one another before it is worth calling an

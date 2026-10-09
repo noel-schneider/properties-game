@@ -1,5 +1,5 @@
 import { fireEvent, screen } from '@testing-library/react'
-import { renderApp } from './test-utils'
+import { pinTheScatter, renderApp } from './test-utils'
 import { act } from 'react'
 import Graph from './Graph'
 import { BUBBLE_GAP, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
@@ -25,7 +25,11 @@ function runFrames(count: number) {
 }
 
 beforeEach(() => vi.useFakeTimers());
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+  vi.useRealTimers();
+  // Or the next test in the file inherits a `Math.random` that is not random.
+  vi.restoreAllMocks();
+});
 
 test('the bubbles drift into place instead of appearing settled', () => {
   renderApp(<Graph concepts={concepts} selected={[]} found={[]} onToggle={() => {}} />);
@@ -252,6 +256,9 @@ test('the name of a found group stays inside the frame, wherever the group lands
 
 test('finished concepts take less room, not just a smaller picture', () => {
   const spread = (found: Array<{ property: string; concepts: string[] }>) => {
+    // From the same scatter both times, or the two boards being compared
+    // started in different places and the ratio is whatever the draw gave.
+    pinTheScatter();
     const view = renderApp(
       <Graph concepts={concepts} selected={[]} found={found} onToggle={() => {}} />,
     );
