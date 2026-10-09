@@ -53,7 +53,7 @@ npm run dev        # http://localhost:3000
 ```
 
 ```sh
-npm test           # 487 unit tests
+npm test           # 491 unit tests
 npm run test:e2e   # 57 end-to-end tests, in a real browser
 npm run typecheck
 npm run build
@@ -62,7 +62,7 @@ npm run build
 The end-to-end suite starts the dev server itself, on port 3100 rather than the
 3000 `npm run dev` uses, so the two never fight over it. The unit tests run in
 jsdom, which has no audio and no layout, so anything that needs either — the
-music, the sunrise following it, what a crowded board does to itself — is
+music, the water lit from above, what a crowded board does to itself — is
 pinned in the browser instead.
 
 ## How it is built

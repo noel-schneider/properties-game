@@ -3,7 +3,7 @@ import { renderApp } from './test-utils'
 import Sky from './Sky'
 import { chordStruck } from './pulse'
 
-test('the sunrise swells when a chord lands, and says how big it was', () => {
+test('the light from the surface swells when a chord lands, and says how big it was', () => {
   renderApp(<Sky />);
   const glow = document.querySelector('.sky__pulse')!;
 

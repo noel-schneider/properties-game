@@ -1,9 +1,9 @@
 /*
- * The background: the game's indigo with a sunrise rising behind the board.
+ * The background: deep water, with the surface somewhere far above the board.
  *
- * It sits on its own fixed layer behind the page, and the only thing that
- * moves is a slow scale on a layer the compositor already holds — no repaint,
- * no layout, nothing per frame that the board has to pay for.
+ * It sits on its own fixed layer behind the page, and everything on it is a
+ * transform or an opacity on a layer the compositor already holds — no
+ * repaint, no layout, nothing per frame that the board has to pay for.
  */
 .sky {
     position: fixed;
@@ -11,15 +11,31 @@
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
-    background-color: #2d3047;
+    /*
+     * Lit at the top and black at the bottom, which is the whole story: the
+     * surface is up there and the board is hanging a long way under it. Two
+     * stops would read as a wash, so the fall is weighted towards the top —
+     * light goes quickly in water, and then takes its time.
+     */
+    background:
+        linear-gradient(to bottom,
+            #10414b 0%,
+            #0d3744 11%,
+            #0a2d3b 23%,
+            #082431 36%,
+            #061c28 50%,
+            #05151f 64%,
+            #040f17 79%,
+            #030a10 100%),
+        #030a10;
 }
 
 /*
  * A film of noise over the lot.
  *
- * A glow this wide crosses only a handful of 8-bit steps, and the eye resolves
- * every one of them as a band. A little noise scatters the step boundary and
- * the bands stop existing.
+ * A gradient this long crosses only a handful of 8-bit steps, and the eye
+ * resolves every one of them as a band. A little noise scatters the step
+ * boundary and the bands stop existing.
  */
 .sky::after {
     content: '';
@@ -29,89 +45,132 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/*
- * Both halves of the halo run down a nine-stop curve to rgba(their own colour,
- * 0). Two things make a glow show its own outline: CSS `transparent` is
- * transparent *black*, so a warm colour faded to it goes through grey and
- * draws a dirty ring, and a single colour stop ends in an edge you can trace
- * with a finger.
- */
-.sky__glow {
+/* ---------------------------------------------------------------------------
+ * The caustics: the net of light the surface throws down.
+ *
+ * Generated once and drifted across, rather than animated where it is made.
+ * Animating the `feTurbulence` would be the real thing and would also be a
+ * filter recomputed on every frame, which is the one budget this layer does
+ * not have. A slow drift with a slow stretch under it reads as water anyway:
+ * nobody watches caustics closely enough to catch the loop.
+ *
+ * Strongest at the top and gone by halfway down, because that is where the
+ * light is.
+ * ------------------------------------------------------------------------ */
+.sky__caustics {
     position: absolute;
-    left: 50%;
-    will-change: transform;
-}
-
-/* The sun itself: the orange the game already wears on its labels and counts. */
-.sky__glow--core {
-    bottom: -22%;
-    width: 70%;
-    height: 56%;
-    margin-left: -35%;
-    background: radial-gradient(closest-side,
-        rgba(255, 173, 105, 0.5) 0%,
-        rgba(255, 173, 105, 0.47) 12%,
-        rgba(255, 173, 105, 0.41) 24%,
-        rgba(255, 173, 105, 0.33) 36%,
-        rgba(255, 173, 105, 0.245) 48%,
-        rgba(255, 173, 105, 0.165) 60%,
-        rgba(255, 173, 105, 0.095) 72%,
-        rgba(255, 173, 105, 0.04) 84%,
-        rgba(255, 173, 105, 0) 100%);
-    animation: breathe-core 19s ease-in-out infinite alternate;
-}
-
-/* The light it throws much wider, pink where it meets the indigo. */
-.sky__glow--spill {
-    bottom: -34%;
-    width: 150%;
+    top: -20%;
+    left: -20%;
+    width: 140%;
     height: 90%;
-    margin-left: -75%;
-    background: radial-gradient(closest-side,
-        rgba(228, 106, 146, 0.3) 0%,
-        rgba(228, 106, 146, 0.282) 12%,
-        rgba(228, 106, 146, 0.246) 24%,
-        rgba(228, 106, 146, 0.198) 36%,
-        rgba(228, 106, 146, 0.147) 48%,
-        rgba(228, 106, 146, 0.099) 60%,
-        rgba(228, 106, 146, 0.057) 72%,
-        rgba(228, 106, 146, 0.024) 84%,
-        rgba(228, 106, 146, 0) 100%);
-    animation: breathe-spill 27s ease-in-out infinite alternate;
+    /* Present, not a feature. Past about a third the water stops being
+       something the board hangs in and starts being the thing you look at. */
+    opacity: 0.34;
+    mix-blend-mode: screen;
+    will-change: transform;
+    /*
+     * Two things make this tile without a seam, and it needs both:
+     * `stitchTiles`, so the noise carries across a tile edge instead of
+     * stopping dead at it, and a filter region clipped to the rect itself —
+     * the default reaches ten percent past every side, and that overhang is
+     * what was drawing a line straight down the middle of the screen.
+     *
+     * Two octaves and a steep alpha ramp turn the cloud into threads: the net
+     * of light, rather than fog.
+     */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.019 0.026' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.86  0 0 0 0 0.88  0 0 0 -3.4 1.9'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23c)'/%3E%3C/svg%3E");
+    background-size: 46% 42%;
+    /* Fades out before the floor, or the net of light goes on glowing in water
+       that is supposed to be too deep for it. */
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 38%, transparent 100%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 38%, transparent 100%);
+    animation: caustics 41s ease-in-out infinite alternate;
 }
 
-/* Two cycles that do not divide into each other, so the sunrise never
-   visibly repeats itself. Small enough that you notice it only by looking. */
-@keyframes breathe-core {
-    from { transform: scale(1); }
-    to   { transform: scale(1.07) translateY(-2%); }
+@keyframes caustics {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(2.5%, 1.5%, 0) scale(1.08); }
 }
 
-@keyframes breathe-spill {
-    from { transform: scale(1.04); }
-    to   { transform: scale(1) translateY(-1%); }
+/* ---------------------------------------------------------------------------
+ * The shafts: light coming down from a surface a long way up.
+ *
+ * Each one leans its own way and sways on its own cycle. The cycles do not
+ * divide into each other, so the background never visibly returns to a frame
+ * you have seen — small enough that you notice it only by looking.
+ * ------------------------------------------------------------------------ */
+.sky__shaft {
+    position: absolute;
+    top: -30%;
+    height: 125%;
+    will-change: transform;
+    transform-origin: 50% 0;
+    background: linear-gradient(to bottom,
+        rgba(142, 219, 224, 0.17) 0%,
+        rgba(132, 206, 216, 0.13) 18%,
+        rgba(118, 186, 201, 0.088) 36%,
+        rgba(104, 162, 183, 0.052) 54%,
+        rgba(92, 140, 164, 0.024) 72%,
+        rgba(80, 120, 145, 0) 100%);
+    /* Soft at both edges, or a shaft of light has a side you can trace with a
+       finger, which no shaft of light has. */
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    filter: blur(14px);
+    animation: sway var(--sway) ease-in-out infinite alternate;
 }
 
-/* Asked for less motion: the same sunrise, holding still. */
-.sky[data-still="true"] .sky__glow {
+.sky__shaft--1 {
+    --sway: 19s;
+    left: 4%;
+    width: 26%;
+    transform: rotate(5deg);
+}
+
+.sky__shaft--2 {
+    --sway: 23s;
+    left: 38%;
+    width: 38%;
+    opacity: 0.85;
+    transform: rotate(-3deg);
+}
+
+.sky__shaft--3 {
+    --sway: 31s;
+    left: 72%;
+    width: 22%;
+    opacity: 0.7;
+    transform: rotate(7deg);
+}
+
+/* Barely a lean either way. Water moves the light; it does not wave it about. */
+@keyframes sway {
+    from { transform: rotate(-2.2deg) translateX(-1.5%) scaleX(1); }
+    to   { transform: rotate(2.2deg) translateX(1.5%) scaleX(1.06); }
+}
+
+/* Asked for less motion: the same water, holding still. */
+.sky[data-still="true"] .sky__shaft,
+.sky[data-still="true"] .sky__caustics {
     animation: none;
 }
 
-/*
- * The sunrise following the music.
+/* ---------------------------------------------------------------------------
+ * The surface answering the music.
  *
- * One swell per chord, started by a class change every nine seconds rather
- * than by anything measured per frame. It alternates between two identical
- * animations because a running animation ignores a request to start again.
+ * One swell of light per chord, started by a class change every nine seconds
+ * rather than by anything measured per frame. It alternates between two
+ * identical animations because a running animation ignores a request to start
+ * again.
  *
  * The rise is tiny on purpose — a background that keeps catching the eye is a
  * background that has stopped being one — and it deepens as the orchestra
- * grows, so a game played to the end is lit a little more warmly.
- */
+ * grows, so a game played to the end is lit a little more brightly.
+ * ------------------------------------------------------------------------ */
 .sky__pulse {
     position: absolute;
     inset: 0;
-    transform-origin: 50% 100%;
+    transform-origin: 50% 0;
     --swell: 0;
 }
 
@@ -123,13 +182,13 @@
 
 @keyframes sky-swell-a {
     0%   { opacity: 1; transform: scale(1); }
-    14%  { opacity: calc(1 + var(--swell) * 0.022); transform: scale(calc(1 + var(--swell) * 0.0024)); }
+    14%  { opacity: calc(1 + var(--swell) * 0.03); transform: scale(calc(1 + var(--swell) * 0.0022)); }
     100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes sky-swell-b {
     0%   { opacity: 1; transform: scale(1); }
-    14%  { opacity: calc(1 + var(--swell) * 0.022); transform: scale(calc(1 + var(--swell) * 0.0024)); }
+    14%  { opacity: calc(1 + var(--swell) * 0.03); transform: scale(calc(1 + var(--swell) * 0.0022)); }
     100% { opacity: 1; transform: scale(1); }
 }
 
@@ -137,6 +196,61 @@
     animation: none;
 }
 
+/* ---------------------------------------------------------------------------
+ * The motes: whatever it is that hangs in deep water, on its way up.
+ *
+ * The layer that does most of the work of saying the page is not a
+ * photograph. Each one carries its own start, climb and wander as custom
+ * properties, so twenty elements share one keyframe and the compositor moves
+ * them without anything being recomputed.
+ *
+ * Negative delays, so the water is already full of them on the first frame
+ * rather than filling from the floor up while somebody watches.
+ * ------------------------------------------------------------------------ */
+.sky__drift {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.sky__mote {
+    position: absolute;
+    bottom: -4%;
+    left: var(--mote-left);
+    width: var(--mote-size);
+    height: var(--mote-size);
+    border-radius: 50%;
+    background: #cdf1f3;
+    /* A halo the width of the mote again: a single hard pixel reads as a dead
+       pixel, and a thing suspended in water has light around it. */
+    box-shadow: 0 0 calc(var(--mote-size) * 2) rgba(190, 236, 240, 0.55);
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: rise var(--rise-time) linear var(--rise-delay) infinite;
+}
+
+/*
+ * Up, with a lean. It fades in off the floor and out before the top, so
+ * nothing is ever seen to appear or to stop — the two things that would give
+ * away that these are twenty elements on a loop.
+ */
+@keyframes rise {
+    0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+    12%  { opacity: var(--mote-dim); }
+    80%  { opacity: var(--mote-dim); }
+    100% { transform: translate3d(var(--mote-drift), -104vh, 0); opacity: 0; }
+}
+
+.sky[data-still="true"] .sky__mote {
+    animation: none;
+    opacity: var(--mote-dim);
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .sky__pulse { animation: none !important; }
+    .sky__pulse,
+    .sky__shaft,
+    .sky__caustics,
+    .sky__mote {
+        animation: none !important;
+    }
 }
