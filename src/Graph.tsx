@@ -24,6 +24,13 @@ const RADIUS = 62;
  */
 export const IDLE_AFTER = 20_000;
 
+/**
+ * How many bubbles of air a concept lets go of, each time it does.
+ *
+ * Two. One is a leak and three is a vent; two is something breathing out.
+ */
+export const EXHALES = 2;
+
 /** A concept with nothing left to find takes a third of the room. */
 export const FINISHED_RADIUS = Math.round(62 * 0.34);
 
@@ -660,6 +667,9 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                     // One concept shivers at a time, which is the difference
                     // between water and a wave machine.
                     '--shiver-delay': `${(i * 17) % 160}s`,
+                    // And one lets go of some air at a time, on a different
+                    // cycle again, so the two never line up.
+                    '--exhale-delay': `${-((i * 23) % 47)}s`,
                 } as React.CSSProperties;
 
                 return (
@@ -814,6 +824,35 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                             </text>
                         )}
                     </g>
+                    {/*
+                      * A little air, every so often, for no reason at all.
+                      *
+                      * Beside the bubble rather than inside it: everything
+                      * that measures a concept — a pointer, a drop target,
+                      * Playwright — measures the shape of that group, and a
+                      * group that grows and shrinks three times a minute is
+                      * a target that will not hold still. The board has been
+                      * caught by that once already.
+                      *
+                      * Not from a concept that has given everything: it is a
+                      * dot sitting out the rest of the game, and air coming
+                      * off it would say something is still happening there.
+                      */}
+                    {!isDone &&
+                        Array.from({ length: EXHALES }, (_, breath) => (
+                            <circle
+                                key={`exhale-${breath}`}
+                                className="exhale"
+                                cx={x + (breath === 0 ? -9 : 7)}
+                                // Off the crown of the bubble, not out of
+                                // the middle of it: these are drawn over the
+                                // cream disc, and a pale bubble of air on a
+                                // pale disc is nothing anybody can see.
+                                cy={y - radius - 4}
+                                r={breath === 0 ? 2.4 : 1.7}
+                                style={{ '--exhale-step': `${breath * 0.5}s` } as React.CSSProperties}
+                            />
+                        ))}
                     </g>
                 );
             })}

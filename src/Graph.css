@@ -717,3 +717,35 @@
         animation: none;
     }
 }
+
+/*
+ * The air a concept lets go of, now and then.
+ *
+ * Forty-seven seconds apart per concept, with every concept on its own
+ * offset, so somewhere on the board something is always just about to, and
+ * nowhere on it are two doing it at once.
+ *
+ * Two bubbles, a beat apart, rising and gone in three seconds out of the
+ * forty-seven. The rest of the cycle costs nothing: they are drawn at zero
+ * opacity, which the compositor skips.
+ */
+.exhale {
+    fill: rgba(206, 240, 244, 0.42);
+    pointer-events: none;
+    opacity: 0;
+    animation: exhale 47s ease-in calc(var(--exhale-delay) + var(--exhale-step)) infinite;
+}
+
+@keyframes exhale {
+    0%   { transform: translate(0, 0) scale(0.5); opacity: 0; }
+    1.2% { opacity: 0.55; }
+    4.5% { opacity: 0.4; }
+    6%   { transform: translate(7px, -74px) scale(1); opacity: 0; }
+    100% { transform: translate(7px, -74px) scale(1); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .exhale {
+        animation: none;
+    }
+}
