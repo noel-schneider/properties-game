@@ -71,7 +71,7 @@
        rather than being painted on it. Nearly straight down now, and bluer:
        the light used to be a sunrise off to one side and is now the surface,
        a long way overhead. */
-    filter: drop-shadow(2px 11px 10px rgba(2, 10, 18, 0.55));
+    filter: drop-shadow(2px 11px 10px rgba(5, 7, 16, 0.55));
     /*
      * A concept that has given everything goes to a third of its size, and
      * it used to get there between one frame and the next. Eased, it sinks:
@@ -649,7 +649,7 @@
 
 .shock {
     fill: none;
-    stroke: rgba(201, 240, 243, 0.6);
+    stroke: rgba(206, 216, 248, 0.6);
     stroke-width: 2.5;
     /*
      * Scaling a circle scales the line it is drawn with, and this one is
@@ -671,7 +671,7 @@
 }
 
 .spout__air {
-    fill: rgba(214, 245, 247, 0.5);
+    fill: rgba(216, 224, 250, 0.5);
     animation: let-go 1.5s ease-in var(--spout-delay) both;
 }
 

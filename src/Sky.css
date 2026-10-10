@@ -25,15 +25,15 @@
      */
     background:
         linear-gradient(to bottom,
-            #0d3f4c 0%,
-            #0b3544 11%,
-            #092b3a 23%,
-            #072231 36%,
-            #061a28 50%,
-            #05131f 64%,
-            #040d17 79%,
-            #02080f 100%),
-        #02080f;
+            #273c62 0%,
+            #223355 11%,
+            #1c2b47 23%,
+            #17223a 36%,
+            #121a2d 50%,
+            #0e1422 64%,
+            #0a0e18 79%,
+            #05070e 100%),
+        #05070e;
 }
 
 /*
@@ -50,14 +50,14 @@
     inset: 0;
     opacity: var(--risen);
     background: linear-gradient(to bottom,
-        #1d6f74 0%,
-        #195f69 11%,
-        #15505d 23%,
-        #114251 36%,
-        #0e3544 50%,
-        #0b2937 64%,
-        #081e2a 79%,
-        #05141d 100%);
+        #3f6aa6 0%,
+        #375d94 11%,
+        #2f5082 23%,
+        #28436f 36%,
+        #21375c 50%,
+        #1a2b49 64%,
+        #142037 79%,
+        #0d1525 100%);
 }
 
 /*
@@ -106,14 +106,22 @@
     animation: bloom var(--bloom-time) ease-in-out var(--bloom-delay, 0s) infinite alternate;
 }
 
-/* The broad one, high and off to the left: the nearest thing to a source. */
+/*
+ * The broad one, high and off to the left: the nearest thing to a source.
+ *
+ * All four sit in the violet-blue the interface is already built out of —
+ * #1f2135 and #40405c on the panels, #6f6a85 on the gauges. The water was a
+ * clear teal before, which is a different family of colours altogether, and
+ * the board looked pasted onto it. Indigo also leaves the orange where it
+ * does the most: straight across the wheel from it.
+ */
 .sky__bloom--1 {
     --bloom-time: 37s;
     top: -14%;
     left: -12%;
     width: 78%;
     height: 68%;
-    background: radial-gradient(closest-side, rgba(38, 150, 162, 0.5), rgba(38, 150, 162, 0.28) 46%, rgba(38, 150, 162, 0) 100%);
+    background: radial-gradient(closest-side, rgba(62, 108, 176, 0.5), rgba(62, 108, 176, 0.28) 46%, rgba(62, 108, 176, 0) 100%);
 }
 
 /* Its answer on the other side, colder and further down. */
@@ -124,7 +132,7 @@
     right: -18%;
     width: 86%;
     height: 82%;
-    background: radial-gradient(closest-side, rgba(24, 104, 142, 0.44), rgba(24, 104, 142, 0.24) 48%, rgba(24, 104, 142, 0) 100%);
+    background: radial-gradient(closest-side, rgba(46, 72, 142, 0.46), rgba(46, 72, 142, 0.25) 48%, rgba(46, 72, 142, 0) 100%);
 }
 
 /* A wash of indigo across the middle, which is what stops the whole thing
@@ -136,11 +144,12 @@
     left: 14%;
     width: 96%;
     height: 72%;
-    background: radial-gradient(closest-side, rgba(46, 72, 140, 0.34), rgba(46, 72, 140, 0.16) 52%, rgba(46, 72, 140, 0) 100%);
+    background: radial-gradient(closest-side, rgba(96, 80, 152, 0.34), rgba(96, 80, 152, 0.16) 52%, rgba(96, 80, 152, 0) 100%);
 }
 
-/* And one small cold green low down, the only thing suggesting there is
-   anything alive at that depth. */
+/* And one small flush of the game's own pink, low down and nearly out: the
+   only thing suggesting anything is alive at that depth, and the same colour
+   the loops of a found group are drawn in. */
 .sky__bloom--4 {
     --bloom-time: 43s;
     --bloom-delay: -17s;
@@ -148,7 +157,7 @@
     left: 36%;
     width: 46%;
     height: 44%;
-    background: radial-gradient(closest-side, rgba(30, 150, 126, 0.3), rgba(30, 150, 126, 0.13) 50%, rgba(30, 150, 126, 0) 100%);
+    background: radial-gradient(closest-side, rgba(156, 86, 124, 0.3), rgba(156, 86, 124, 0.13) 50%, rgba(156, 86, 124, 0) 100%);
 }
 
 /*
@@ -193,7 +202,7 @@
     /* A whale, more or less: a long body, a notch for the tail, no detail at
        all. Anything more precise would be a picture of a fish rather than
        the shape of one too far away to make out. */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 70'%3E%3Cpath fill='%23040d14' d='M8 36 C34 10 96 6 128 22 C140 28 150 33 160 33 L186 18 L178 36 L186 54 L160 39 C150 39 140 44 128 50 C96 66 34 62 8 36 Z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 70'%3E%3Cpath fill='%2305070e' d='M8 36 C34 10 96 6 128 22 C140 28 150 33 160 33 L186 18 L178 36 L186 54 L160 39 C150 39 140 44 128 50 C96 66 34 62 8 36 Z'/%3E%3C/svg%3E");
     animation: passing 247s linear infinite;
 }
 
@@ -254,12 +263,12 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom,
-        rgba(152, 226, 231, 0.2) 0%,
-        rgba(138, 210, 220, 0.145) 18%,
-        rgba(120, 188, 203, 0.094) 36%,
-        rgba(104, 162, 183, 0.054) 54%,
-        rgba(92, 140, 164, 0.024) 72%,
-        rgba(80, 120, 145, 0) 100%);
+        rgba(186, 206, 250, 0.2) 0%,
+        rgba(170, 190, 240, 0.145) 18%,
+        rgba(150, 168, 222, 0.094) 36%,
+        rgba(130, 146, 200, 0.054) 54%,
+        rgba(112, 126, 178, 0.024) 72%,
+        rgba(96, 108, 158, 0) 100%);
     /* Narrow where it enters and spread by the time it arrives, which is what
        light does on its way down through anything. */
     clip-path: polygon(41% 0%, 59% 0%, 100% 100%, 0% 100%);
@@ -376,10 +385,10 @@
     width: var(--mote-size);
     height: var(--mote-size);
     border-radius: 50%;
-    background: #cdf1f3;
+    background: #dde2f7;
     /* A halo the width of the mote again: a single hard pixel reads as a dead
        pixel, and a thing suspended in water has light around it. */
-    box-shadow: 0 0 calc(var(--mote-size) * 2) rgba(190, 236, 240, 0.55);
+    box-shadow: 0 0 calc(var(--mote-size) * 2) rgba(202, 212, 246, 0.55);
     opacity: 0;
     will-change: transform, opacity;
     animation: rise var(--rise-time) linear var(--rise-delay) infinite;
