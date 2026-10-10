@@ -25,15 +25,15 @@
      */
     background:
         linear-gradient(to bottom,
-            #10414b 0%,
-            #0d3744 11%,
-            #0a2d3b 23%,
-            #082431 36%,
-            #061c28 50%,
-            #05151f 64%,
-            #040f17 79%,
-            #030a10 100%),
-        #030a10;
+            #0d3f4c 0%,
+            #0b3544 11%,
+            #092b3a 23%,
+            #072231 36%,
+            #061a28 50%,
+            #05131f 64%,
+            #040d17 79%,
+            #02080f 100%),
+        #02080f;
 }
 
 /*
@@ -76,52 +76,89 @@
 }
 
 /* ---------------------------------------------------------------------------
- * The caustics: the net of light the surface throws down.
+ * The deep: four bodies of light, drifting over one another.
  *
- * Generated once and drifted across, rather than animated where it is made.
- * Animating the `feTurbulence` would be the real thing and would also be a
- * filter recomputed on every frame, which is the one budget this layer does
- * not have. A slow drift with a slow stretch under it reads as water anyway:
- * nobody watches caustics closely enough to catch the loop.
+ * This replaced a tiled fractal-noise texture, which is what a generated
+ * image looks like however it is tinted — mottled, repeating, and never once
+ * mistaken for water. What is here instead has no texture at all: four very
+ * large radial gradients in hues close enough to read as one colour, each
+ * drifting and swelling on its own long cycle, added to the water rather than
+ * laid over it.
  *
- * Strongest at the top and gone by halfway down, because that is where the
- * light is.
+ * They are what keeps a deep gradient from being a flat wash. Nothing here
+ * has an edge, so nothing here can look like a tile.
  * ------------------------------------------------------------------------ */
-.sky__caustics {
+.sky__deep {
     position: absolute;
-    top: -20%;
-    left: -20%;
-    width: 140%;
-    height: 90%;
-    /* Present, not a feature. Past about a third the water stops being
-       something the board hangs in and starts being the thing you look at. */
-    opacity: 0.34;
+    inset: -25%;
+    /* Furthest off of everything, so it barely leans at all. */
+    translate: calc(var(--lean-x) * 7px) calc(var(--lean-y) * 5px);
     mix-blend-mode: screen;
-    will-change: transform;
-    /*
-     * Two things make this tile without a seam, and it needs both:
-     * `stitchTiles`, so the noise carries across a tile edge instead of
-     * stopping dead at it, and a filter region clipped to the rect itself —
-     * the default reaches ten percent past every side, and that overhang is
-     * what was drawing a line straight down the middle of the screen.
-     *
-     * Two octaves and a steep alpha ramp turn the cloud into threads: the net
-     * of light, rather than fog.
-     */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.019 0.026' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.86  0 0 0 0 0.88  0 0 0 -3.4 1.9'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23c)'/%3E%3C/svg%3E");
-    background-size: 46% 42%;
-    /* The nearest layer, so it leans the most. */
-    translate: calc(var(--lean-x) * 26px) calc(var(--lean-y) * 18px);
-    /* Fades out before the floor, or the net of light goes on glowing in water
-       that is supposed to be too deep for it. */
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 38%, transparent 100%);
-    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 38%, transparent 100%);
-    animation: caustics 41s ease-in-out infinite alternate;
+    /* Gone by the floor: light this far down is the memory of light. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.75) 42%, rgba(0, 0, 0, 0.25) 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.75) 42%, rgba(0, 0, 0, 0.25) 72%, transparent 100%);
 }
 
-@keyframes caustics {
+.sky__bloom {
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform;
+    animation: bloom var(--bloom-time) ease-in-out var(--bloom-delay, 0s) infinite alternate;
+}
+
+/* The broad one, high and off to the left: the nearest thing to a source. */
+.sky__bloom--1 {
+    --bloom-time: 37s;
+    top: -14%;
+    left: -12%;
+    width: 78%;
+    height: 68%;
+    background: radial-gradient(closest-side, rgba(38, 150, 162, 0.5), rgba(38, 150, 162, 0.28) 46%, rgba(38, 150, 162, 0) 100%);
+}
+
+/* Its answer on the other side, colder and further down. */
+.sky__bloom--2 {
+    --bloom-time: 53s;
+    --bloom-delay: -9s;
+    top: 2%;
+    right: -18%;
+    width: 86%;
+    height: 82%;
+    background: radial-gradient(closest-side, rgba(24, 104, 142, 0.44), rgba(24, 104, 142, 0.24) 48%, rgba(24, 104, 142, 0) 100%);
+}
+
+/* A wash of indigo across the middle, which is what stops the whole thing
+   being one colour thinned out. */
+.sky__bloom--3 {
+    --bloom-time: 71s;
+    --bloom-delay: -24s;
+    top: 22%;
+    left: 14%;
+    width: 96%;
+    height: 72%;
+    background: radial-gradient(closest-side, rgba(46, 72, 140, 0.34), rgba(46, 72, 140, 0.16) 52%, rgba(46, 72, 140, 0) 100%);
+}
+
+/* And one small cold green low down, the only thing suggesting there is
+   anything alive at that depth. */
+.sky__bloom--4 {
+    --bloom-time: 43s;
+    --bloom-delay: -17s;
+    top: 46%;
+    left: 36%;
+    width: 46%;
+    height: 44%;
+    background: radial-gradient(closest-side, rgba(30, 150, 126, 0.3), rgba(30, 150, 126, 0.13) 50%, rgba(30, 150, 126, 0) 100%);
+}
+
+/*
+ * Each one breathes and wanders a little. Cycles in the thirties to the
+ * seventies, none dividing into another, so the water never comes back to an
+ * arrangement anybody has seen.
+ */
+@keyframes bloom {
     from { transform: translate3d(0, 0, 0) scale(1); }
-    to   { transform: translate3d(2.5%, 1.5%, 0) scale(1.08); }
+    to   { transform: translate3d(5%, -3%, 0) scale(1.18); }
 }
 
 /* ---------------------------------------------------------------------------
@@ -189,65 +226,86 @@
  * ------------------------------------------------------------------------ */
 .sky__shaft {
     position: absolute;
-    top: -30%;
-    height: 125%;
+    top: -34%;
+    height: 132%;
     will-change: transform;
-    transform-origin: 50% 0;
-    background: linear-gradient(to bottom,
-        rgba(142, 219, 224, 0.17) 0%,
-        rgba(132, 206, 216, 0.13) 18%,
-        rgba(118, 186, 201, 0.088) 36%,
-        rgba(104, 162, 183, 0.052) 54%,
-        rgba(92, 140, 164, 0.024) 72%,
-        rgba(80, 120, 145, 0) 100%);
-    /* Soft at both edges, or a shaft of light has a side you can trace with a
-       finger, which no shaft of light has. */
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    /*
+     * Pivoted on a point well above the frame, so the three of them open out
+     * from one source rather than hanging parallel. Parallel bars were the
+     * other half of what made this look drawn rather than lit.
+     */
+    transform-origin: 50% -46%;
     /* Stronger as the surface comes down: light that has less water to cross
        arrives with more of itself left. Through a variable, so a shaft can
        still be dimmer than its neighbours without losing the rise. */
     --dim: 1;
     opacity: calc(var(--dim) * (0.75 + var(--risen) * 0.45));
-    filter: blur(14px);
-    /* Further off than the caustics, so it leans less: that difference is the
-       whole of the depth. */
+    /*
+     * The blur sits on this element and the shape on the one inside it.
+     * `clip-path` is applied after `filter`, so a shape cut here comes out
+     * with two hard diagonal edges that the blur has already passed over —
+     * which is exactly what the first attempt looked like.
+     */
+    filter: blur(26px);
+}
+
+.sky__shaft::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+        rgba(152, 226, 231, 0.2) 0%,
+        rgba(138, 210, 220, 0.145) 18%,
+        rgba(120, 188, 203, 0.094) 36%,
+        rgba(104, 162, 183, 0.054) 54%,
+        rgba(92, 140, 164, 0.024) 72%,
+        rgba(80, 120, 145, 0) 100%);
+    /* Narrow where it enters and spread by the time it arrives, which is what
+       light does on its way down through anything. */
+    clip-path: polygon(41% 0%, 59% 0%, 100% 100%, 0% 100%);
+    /* Soft at both edges even so, or a shaft of light has a side you can
+       trace with a finger, which no shaft of light has. */
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 26%, #000 74%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, #000 26%, #000 74%, transparent 100%);
+    /* Further off than the light behind it, so it leans less: that
+       difference is the whole of the depth. */
     translate: calc(var(--lean-x) * 12px) 0;
     animation: sway var(--sway) ease-in-out infinite alternate;
 }
 
 .sky__shaft--1 {
     --sway: 19s;
-    left: 4%;
-    width: 26%;
+    left: -2%;
+    width: 42%;
     transform: rotate(5deg);
 }
 
 .sky__shaft--2 {
     --sway: 23s;
-    --dim: 0.85;
-    left: 38%;
-    width: 38%;
+    --dim: 0.9;
+    left: 32%;
+    width: 52%;
     transform: rotate(-3deg);
 }
 
 .sky__shaft--3 {
     --sway: 31s;
-    --dim: 0.7;
-    left: 72%;
-    width: 22%;
+    --dim: 0.72;
+    left: 68%;
+    width: 38%;
     transform: rotate(7deg);
 }
 
-/* Barely a lean either way. Water moves the light; it does not wave it about. */
+/* Barely a lean either way. Water moves the light; it does not wave it about,
+   and the pivot is far enough above the frame that a degree is plenty. */
 @keyframes sway {
-    from { transform: rotate(-2.2deg) translateX(-1.5%) scaleX(1); }
-    to   { transform: rotate(2.2deg) translateX(1.5%) scaleX(1.06); }
+    from { transform: rotate(-1.3deg) scaleX(1); }
+    to   { transform: rotate(1.3deg) scaleX(1.07); }
 }
 
 /* Asked for less motion: the same water, holding still. */
 .sky[data-still="true"] .sky__shaft,
-.sky[data-still="true"] .sky__caustics {
+.sky[data-still="true"] .sky__bloom {
     animation: none;
 }
 
@@ -347,7 +405,7 @@
 @media (prefers-reduced-motion: reduce) {
     .sky__pulse,
     .sky__shaft,
-    .sky__caustics,
+    .sky__bloom,
     .sky__mote {
         animation: none !important;
     }
