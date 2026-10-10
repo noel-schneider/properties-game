@@ -172,17 +172,17 @@ test('a group says what it was while one of its concepts is pointed at', () => {
   expect(screen.getByText('thing')).toBeInTheDocument();
 });
 
-test('the other groups keep their loops, named in their own right', () => {
+test('the other groups keep their loops without saying anything', () => {
   const older = { property: 'pair-3', concepts: ['concept-3', 'concept-8', 'concept-13'] };
   renderApp(
     <Graph concepts={concepts} selected={[]} found={[older, foundGroup]} onToggle={() => {}} />,
   );
   fireEvent.pointerEnter(screen.getByLabelText('concept-3'));
 
-  // Every loop takes a colour while a concept is pointed at, so every loop
-  // says what it is: an unnamed colour is one nobody can read.
+  // A name answers a question that was asked. Naming every group at once put
+  // the record of the game on top of the board it was a record of.
   expect(screen.getByText('pair-3')).toBeInTheDocument();
-  expect(screen.getByText('thing')).toBeInTheDocument();
+  expect(screen.queryByText('thing')).toBeNull();
   expect(document.querySelectorAll('.found__loop')).toHaveLength(2);
 });
 

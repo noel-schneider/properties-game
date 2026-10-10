@@ -168,7 +168,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, arriving = [], hinted = [], reveal = 'all-arcs', onToggle, onDropInto, onClear }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, arriving = [], hinted = [], reveal = 'arcs', onToggle, onDropInto, onClear }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);

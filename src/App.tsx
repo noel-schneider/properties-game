@@ -134,7 +134,7 @@ function App({
     // Dev only: which marks a reveal wears, so the four ways of tying a
     // category's name to its three bubbles can be swapped between on a board
     // that has enough found on it for the difference to show.
-    const [reveal, setReveal] = useState<Reveal>('all-arcs');
+    const [reveal, setReveal] = useState<Reveal>('arcs');
 
     // Dev only: what the board looks like once every finished concept has gone.
     const [swept, setSwept] = useState<string[]>([]);
