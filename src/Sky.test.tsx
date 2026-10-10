@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fireEvent, render } from '@testing-library/react'
-import Sky, { MOTES, SHAFTS } from './Sky'
+import Sky, { BLOOMS, MOTES, SHAFTS } from './Sky'
 
 const css = readFileSync(join(__dirname, 'Sky.css'), 'utf8');
 
@@ -10,6 +10,24 @@ function sky() {
 }
 
 afterEach(() => vi.unstubAllGlobals());
+
+test('the deep is lit by a few large bodies of light, and no texture at all', () => {
+  // Fractal noise is what a generated texture looks like, and it looks like
+  // one however it is tinted. What replaced it is a handful of very large
+  // soft gradients drifting over one another, which is a thing water does
+  // and an image file does not.
+  render(<Sky />);
+
+  expect(document.querySelectorAll('.sky__bloom')).toHaveLength(BLOOMS);
+  expect(css).not.toMatch(/feTurbulence[^"]*baseFrequency='0\.0/);
+});
+
+test('no two of those drift on the same cycle either', () => {
+  const periods = [...css.matchAll(/--bloom-time:\s*([\d.]+)s/g)].map((found) => Number(found[1]));
+
+  expect(periods).toHaveLength(BLOOMS);
+  expect(new Set(periods).size).toBe(BLOOMS);
+});
 
 test('the light comes down in shafts, so the water has a surface above it', () => {
   // One beam is a spotlight. Several, at different widths and leaning

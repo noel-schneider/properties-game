@@ -16,6 +16,17 @@ function stillSky(): boolean {
 export const SHAFTS = 3;
 
 /**
+ * How many bodies of light hang in the deep.
+ *
+ * Four very large, very soft gradients drifting over one another, in hues
+ * close enough to be one colour and far enough apart to keep the water from
+ * reading as a flat wash. This is what replaced a tiled fractal-noise
+ * texture: noise is what a generated image looks like, however it is tinted,
+ * and no amount of it is ever mistaken for water.
+ */
+export const BLOOMS = 4;
+
+/**
  * How many motes drift up through the water.
  *
  * Twenty is the number at which the eye stops counting them and starts
@@ -33,10 +44,11 @@ export const MOTES = 20;
  * or an opacity on a layer the compositor already holds, started once and
  * left alone.
  *
- * That rules out the obvious way to draw moving water. Animating the
- * `feTurbulence` that makes the caustics would be the real thing and would
- * also be a filter recomputed every frame — so the texture is generated once
- * and it is the drift across it that moves.
+ * It also rules out the obvious way to draw moving water, which is just as
+ * well: a `feTurbulence` texture was tried and is the thing that made the
+ * background look generated. What is here instead is light rather than
+ * texture — a few very large gradients drifting over one another — and it
+ * costs less than the noise did.
  *
  * The one thing driven from the game is the music. When a chord lands the
  * light from the surface swells once and settles, which is a single class
@@ -108,7 +120,7 @@ function Sky({ risen = 0 }: SkyProps) {
                 delay: -((i * 41) % 38),
                 rise: 18 + ((i * 7) % 23),
                 drift: (i % 2 === 0 ? 1 : -1) * (3 + (i % 5) * 2),
-                size: 1.4 + (i % 3) * 0.9,
+                size: 3.4 + (i % 4) * 1.4,
                 dim: 0.3 + (i % 4) * 0.12,
             })),
         [],
@@ -125,7 +137,11 @@ function Sky({ risen = 0 }: SkyProps) {
             // does nothing good to it.
             style={{ '--risen': String(Math.min(Math.max(risen, 0), 1)) } as React.CSSProperties}
         >
-            <div className="sky__caustics" />
+            <div className="sky__deep">
+                {Array.from({ length: BLOOMS }, (_, i) => (
+                    <span key={i} className={`sky__bloom sky__bloom--${i + 1}`} />
+                ))}
+            </div>
 
             {/*
               * Something large, a long way off, every few minutes.

@@ -561,6 +561,26 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                     <stop offset="55%" stopColor="#ffad69" />
                     <stop offset="100%" stopColor="#e46a92" />
                 </linearGradient>
+                {/*
+                  * What a bubble of air is made of.
+                  *
+                  * A filled disc is a dot, and a column of dots going up the
+                  * screen is a column of dots. What makes it a bubble is
+                  * being able to see through the middle: a highlight off to
+                  * one side where the light enters, almost nothing across
+                  * the body, and a bright rim where it goes round the back.
+                  *
+                  * `fx` and `fy` put the highlight off centre. In the middle
+                  * it would be a sphere lit from the camera, which is the
+                  * other way a drawn bubble gives itself away.
+                  */}
+                <radialGradient id="air" cx="50%" cy="50%" r="50%" fx="34%" fy="30%">
+                    <stop offset="0%" stopColor="#ffffff" stopOpacity={0.72} />
+                    <stop offset="22%" stopColor="#dfe6ff" stopOpacity={0.16} />
+                    <stop offset="62%" stopColor="#c6d2f6" stopOpacity={0.06} />
+                    <stop offset="86%" stopColor="#dde4ff" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="#dde4ff" stopOpacity={0} />
+                </radialGradient>
             </defs>
             {outlines.map(({ group, where, d, latest }) => {
                 const hue = hues.get(group.property);
@@ -611,9 +631,13 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                             style={{ '--spout-delay': `${where * 0.12}s` } as React.CSSProperties}
                             transform={`translate(${place.x}, ${place.y})`}
                         >
-                            <circle className="spout__air spout__air--1" r={3} />
-                            <circle className="spout__air spout__air--2" r={2} />
-                            <circle className="spout__air spout__air--3" r={2.6} />
+                            {/* Big enough to be seen through, which is the
+                                whole of what makes a bubble a bubble. A
+                                two-pixel one is a speck however it is
+                                drawn. */}
+                            <circle className="spout__air spout__air--1" r={9} />
+                            <circle className="spout__air spout__air--2" r={5.5} />
+                            <circle className="spout__air spout__air--3" r={7} />
                         </g>
                     ))}
                 </g>
@@ -843,13 +867,13 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                             <circle
                                 key={`exhale-${breath}`}
                                 className="exhale"
-                                cx={x + (breath === 0 ? -9 : 7)}
+                                cx={x + (breath === 0 ? -11 : 8)}
                                 // Off the crown of the bubble, not out of
                                 // the middle of it: these are drawn over the
                                 // cream disc, and a pale bubble of air on a
                                 // pale disc is nothing anybody can see.
                                 cy={y - radius - 4}
-                                r={breath === 0 ? 2.4 : 1.7}
+                                r={breath === 0 ? 8 : 5.5}
                                 style={{ '--exhale-step': `${breath * 0.5}s` } as React.CSSProperties}
                             />
                         ))}
