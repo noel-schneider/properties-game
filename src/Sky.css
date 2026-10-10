@@ -385,10 +385,16 @@
     width: var(--mote-size);
     height: var(--mote-size);
     border-radius: 50%;
-    background: #dde2f7;
-    /* A halo the width of the mote again: a single hard pixel reads as a dead
-       pixel, and a thing suspended in water has light around it. */
-    box-shadow: 0 0 calc(var(--mote-size) * 2) rgba(202, 212, 246, 0.55);
+    /*
+     * A shell, not a dot: a highlight off to one side, almost nothing across
+     * the body, and a rim where the light goes round the back. Two gradients
+     * on one element, which costs the same as the flat fill it replaced.
+     */
+    background:
+        radial-gradient(circle at 33% 28%, rgba(255, 255, 255, 0.85) 0%, rgba(223, 230, 255, 0.2) 26%, rgba(223, 230, 255, 0) 46%),
+        radial-gradient(circle, rgba(221, 228, 255, 0) 52%, rgba(221, 228, 255, 0.62) 76%, rgba(221, 228, 255, 0) 100%);
+    /* The light it throws into the water around it. */
+    box-shadow: 0 0 calc(var(--mote-size) * 1.6) rgba(202, 212, 246, 0.3);
     opacity: 0;
     will-change: transform, opacity;
     animation: rise var(--rise-time) linear var(--rise-delay) infinite;
@@ -399,11 +405,18 @@
  * nothing is ever seen to appear or to stop — the two things that would give
  * away that these are twenty elements on a loop.
  */
+/*
+ * Up, wandering. A bubble rising in water is pushed about on the way; a dead
+ * straight line is the giveaway that nothing is pushing back. It also goes
+ * in and out of round, which is the other half of it.
+ */
 @keyframes rise {
-    0%   { transform: translate3d(0, 0, 0); opacity: 0; }
-    12%  { opacity: var(--mote-dim); }
-    80%  { opacity: var(--mote-dim); }
-    100% { transform: translate3d(var(--mote-drift), -104vh, 0); opacity: 0; }
+    0%   { transform: translate3d(0, 0, 0) scale(1, 1); opacity: 0; }
+    12%  { transform: translate3d(calc(var(--mote-drift) * 0.3), -12vh, 0) scale(0.92, 1.06); opacity: var(--mote-dim); }
+    38%  { transform: translate3d(calc(var(--mote-drift) * -0.25), -38vh, 0) scale(1.08, 0.93); opacity: var(--mote-dim); }
+    64%  { transform: translate3d(calc(var(--mote-drift) * 0.75), -64vh, 0) scale(0.94, 1.05); opacity: var(--mote-dim); }
+    80%  { transform: translate3d(calc(var(--mote-drift) * 0.5), -82vh, 0) scale(1.04, 0.96); opacity: var(--mote-dim); }
+    100% { transform: translate3d(var(--mote-drift), -104vh, 0) scale(1, 1); opacity: 0; }
 }
 
 .sky[data-still="true"] .sky__mote {

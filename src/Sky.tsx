@@ -120,7 +120,7 @@ function Sky({ risen = 0 }: SkyProps) {
                 delay: -((i * 41) % 38),
                 rise: 18 + ((i * 7) % 23),
                 drift: (i % 2 === 0 ? 1 : -1) * (3 + (i % 5) * 2),
-                size: 1.4 + (i % 3) * 0.9,
+                size: 3.4 + (i % 4) * 1.4,
                 dim: 0.3 + (i % 4) * 0.12,
             })),
         [],
