@@ -183,36 +183,28 @@ export function isExhausted(pool: Concept[], found: Solution[]): boolean {
 }
 
 /**
- * The board everybody starts from.
+ * A board to start from, dealt.
  *
- * Written down rather than dealt. A random first board is sometimes a wall —
- * three obscure categories and nothing a newcomer can name — and the first
- * thing anybody meets should not be decided by a throw.
+ * It used to be written down, because a first board dealt at random is
+ * sometimes a wall — three obscure categories and nothing a newcomer can
+ * name — and the first thing anybody meets should not be decided by a throw.
  *
- * These open on nine categories and all of them are ones anybody can name:
- * food, sweet, animal, insect, object, metal, small, cold, white. The turtle
- * is in none of them on purpose: not everything on the board is part of an
- * answer, and learning that on the first board is kinder than learning it on
- * the twentieth.
- */
-export const OPENING = [
-    'chocolate', 'honey', 'cake',
-    'ant', 'bee', 'ladybug', 'turtle',
-    'key', 'coin', 'watch',
-    'snow', 'igloo', 'glacier',
-];
-
-/**
- * A board to start from.
+ * What it was instead was the same wall every time. All four of its trios
+ * answered to two names at once: chocolate, honey and cake are food *and*
+ * sweet; ant, bee and ladybug are insect *and* animal; key, coin and watch
+ * are object *and* metal; snow, igloo and glacier are cold *and* white. Four
+ * of its five formable trios carried a second name, so a player's first
+ * lesson was that the game wanted one of two right answers and would not say
+ * which. Dealt boards carry a second name on about one trio in twenty-five,
+ * and none of them is doubled all the way through.
  *
- * The written opening when the game still knows every concept in it, and a
- * dealt one otherwise — renaming a concept must not be able to leave a new
- * player with a board that cannot be played.
+ * The half of the old reasoning that was right is kept by `refill`, which
+ * tops the deal up until there are moves on the board. What is given up is
+ * the promise that the first categories are easy ones — measured against a
+ * first board that was teaching the wrong thing, that is a trade worth
+ * making.
  */
 export function openingBoard(pool: Concept[], ways: number): string[] {
-    const known = new Set(pool.map((concept) => concept.name));
-    if (OPENING.every((name) => known.has(name))) return [...OPENING];
-
     const first = getNRandomElements(pool, OPENING_SCATTER).map((concept) => concept.name);
     return refill(first, pool, [], ways);
 }
