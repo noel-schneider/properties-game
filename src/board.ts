@@ -1,4 +1,6 @@
 import { getNRandomElements } from './utils'
+import { atMost, levelOf } from './difficulty'
+import type { Level } from './difficulty'
 import { isFinished, isSpent, openProperties } from './game'
 import { canJoin } from './join'
 import type { Solution } from './hand'
@@ -70,11 +72,56 @@ export function formableGroups(
 }
 
 /** Concepts that could still be used for something, in a shuffled order. */
+/**
+ * How hard the game is willing to be, this many finds in.
+ *
+ * A first board that asks somebody to say *exploration* has lost them, and a
+ * board on the eightieth answer that only ever asks for *food* is not a game
+ * any more. So the deal starts at the easy end and opens up: the first few
+ * finds are named things anybody can see, and the abstractions arrive once
+ * there is some evidence the player can handle them.
+ *
+ * Six and twenty-four, against a whole game of about ninety-five answers, so
+ * the opening up happens inside the first quarter and the rest of the game is
+ * played with everything on the table.
+ */
+export function ceilingFor(finds: number): Level {
+    if (finds < 6) return 'easy';
+    if (finds < 24) return 'medium';
+    return 'hard';
+}
+
+/**
+ * The concepts worth dealing, easiest first.
+ *
+ * A preference, never a gate. The whole list is still returned, in the same
+ * random order within each half, so everything downstream — the mark `refill`
+ * aims at, the floor under `topUp` — behaves exactly as it did. What changes
+ * is only which concepts get looked at first, and late in a game, when
+ * nothing easy is left open, that is no change at all.
+ *
+ * Filtering instead of sorting was the obvious version and the wrong one: by
+ * the fortieth answer every easy category is spent, and a deal that insisted
+ * would hand back an empty board rather than a hard one.
+ */
 function stillUseful(pool: Concept[], found: Solution[], exclude: Set<string>): Concept[] {
-    return getNRandomElements(
+    const useful = getNRandomElements(
         pool.filter((concept) => !exclude.has(concept.name) && !isFinished(concept, found)),
         pool.length,
     );
+
+    const ceiling = ceilingFor(found.length);
+    // How much of what this concept still has to offer is within reach. Counted
+    // rather than asked as a yes or no: nearly every concept carries one easy
+    // category among its harder ones, so "has an easy one" sorts almost the
+    // whole game into the same half and changes nothing.
+    const reach = (concept: Concept): number => {
+        const open = openProperties(concept, found);
+        const within = open.filter((property) => atMost(levelOf(concept.name, property), ceiling));
+        return within.length - (open.length - within.length);
+    };
+
+    return [...useful].sort((a, b) => reach(b) - reach(a));
 }
 
 /**

@@ -40,6 +40,13 @@ A hundred concepts, fifty categories, 307 tags between them — three on
 average. It is in [`src/concepts.json`](src/concepts.json), with the two
 languages in [`src/i18n`](src/i18n).
 
+Each of the 307 carries a difficulty — how far it is from seeing three
+concepts to saying the word — in [`src/difficulty.json`](src/difficulty.json).
+The judgement is on the category, with exceptions where a concept departs from
+it: a rainbow is the one member of *colours* nobody has to think about, a cave
+the one *shelter* you would never call one. It comes out 55% easy, 30% medium,
+13% hard, and it is what makes the board start gently and open up.
+
 The shape of it is held by tests rather than by hand: every category has at
 least three members, no two categories hold exactly the same concepts, every
 concept carries between two and five, and the number of concepts that can never
@@ -53,7 +60,7 @@ npm run dev        # http://localhost:3000
 ```
 
 ```sh
-npm test           # 538 unit tests
+npm test           # 552 unit tests
 npm run test:e2e   # 57 end-to-end tests, in a real browser
 npm run typecheck
 npm run build
