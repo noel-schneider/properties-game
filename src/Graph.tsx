@@ -564,22 +564,17 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                 {/*
                   * What a bubble of air is made of.
                   *
-                  * A filled disc is a dot, and a column of dots going up the
-                  * screen is a column of dots. What makes it a bubble is
-                  * being able to see through the middle: a highlight off to
-                  * one side where the light enters, almost nothing across
-                  * the body, and a bright rim where it goes round the back.
-                  *
-                  * `fx` and `fy` put the highlight off centre. In the middle
-                  * it would be a sphere lit from the camera, which is the
-                  * other way a drawn bubble gives itself away.
+                  * A soft light, and nothing more. A bright rim, an
+                  * off-centre highlight and a see-through middle were tried:
+                  * drawn that carefully they read as photographs of bubbles
+                  * floating over a board that is otherwise flat colour and
+                  * plain shapes, and the mismatch is the only thing anybody
+                  * sees. What belongs here is a mark, not a model.
                   */}
-                <radialGradient id="air" cx="50%" cy="50%" r="50%" fx="34%" fy="30%">
-                    <stop offset="0%" stopColor="#ffffff" stopOpacity={0.72} />
-                    <stop offset="22%" stopColor="#dfe6ff" stopOpacity={0.16} />
-                    <stop offset="62%" stopColor="#c6d2f6" stopOpacity={0.06} />
-                    <stop offset="86%" stopColor="#dde4ff" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="#dde4ff" stopOpacity={0} />
+                <radialGradient id="air" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#e8eeff" stopOpacity={0.46} />
+                    <stop offset="55%" stopColor="#d4ddfb" stopOpacity={0.26} />
+                    <stop offset="100%" stopColor="#c6d2f6" stopOpacity={0} />
                 </radialGradient>
             </defs>
             {outlines.map(({ group, where, d, latest }) => {
@@ -635,9 +630,9 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                                 whole of what makes a bubble a bubble. A
                                 two-pixel one is a speck however it is
                                 drawn. */}
-                            <circle className="spout__air spout__air--1" r={9} />
-                            <circle className="spout__air spout__air--2" r={5.5} />
-                            <circle className="spout__air spout__air--3" r={7} />
+                            <circle className="spout__air spout__air--1" r={7} />
+                            <circle className="spout__air spout__air--2" r={4.5} />
+                            <circle className="spout__air spout__air--3" r={5.5} />
                         </g>
                     ))}
                 </g>
@@ -873,7 +868,7 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                                 // cream disc, and a pale bubble of air on a
                                 // pale disc is nothing anybody can see.
                                 cy={y - radius - 4}
-                                r={breath === 0 ? 8 : 5.5}
+                                r={breath === 0 ? 6.5 : 4.5}
                                 style={{ '--exhale-step': `${breath * 0.5}s` } as React.CSSProperties}
                             />
                         ))}
