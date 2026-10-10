@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './Sky.css'
 import { onChord } from './pulse'
 
@@ -45,9 +45,47 @@ export const MOTES = 20;
  * for one. The swell deepens as the orchestra grows, so a game played to the
  * end is lit a little more brightly than one just begun.
  */
-function Sky() {
+interface SkyProps {
+    /**
+     * How far the game has got, from nothing to everything, drawn as how far
+     * the surface has come down to meet it.
+     *
+     * A hundred concepts is a long game and the number at the top of the
+     * screen is a poor way to feel it. The water is a better one: you start
+     * as deep as the game goes and you finish in the light.
+     */
+    risen?: number;
+}
+
+function Sky({ risen = 0 }: SkyProps) {
     const [beat, setBeat] = useState(0);
     const [parts, setParts] = useState(0);
+    const water = useRef<HTMLDivElement>(null);
+
+    /**
+     * The water leans the other way from the hand.
+     *
+     * The one thing on this layer the player drives, and it is written
+     * straight to the element: a render of the background on every pointer
+     * move is precisely the budget it has never had. The browser already
+     * coalesces pointer moves to one per frame, so there is nothing to
+     * throttle on top.
+     *
+     * Away rather than with, and by a few pixels: that is what tells the eye
+     * the water is behind the board rather than painted on it.
+     */
+    useEffect(() => {
+        const lean = (event: PointerEvent) => {
+            const layer = water.current;
+            if (!layer) return;
+
+            layer.style.setProperty('--lean-x', String(0.5 - event.clientX / window.innerWidth));
+            layer.style.setProperty('--lean-y', String(0.5 - event.clientY / window.innerHeight));
+        };
+
+        window.addEventListener('pointermove', lean);
+        return () => window.removeEventListener('pointermove', lean);
+    }, []);
 
     useEffect(() => onChord((playing) => {
         setBeat((count) => count + 1);
@@ -77,8 +115,26 @@ function Sky() {
     );
 
     return (
-        <div className="sky" data-still={String(stillSky())} aria-hidden="true">
+        <div
+            className="sky"
+            ref={water}
+            data-still={String(stillSky())}
+            aria-hidden="true"
+            // Clamped here rather than trusted: this is a count divided by
+            // another count, and a fraction over one reaching the gradient
+            // does nothing good to it.
+            style={{ '--risen': String(Math.min(Math.max(risen, 0), 1)) } as React.CSSProperties}
+        >
             <div className="sky__caustics" />
+
+            {/*
+              * Something large, a long way off, every few minutes.
+              *
+              * Never explained and never acknowledged by the game. It costs
+              * one element and one very slow animation, and it is the detail
+              * people tell each other about.
+              */}
+            <div className="sky__passer" />
 
             {/*
               * The swell alternates between two identical animations rather

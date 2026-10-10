@@ -3,6 +3,12 @@ import { useTranslator } from './i18n'
 interface HintProps {
     /** Whether there is a trio on the board to point at. */
     available: boolean;
+    /**
+     * Nothing has been found in a while. The button starts shifting its
+     * weight — it does not volunteer anything, and pressing it is still the
+     * only way to be shown a pair.
+     */
+    urging?: boolean;
     onAsk: () => void;
 }
 
@@ -17,13 +23,15 @@ interface HintProps {
  * Behind a button, the same mark answers a question, which is the whole
  * difference — and a player who never presses it is never nudged at all.
  */
-function Hint({ available, onAsk }: HintProps) {
+function Hint({ available, urging = false, onAsk }: HintProps) {
     const { t } = useTranslator();
 
     return (
         <button
             type="button"
-            className="control"
+            // Never while there is nothing to show: a button that asks to be
+            // pressed and then does nothing is worse than a quiet one.
+            className={urging && available ? 'control control--urging' : 'control'}
             onClick={onAsk}
             // Nothing can be formed from what is on the board: at that point
             // the only move left is dropping a concept into a group already

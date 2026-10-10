@@ -27,6 +27,15 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
     const { t } = useTranslator();
     const [inputValue, setInputValue] = React.useState("");
     const [stale, setStale] = React.useState(false);
+    /**
+     * How many answers have been sent, so a refusal can be seen twice.
+     *
+     * Two wrong answers running leave `feedback` on the same value, and a
+     * class that depends only on that never changes — so the box rocks once
+     * and then sits still however many times it refuses. This counter is what
+     * makes the second refusal a different class from the first.
+     */
+    const [attempts, setAttempts] = React.useState(0);
     const input = React.useRef<HTMLInputElement>(null);
 
     // Each new verdict starts its own clock, and clears the one before it.
@@ -68,6 +77,7 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setAttempts((sent) => sent + 1);
         if (!isSubmitEnabled) return;
         if (onSubmit(inputValue)) setInputValue("");
     };
@@ -140,7 +150,23 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
     return (
         <form className="input-container" onSubmit={handleSubmit}>
             <div className="input-and-submit-container">
-                <input ref={input} id="category-input" className="input" type="text" value={inputValue}
+                <input
+                    ref={input}
+                    id="category-input"
+                    /*
+                     * A refusal rocks the box. Which of the two names it
+                     * takes alternates with the count of answers sent: a
+                     * running animation ignores a request to start again, so
+                     * two wrong answers in a row need two different classes
+                     * or the second one is silent.
+                     */
+                    className={
+                        !stale && (feedback === 'wrong' || feedback === 'spent')
+                            ? `input input--refused-${attempts % 2 === 0 ? 'a' : 'b'}`
+                            : 'input'
+                    }
+                    type="text"
+                    value={inputValue}
                        onChange={handleChange}
                        readOnly={!enough}
                        aria-disabled={!enough}

@@ -17,3 +17,25 @@
   font-weight: 600;
   margin-left: 0.35rem;
 }
+
+/*
+ * A count that has just changed arrives rather than appearing.
+ *
+ * Keyed on its own value in the markup, so React hands this element to the
+ * page anew whenever the number moves and the animation has something to
+ * play on. Upwards, since every count in this game only ever goes up — bar
+ * the groups still formable, which is the one that matters least.
+ */
+.scoreboard__value {
+    display: inline-block;
+    animation: counted 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes counted {
+    from { transform: translateY(0.4em); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scoreboard__value { animation: none; }
+}

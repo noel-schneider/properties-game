@@ -6,6 +6,12 @@
  * repaint, no layout, nothing per frame that the board has to pay for.
  */
 .sky {
+    /* How far the hand has pulled the water, as a fraction of the window from
+       its middle. Written by the component, read by the layers below. */
+    --lean-x: 0;
+    --lean-y: 0;
+    /* How far the game has got, and so how near the surface is. */
+    --risen: 0;
     position: fixed;
     inset: 0;
     z-index: -1;
@@ -28,6 +34,30 @@
             #040f17 79%,
             #030a10 100%),
         #030a10;
+}
+
+/*
+ * The shallows, laid over the deep and brought up by the game.
+ *
+ * A second gradient rather than one gradient interpolated: a colour that
+ * changes by a hundredth of a step per concept is not something anyone can
+ * animate by hand, and two layers with an opacity between them is something
+ * the compositor does for nothing.
+ */
+.sky::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: var(--risen);
+    background: linear-gradient(to bottom,
+        #1d6f74 0%,
+        #195f69 11%,
+        #15505d 23%,
+        #114251 36%,
+        #0e3544 50%,
+        #0b2937 64%,
+        #081e2a 79%,
+        #05141d 100%);
 }
 
 /*
@@ -80,6 +110,8 @@
      */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.019 0.026' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.86  0 0 0 0 0.88  0 0 0 -3.4 1.9'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23c)'/%3E%3C/svg%3E");
     background-size: 46% 42%;
+    /* The nearest layer, so it leans the most. */
+    translate: calc(var(--lean-x) * 26px) calc(var(--lean-y) * 18px);
     /* Fades out before the floor, or the net of light goes on glowing in water
        that is supposed to be too deep for it. */
     -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 38%, transparent 100%);
@@ -90,6 +122,62 @@
 @keyframes caustics {
     from { transform: translate3d(0, 0, 0) scale(1); }
     to   { transform: translate3d(2.5%, 1.5%, 0) scale(1.08); }
+}
+
+/* ---------------------------------------------------------------------------
+ * Something large going past, a long way off.
+ *
+ * Barely darker than the water it crosses, because that is what distance
+ * does to a thing in water, and slow enough that you are never quite sure
+ * you saw it. Once every four minutes or so: a wonder that turns up on
+ * schedule stops being one.
+ *
+ * One element and one animation. It is off screen for nine tenths of its
+ * cycle, which costs nothing to be.
+ * ------------------------------------------------------------------------ */
+.sky__passer {
+    position: absolute;
+    /*
+     * High, and above the board rather than across it. Two earlier places
+     * were wrong for two different reasons: down in the deep the silhouette
+     * and the water are the same colour and it crossed unseen, and at a
+     * quarter down it passed behind the bubbles, where the only part of it
+     * anybody saw was the tail.
+     */
+    top: 8%;
+    left: 0;
+    width: 215px;
+    height: 79px;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform;
+    background-repeat: no-repeat;
+    background-size: contain;
+    /* A whale, more or less: a long body, a notch for the tail, no detail at
+       all. Anything more precise would be a picture of a fish rather than
+       the shape of one too far away to make out. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 70'%3E%3Cpath fill='%23040d14' d='M8 36 C34 10 96 6 128 22 C140 28 150 33 160 33 L186 18 L178 36 L186 54 L160 39 C150 39 140 44 128 50 C96 66 34 62 8 36 Z'/%3E%3C/svg%3E");
+    animation: passing 247s linear infinite;
+}
+
+/*
+ * Across in about half a minute, then four minutes of nothing. The fade is
+ * inside the crossing, so it is never seen to arrive at an edge or stop at
+ * one.
+ */
+@keyframes passing {
+    0%    { transform: translate3d(-18vw, 0, 0) scaleX(1); opacity: 0; }
+    2%    { opacity: 0.55; }
+    10%   { opacity: 0.55; }
+    12%   { transform: translate3d(118vw, 0, 0) scaleX(1); opacity: 0; }
+    100%  { transform: translate3d(118vw, 0, 0) scaleX(1); opacity: 0; }
+}
+
+.sky[data-still="true"] .sky__passer {
+    /* Not stilled — gone. A silhouette parked in the middle of the board is
+       not a still version of something swimming past, it is a smudge nobody
+       can explain. */
+    display: none;
 }
 
 /* ---------------------------------------------------------------------------
@@ -116,7 +204,15 @@
        finger, which no shaft of light has. */
     -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
     mask-image: linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%);
+    /* Stronger as the surface comes down: light that has less water to cross
+       arrives with more of itself left. Through a variable, so a shaft can
+       still be dimmer than its neighbours without losing the rise. */
+    --dim: 1;
+    opacity: calc(var(--dim) * (0.75 + var(--risen) * 0.45));
     filter: blur(14px);
+    /* Further off than the caustics, so it leans less: that difference is the
+       whole of the depth. */
+    translate: calc(var(--lean-x) * 12px) 0;
     animation: sway var(--sway) ease-in-out infinite alternate;
 }
 
@@ -129,17 +225,17 @@
 
 .sky__shaft--2 {
     --sway: 23s;
+    --dim: 0.85;
     left: 38%;
     width: 38%;
-    opacity: 0.85;
     transform: rotate(-3deg);
 }
 
 .sky__shaft--3 {
     --sway: 31s;
+    --dim: 0.7;
     left: 72%;
     width: 22%;
-    opacity: 0.7;
     transform: rotate(7deg);
 }
 
@@ -211,6 +307,8 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
+    /* Hanging nearest of all, between the board and the shafts. */
+    translate: calc(var(--lean-x) * 34px) calc(var(--lean-y) * 22px);
 }
 
 .sky__mote {
@@ -252,5 +350,9 @@
     .sky__caustics,
     .sky__mote {
         animation: none !important;
+    }
+
+    .sky__passer {
+        display: none;
     }
 }

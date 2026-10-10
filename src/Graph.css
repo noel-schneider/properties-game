@@ -67,12 +67,18 @@
     /* Heavier than it was. A hairline contour reads as a diagram; a thick one
        reads as something you are meant to poke. */
     stroke-width: 3;
-    /* Thrown down and to the side and blurred, so the bubble sits above the
-       board rather than on it. Offset rather than straight down on purpose: a
-       shadow directly under a round thing says the light is overhead and
-       nowhere in particular, which reads as flat. */
-    filter: drop-shadow(5px 9px 7px rgba(12, 12, 22, 0.5));
-    transition: fill 0.15s ease;
+    /* Thrown downwards and blurred, so the bubble hangs in front of the water
+       rather than being painted on it. Nearly straight down now, and bluer:
+       the light used to be a sunrise off to one side and is now the surface,
+       a long way overhead. */
+    filter: drop-shadow(2px 11px 10px rgba(2, 10, 18, 0.55));
+    /*
+     * A concept that has given everything goes to a third of its size, and
+     * it used to get there between one frame and the next. Eased, it sinks:
+     * the one moment in the game where something leaves, and the water is
+     * the right speed for it.
+     */
+    transition: fill 0.5s ease, r 0.62s cubic-bezier(0.4, 0, 0.3, 1);
 }
 
 .bubble text {
@@ -322,14 +328,21 @@
     100% { transform: scale(1); }
 }
 
-/* The outline closes around them rather than appearing already closed. */
+/*
+ * The outline draws itself from end to end rather than appearing drawn.
+ *
+ * `pathLength` normalises the whole outline to one, sides fanned apart and
+ * all, so a dash from nothing to everything works the same on a triangle as
+ * on a group of six.
+ */
 .found__loop--latest {
-    animation: tighten 0.5s ease-out both;
+    animation: tighten 0.62s ease-out both;
 }
 
 @keyframes tighten {
-    from { opacity: 0; stroke-width: 16; }
-    to   { opacity: 0.8; stroke-width: 9; }
+    from { opacity: 0; stroke-width: 16; stroke-dasharray: 0 1; }
+    40%  { opacity: 0.8; }
+    to   { opacity: 0.8; stroke-width: 9; stroke-dasharray: 1 1; }
 }
 
 /* And the name arrives under its own weight. */
@@ -517,4 +530,190 @@
     transform: rotate(-90deg);
     transform-box: fill-box;
     transform-origin: center;
+}
+
+/* ---------------------------------------------------------------------------
+ * The board, hanging in water.
+ *
+ * Every concept drifts on a layer of its own, wrapped around the bubble
+ * rather than applied to it: the bubble carries the transform the simulation
+ * writes on every frame, and a second one there would overwrite it.
+ *
+ * Each cycle, lean and swell is worked out from the concept's place in the
+ * board, so no two of them rise and fall together — a board breathing in
+ * unison is one object, not twenty things floating.
+ *
+ * And it only drifts once nobody is playing. A board that never holds still
+ * is a board you have to catch: the first thing it cost was every click in
+ * the end-to-end suite, which is an automated way of saying that a target
+ * which never settles is harder to hit. So the amplitude rests at zero while
+ * there is a hand on the board and comes up when there is not — which is
+ * also exactly where the stillness was worth fixing.
+ * ------------------------------------------------------------------------ */
+.bubble-float {
+    /* How much of its drift a concept takes. Zero while the game is being
+       played; the board turns it up when nobody has moved for a while. */
+    --float-amp: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    will-change: transform;
+    animation:
+        afloat var(--float-time) ease-in-out var(--float-delay) infinite alternate,
+        shiver 160s ease-in-out var(--shiver-delay) infinite;
+    /* Eased rather than switched, and eased on the amplitude rather than by
+       restarting the animations: new keyframes would snap every concept back
+       to the top of its cycle at once, which is the one moment the whole
+       board would move as a single object. */
+    transition: --float-amp 2.8s ease-in-out;
+}
+
+@keyframes afloat {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform:
+            translate(calc(var(--drift-x) * var(--float-amp)), calc(var(--drift-y) * var(--float-amp)))
+            scale(calc(1 + var(--swell) * var(--float-amp)));
+    }
+}
+
+/*
+ * Every so often one concept stirs, as if something had passed it.
+ *
+ * On its own very long cycle with a delay spread across the board, so there
+ * is rarely more than one going at a time and never a rhythm to catch. Three
+ * seconds of movement in a hundred and sixty.
+ */
+@keyframes shiver {
+    0%, 98.6%, 100% { rotate: 0deg; }
+    99.1%           { rotate: calc(0.9deg * var(--float-amp)); }
+    99.6%           { rotate: calc(-0.7deg * var(--float-amp)); }
+}
+
+/* Nobody has moved for a while: the water takes over. */
+.graph[data-idle="true"] .bubble-float {
+    --float-amp: 1;
+}
+
+@property --float-amp {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bubble-float {
+        animation: none;
+    }
+}
+
+/*
+ * One category from done.
+ *
+ * The gauge is nearly closed, and a nearly closed ring looks like every
+ * other nearly closed ring — so the last one breathes. It is the moment a
+ * concept is worth picking before it leaves the board for good.
+ */
+.bubble--brimming circle.gauge {
+    animation: brimming 2.8s ease-in-out infinite;
+}
+
+@keyframes brimming {
+    0%, 100% { stroke: #6f6a85; stroke-width: 4; }
+    50%      { stroke: #ffc38c; stroke-width: 5.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bubble--brimming circle.gauge {
+        animation: none;
+        /* The mark stays: it says the concept is nearly spent, which is true
+           whether or not anything is allowed to move. */
+        stroke: #ffc38c;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+ * The wake of a find.
+ *
+ * One ring out from the middle of the group, and a stream of air let go by
+ * each of the three concepts. Drawn before the bubbles so it passes behind
+ * them: a wave in front of the board would be a wave in front of the water.
+ *
+ * Every piece of it is a transform or an opacity, and the whole thing is
+ * gone in a second and a half.
+ * ------------------------------------------------------------------------ */
+.wake {
+    pointer-events: none;
+}
+
+.shock {
+    fill: none;
+    stroke: rgba(201, 240, 243, 0.6);
+    stroke-width: 2.5;
+    /*
+     * Scaling a circle scales the line it is drawn with, and this one is
+     * scaled by nine hundred: without this the ring leaves as a hairline and
+     * arrives as a wall. The first version did exactly that, invisibly,
+     * because it faded out before anyone could see how thick it had become.
+     */
+    vector-effect: non-scaling-stroke;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: shock 1.15s cubic-bezier(0.16, 0.82, 0.3, 1) both;
+}
+
+/* Out fast, and gone before it reaches the far corner. A ring of one unit
+   has to reach nine hundred to cross a board sixteen hundred wide. */
+@keyframes shock {
+    from { transform: scale(1); opacity: 0.75; }
+    to   { transform: scale(900); opacity: 0; }
+}
+
+.spout__air {
+    fill: rgba(214, 245, 247, 0.5);
+    animation: let-go 1.5s ease-in var(--spout-delay) both;
+}
+
+/* Each of the three leaves at its own moment and wanders its own way, or the
+   board lets go of nine bubbles in one breath. */
+.spout__air--1 { animation-delay: calc(var(--spout-delay) + 0.02s); --wander: -14px; }
+.spout__air--2 { animation-delay: calc(var(--spout-delay) + 0.22s); --wander: 11px; }
+.spout__air--3 { animation-delay: calc(var(--spout-delay) + 0.44s); --wander: -5px; }
+
+@keyframes let-go {
+    from { transform: translate(0, 0) scale(0.4); opacity: 0; }
+    18%  { opacity: 0.6; }
+    to   { transform: translate(var(--wander), -120px) scale(1); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shock { animation: none; opacity: 0; }
+    .spout__air { animation: none; opacity: 0; }
+}
+
+/*
+ * The older outlines stir.
+ *
+ * Every group found is a line hanging in water, and water does not hold
+ * anything still. Opacity only — nothing moves, so nothing on the board
+ * becomes harder to hit — and each one drifts on its own long cycle.
+ *
+ * Never while the reveal is on. Pointing at a concept hands the loops their
+ * colours and their weight, and a shimmer running over that would undo the
+ * one thing the reveal is for; a loop wearing a colour is left alone.
+ */
+.found__loop:not([data-hue]):not(.found__loop--latest) {
+    animation: adrift 13s ease-in-out infinite alternate;
+}
+
+@keyframes adrift {
+    from { opacity: 0.26; }
+    to   { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .found__loop:not([data-hue]):not(.found__loop--latest) {
+        animation: none;
+    }
 }

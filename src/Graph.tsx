@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './Graph.css'
 import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
@@ -13,6 +13,16 @@ import type { Solution } from './hand'
 import type { Concept } from './types'
 
 const RADIUS = 62;
+
+/**
+ * How long the hand has to be still before the board decides nobody is
+ * watching and lets the water take over.
+ *
+ * Twenty seconds is past any pause inside a turn — reading the board, typing
+ * a word — and well short of the time it takes to wonder whether the page has
+ * frozen.
+ */
+export const IDLE_AFTER = 20_000;
 
 /** A concept with nothing left to find takes a third of the room. */
 export const FINISHED_RADIUS = Math.round(62 * 0.34);
@@ -213,6 +223,30 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
     }, [found]);
 
     const [hovered, setHovered] = useState<string | null>(null);
+
+    /**
+     * Whether the hand has been still long enough for the board to stop being
+     * watched.
+     *
+     * Two renders per idle spell — one in, one out — rather than anything
+     * measured while the pointer moves. What it switches on is a stronger
+     * drift in CSS; nothing here is drawn per frame.
+     */
+    const [idle, setIdle] = useState(false);
+    const stillness = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const stirred = useCallback(() => {
+        setIdle((wasIdle) => (wasIdle ? false : wasIdle));
+        if (stillness.current) clearTimeout(stillness.current);
+        stillness.current = setTimeout(() => setIdle(true), IDLE_AFTER);
+    }, []);
+
+    useEffect(() => {
+        stirred();
+        return () => {
+            if (stillness.current) clearTimeout(stillness.current);
+        };
+    }, [stirred]);
 
     // Which found group the dragged bubble is currently over, if any.
     const [over, setOver] = useState<number | null>(null);
@@ -470,6 +504,30 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
         }));
     }, [live, index, points]);
 
+    /**
+     * The group found last, and where it sits — for the ring the find sends
+     * out through the water.
+     *
+     * Nothing at all before the first find, and nothing for a group whose
+     * members have all left the board: a wave out of an empty corner is a
+     * wave from nowhere.
+     */
+    const latestFind = useMemo(() => {
+        const latest = found[found.length - 1];
+        if (!latest) return null;
+
+        const places = placesOf(latest.concepts);
+        if (places.length === 0) return null;
+
+        return {
+            places,
+            middle: {
+                x: places.reduce((sum, p) => sum + p.x, 0) / places.length,
+                y: places.reduce((sum, p) => sum + p.y, 0) / places.length,
+            },
+        };
+    }, [found, index, points]);
+
     return (
         <svg
             ref={svg}
@@ -478,6 +536,8 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
             viewBox={`${-VIEW_WIDTH / 2} ${-VIEW_HEIGHT / 2} ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
             role="group"
             aria-label={t('graph.label')}
+            data-idle={String(idle)}
+            onPointerMove={stirred}
             onClick={(event) => {
                 // Only a click on the board itself. Every click on a bubble
                 // bubbles up to here on its way out, and acting on those would
@@ -503,6 +563,9 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                         <path
                             className={latest ? 'found__loop found__loop--latest' : 'found__loop'}
                             d={d}
+                            // So the outline can draw itself from end to end
+                            // whatever its actual length: see `tighten`.
+                            pathLength={1}
                             data-hue={hue}
                             data-near={hue ? String(near.has(group.property)) : undefined}
                             style={hue ? ({ '--hue': hue } as React.CSSProperties) : undefined}
@@ -510,6 +573,44 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                     </g>
                 );
             })}
+
+            {/*
+              * What the last find did to the water: one ring out from the
+              * middle of the group, and a stream of air let go by each of
+              * the three concepts.
+              *
+              * Keyed on which find it belongs to, so React replaces the
+              * elements rather than keeping the ones it has — a running
+              * animation ignores a request to start again, and the second
+              * find would land in silence.
+              *
+              * Drawn before the bubbles, so the ring passes behind them: a
+              * wave that crosses in front of the board would be a wave in
+              * front of the water.
+              */}
+            {latestFind && (
+                <g className="wake" key={`wake-${found.length}`} data-find={String(found.length)}>
+                    <circle
+                        className="shock"
+                        data-find={String(found.length)}
+                        cx={latestFind.middle.x}
+                        cy={latestFind.middle.y}
+                        r={1}
+                    />
+                    {latestFind.places.map((place, where) => (
+                        <g
+                            key={`spout-${where}`}
+                            className="spout"
+                            style={{ '--spout-delay': `${where * 0.12}s` } as React.CSSProperties}
+                            transform={`translate(${place.x}, ${place.y})`}
+                        >
+                            <circle className="spout__air spout__air--1" r={3} />
+                            <circle className="spout__air spout__air--2" r={2} />
+                            <circle className="spout__air spout__air--3" r={2.6} />
+                        </g>
+                    ))}
+                </g>
+            )}
 
             {concepts.map((concept, i) => {
                 const { x, y } = points[i] ?? { x: 0, y: 0 };
@@ -530,15 +631,40 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                 // Lit for a few seconds when nothing has been found in a while.
                 const isHinted = hinted.includes(concept.name);
                 if (isHinted) classes.push('bubble--hinted');
+                // One category from done, and nothing on the board says so:
+                // the gauge is nearly closed and a nearly closed ring looks
+                // like every other nearly closed ring.
+                if (!isDone && spent > 0 && left === 1) classes.push('bubble--brimming');
                 if (kin.has(concept.name)) classes.push('bubble--kin');
                 else if (kin.size > 0) classes.push('bubble--aside');
                 // Lit while a concept is held over their group, so the offer
                 // and the thing it is offering are read in one glance.
                 if (aimedAt?.concepts.includes(concept.name)) classes.push('bubble--target');
 
+                /*
+                 * The drift, on a layer of its own around the bubble.
+                 *
+                 * Not on the bubble itself: that carries the transform the
+                 * simulation writes on every frame, and a second one here
+                 * would overwrite it and throw the concept off the board.
+                 * Every figure is worked out from the index rather than
+                 * drawn, so a concept keeps the same lazy cycle for the whole
+                 * game instead of being handed a new one on every render.
+                 */
+                const float = {
+                    '--float-time': `${7 + ((i * 5) % 7)}s`,
+                    '--float-delay': `${-((i * 13) % 19)}s`,
+                    '--drift-x': `${(i % 2 === 0 ? 1 : -1) * (4 + (i % 3) * 2.5)}px`,
+                    '--drift-y': `${(i % 3 === 0 ? -1 : 1) * (5 + (i % 4) * 2.5)}px`,
+                    '--swell': `${0.012 + (i % 3) * 0.006}`,
+                    // One concept shivers at a time, which is the difference
+                    // between water and a wave machine.
+                    '--shiver-delay': `${(i * 17) % 160}s`,
+                } as React.CSSProperties;
+
                 return (
+                    <g key={concept.name} className="bubble-float" style={float}>
                     <g
-                        key={concept.name}
                         className={classes.join(' ')}
                         transform={`translate(${x}, ${y})`}
                         data-found={String(isDone)}
@@ -687,6 +813,7 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                                 {conceptName(concept.name)}
                             </text>
                         )}
+                    </g>
                     </g>
                 );
             })}
