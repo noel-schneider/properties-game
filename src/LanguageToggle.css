@@ -24,9 +24,9 @@
     gap: 0.3rem;
     padding: 0.3rem;
     border-radius: 0.6rem;
-    border: 1px solid #40405c;
-    background: rgba(28, 30, 48, 0.97);
-    box-shadow: 0 12px 26px rgba(8, 8, 16, 0.42);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    box-shadow: 0 12px 26px var(--shadow);
 }
 
 @keyframes language-in {

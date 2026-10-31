@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: rgba(17, 18, 30, 0.82);
+  background: var(--scrim);
   font-family: 'Poppins', system-ui, sans-serif;
 }
 
@@ -14,9 +14,9 @@
   width: min(30rem, 100%);
   padding: 2rem 2rem 1.5rem;
   border-radius: 1rem;
-  border: 1px solid #4a4063;
-  background: #1f2135;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  box-shadow: 0 24px 60px var(--shadow);
   text-align: center;
 }
 
@@ -25,13 +25,13 @@
   font-size: 0.7rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #ffad69;
+  color: var(--accent);
 }
 
 .summary__title {
   margin: 0 0 1.5rem;
   font-size: 1.35rem;
-  color: #f0ecee;
+  color: var(--ink-strong);
 }
 
 .summary__figures {
@@ -50,13 +50,13 @@
 .summary__value {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #ffad69;
+  color: var(--accent);
 }
 
 .summary__label {
   font-size: 0.7rem;
   letter-spacing: 0.04em;
-  color: #9a9ab0;
+  color: var(--ink-soft);
 }
 
 .summary__actions {
@@ -68,33 +68,33 @@
 .summary__button {
   padding: 0.6rem 1.1rem;
   border-radius: 0.55rem;
-  border: 1px solid #40405c;
-  background: #272a40;
-  color: #c9c9db;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
   font-family: inherit;
   font-size: 0.85rem;
   cursor: pointer;
 }
 
 .summary__button:hover {
-  background: #31344e;
+  background: var(--panel-hover);
 }
 
 .summary__button--primary {
-  background: #ffad69;
-  border-color: #ffad69;
-  color: #1f2135;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
   font-weight: 600;
 }
 
 .summary__button--primary:hover {
-  background: #ffbd87;
+  background: var(--accent-light);
 }
 
 .summary__note {
   margin: 1rem 0 0;
   font-size: 0.72rem;
-  color: #7f7f98;
+  color: var(--ink-faint);
 }
 
 @media (max-width: 30rem) {
@@ -107,11 +107,11 @@
    link in it, not a third button competing with playing again. */
 .summary__support {
     margin: 0 0 1.1rem;
-    color: #8f8aa6;
+    color: var(--ink-soft);
     font-size: 0.8rem;
     line-height: 1.45;
 }
 
 .summary__support a {
-    color: #ffad69;
+    color: var(--accent);
 }

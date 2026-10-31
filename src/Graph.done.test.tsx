@@ -102,7 +102,7 @@ test('the name beside a dot is actually legible', () => {
 
   const style = getComputedStyle(asideNameOf('a')!);
 
-  expect(style.fill).not.toBe('#1b1b1b');
+  expect(style.fill).not.toBe('var(--ink)');
   expect(Number.parseFloat(style.fontSize)).toBeLessThan(17);
 });
 

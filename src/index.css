@@ -1,3 +1,63 @@
+/*
+ * The palette, in one place: sand and coral over turquoise water.
+ *
+ * Every colour the interface uses is named here and nowhere else, so trying
+ * another palette is a matter of rewriting this block.
+ */
+:root {
+  /* The water, for anything that has to match the background behind it. */
+  --water-deep: #010507;
+
+  /* Sand: panels, buttons, the input. */
+  --panel: #f3e6cf;
+  --panel-hover: #faf0dd;
+  --panel-muted: #e6d6ba;
+  --line: #d9c39d;
+  --line-strong: #c4a878;
+
+  /* Brown ink, for anything written on sand or on a shell. */
+  --ink-strong: #3f2e20;
+  --ink: #5b4430;
+  --ink-soft: #8a7258;
+  --ink-faint: #a8916f;
+
+  /* The bubbles: shells, a shade lighter than the sand. */
+  --shell: #fbf3e4;
+  --shell-hover: #fffaf0;
+  --shell-line: #c9ad80;
+
+  /* The accent. Coral sits straight across the wheel from the water. */
+  --accent: #ff6b5b;
+  --accent-deep: #c4503f;
+  --accent-light: #ff9a8a;
+  --accent-pale: #ffd3c8;
+
+  /* Text written straight on the water. */
+  --foam: #f6ecd9;
+  --foam-soft: rgba(246, 236, 217, 0.72);
+  --foam-faint: rgba(246, 236, 217, 0.4);
+
+  /* The nudge: cool where every reward is warm. */
+  --cool: #8fe0d4;
+  --cool-light: #effffb;
+
+  /* A concept with nothing left: dark and quiet against the water. */
+  --spent: #1d3f43;
+  --spent-line: #2c5c62;
+
+  /* The outline that keeps a label readable wherever it lands. */
+  --outline: #0a2a2e;
+
+  --good: #b6f0a8;
+  --bad: #ffb4a8;
+  --warn: #ffe0a8;
+  --danger: #b03a2e;
+  --danger-hover: #c64b3e;
+
+  --scrim: rgba(2, 18, 22, 0.6);
+  --shadow: rgba(0, 30, 35, 0.4);
+}
+
 * {
   font-family: 'Poppins', sans-serif;
 }
@@ -5,7 +65,7 @@
 /* The sky sits behind the page on its own layer, so the page itself must not
    paint over it. The colour stays on the root as the fallback underneath. */
 html {
-  background-color: #05070e;
+  background-color: var(--water-deep);
 }
 
 body {

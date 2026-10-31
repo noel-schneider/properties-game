@@ -62,8 +62,8 @@
 }
 
 .bubble circle {
-    fill: #e2dcde;
-    stroke: #1b1b1b;
+    fill: var(--shell);
+    stroke: var(--shell-line);
     /* Heavier than it was. A hairline contour reads as a diagram; a thick one
        reads as something you are meant to poke. */
     stroke-width: 3;
@@ -71,7 +71,7 @@
        rather than being painted on it. Nearly straight down now, and bluer:
        the light used to be a sunrise off to one side and is now the surface,
        a long way overhead. */
-    filter: drop-shadow(2px 11px 10px rgba(5, 7, 16, 0.55));
+    filter: drop-shadow(2px 11px 10px rgba(0, 30, 35, 0.5));
     /*
      * A concept that has given everything goes to a third of its size, and
      * it used to get there between one frame and the next. Eased, it sinks:
@@ -82,7 +82,7 @@
 }
 
 .bubble text {
-    fill: #1b1b1b;
+    fill: var(--ink);
     font-family: 'Poppins', system-ui, sans-serif;
     font-size: 17px;
     pointer-events: none;
@@ -90,22 +90,28 @@
 }
 
 .bubble:hover circle {
-    fill: #f3eef0;
+    fill: var(--shell-hover);
 }
 
 .bubble--selected circle {
-    fill: #ffad69;
+    fill: var(--accent);
+}
+
+/* Brown on coral turns to mud; the name goes white once the shell does not. */
+.bubble--selected text:not(.bubble__name--aside),
+.bubble--found text:not(.bubble__name--aside) {
+    fill: #fff;
 }
 
 /* Hover is a more specific selector than the selected class, so without this a
    selected bubble turns white again the moment the cursor is over it — which
    reads as having lost the selection. */
 .bubble--selected:hover circle {
-    fill: #ffbd87;
+    fill: var(--accent-light);
 }
 
 .bubble:focus-visible circle {
-    stroke: #ffad69;
+    stroke: var(--accent);
     stroke-width: 4;
 }
 
@@ -141,7 +147,7 @@
 }
 
 .found__label {
-    fill: #ffad69;
+    fill: var(--accent);
     font-family: 'Poppins', system-ui, sans-serif;
     font-size: 19px;
     font-weight: 600;
@@ -149,7 +155,7 @@
     /* Sat in the middle of the group, so it lands on the bubbles as often as
        not. The dark outline is what keeps it readable on cream. */
     paint-order: stroke;
-    stroke: #16141f;
+    stroke: var(--outline);
     stroke-width: 5;
     stroke-linejoin: round;
     pointer-events: none;
@@ -161,12 +167,12 @@
 }
 
 .bubble--found circle {
-    fill: #ffad69;
-    stroke: #c97f3f;
+    fill: var(--accent);
+    stroke: var(--accent-deep);
 }
 
 .bubble--found:hover circle {
-    fill: #ffad69;
+    fill: var(--accent);
 }
 
 /* A concept with nothing left to find: small, faded, out of the way. */
@@ -183,8 +189,8 @@
  * dark keeps it quiet without burying it, and the tick is what says finished.
  */
 .bubble--done circle {
-    fill: #4a4766;
-    stroke: #5a5a7d;
+    fill: var(--spent);
+    stroke: var(--spent-line);
     stroke-width: 2;
     transition: fill 0.4s ease;
 }
@@ -193,7 +199,7 @@
    this board is drawn in. */
 .bubble--done .done-tick {
     fill: none;
-    stroke: #ffad69;
+    stroke: var(--accent);
     stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -217,7 +223,7 @@
     /* Written long-hand deliberately. `.bubble text` is the more specific
        selector, so a plain `.bubble__name--aside` rule loses to it and the
        name comes out in the contour's near-black, on a near-black board. */
-    fill: #a9a3bd;
+    fill: var(--foam-soft);
     font-family: 'Poppins', system-ui, sans-serif;
     font-size: 13px;
     letter-spacing: 0.01em;
@@ -226,7 +232,7 @@
 }
 
 .bubble--done:hover circle {
-    fill: #4a4766;
+    fill: var(--spent);
 }
 
 /*
@@ -238,7 +244,7 @@
  * those over.
  */
 .bubble--kin circle {
-    stroke: #ffad69;
+    stroke: var(--accent);
     stroke-width: 5;
 }
 
@@ -260,12 +266,12 @@
  * answer away with the gesture.
  */
 .drop-hint {
-    fill: #ffd9b0;
+    fill: var(--accent-pale);
     font-family: 'Poppins', system-ui, sans-serif;
     font-size: 16px;
     font-weight: 600;
     paint-order: stroke;
-    stroke: #16141f;
+    stroke: var(--outline);
     stroke-width: 5;
     stroke-linejoin: round;
     pointer-events: none;
@@ -274,7 +280,7 @@
 
 /* The members of the group a held concept is being offered to. */
 .bubble--target circle {
-    stroke: #ffd9b0;
+    stroke: var(--accent-pale);
     stroke-width: 6;
 }
 
@@ -288,7 +294,7 @@
  */
 .bubble circle.gauge {
     fill: none;
-    stroke: #6f6a85;
+    stroke: var(--ink-faint);
     stroke-width: 4;
     stroke-linecap: round;
     /* The bubbles' own shadow under one of these per bubble buys nothing. */
@@ -381,13 +387,13 @@
 }
 
 @keyframes arrive {
-    from { stroke: #ffad69; stroke-width: 6; }
-    to   { stroke: #1b1b1b; stroke-width: 3; }
+    from { stroke: var(--accent); stroke-width: 6; }
+    to   { stroke: var(--shell-line); stroke-width: 3; }
 }
 
 .bubble circle.arrival {
     fill: none;
-    stroke: #ffad69;
+    stroke: var(--accent);
     stroke-width: 2.5;
     /* The bubbles' own shadow under one of these buys nothing. */
     filter: none;
@@ -424,14 +430,14 @@
 }
 
 @keyframes nudge {
-    0%, 100% { stroke: #5aa9cc; stroke-width: 4; }
-    50%      { stroke: #d8f3ff; stroke-width: 9; }
+    0%, 100% { stroke: var(--cool); stroke-width: 4; }
+    50%      { stroke: var(--cool-light); stroke-width: 9; }
 }
 
 /* The ring, outside the gauge so the two never sit on one another. */
 .bubble circle.nudge {
     fill: none;
-    stroke: #8ecae6;
+    stroke: var(--cool);
     stroke-width: 3;
     /* The bubbles' own shadow under one of these buys nothing. */
     filter: none;
@@ -449,7 +455,7 @@
     /* Still marked, just not breathing. */
     .bubble--hinted > circle:first-of-type {
         animation: none;
-        stroke: #d8f3ff;
+        stroke: var(--cool-light);
         stroke-width: 7;
     }
 
@@ -620,8 +626,8 @@
 }
 
 @keyframes brimming {
-    0%, 100% { stroke: #6f6a85; stroke-width: 4; }
-    50%      { stroke: #ffc38c; stroke-width: 5.5; }
+    0%, 100% { stroke: var(--ink-faint); stroke-width: 4; }
+    50%      { stroke: var(--accent-light); stroke-width: 5.5; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -629,7 +635,7 @@
         animation: none;
         /* The mark stays: it says the concept is nearly spent, which is true
            whether or not anything is allowed to move. */
-        stroke: #ffc38c;
+        stroke: var(--accent-light);
     }
 }
 
@@ -649,7 +655,7 @@
 
 .shock {
     fill: none;
-    stroke: rgba(206, 216, 248, 0.6);
+    stroke: rgba(232, 252, 246, 0.6);
     stroke-width: 2.5;
     /*
      * Scaling a circle scales the line it is drawn with, and this one is

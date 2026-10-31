@@ -557,9 +557,9 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                     the player found is the one thing on screen giving off
                     light of its own. */}
                 <linearGradient id="found-loop" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#ffc38c" />
-                    <stop offset="55%" stopColor="#ffad69" />
-                    <stop offset="100%" stopColor="#e46a92" />
+                    <stop offset="0%" stopColor="#ffb3a0" />
+                    <stop offset="55%" stopColor="#ff6b5b" />
+                    <stop offset="100%" stopColor="#e85a8a" />
                 </linearGradient>
                 {/*
                   * What a bubble of air is made of.
@@ -572,9 +572,9 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                   * sees. What belongs here is a mark, not a model.
                   */}
                 <radialGradient id="air" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#e8eeff" stopOpacity={0.46} />
-                    <stop offset="55%" stopColor="#d4ddfb" stopOpacity={0.26} />
-                    <stop offset="100%" stopColor="#c6d2f6" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#eefffa" stopOpacity={0.46} />
+                    <stop offset="55%" stopColor="#d2f4ec" stopOpacity={0.26} />
+                    <stop offset="100%" stopColor="#c0ebe2" stopOpacity={0} />
                 </radialGradient>
             </defs>
             {outlines.map(({ group, where, d, latest }) => {

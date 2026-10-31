@@ -10,36 +10,36 @@
     gap: 0.4rem;
     font-family: 'Poppins', system-ui, sans-serif;
     font-size: 0.75rem;
-    color: #8f8aa6;
+    color: var(--foam-soft);
 }
 
 /* Underlined, both of them: in a line of small grey text a link that is only
    a shade different from its neighbours is a link nobody tries. */
 .signature__by {
-    color: #8f8aa6;
+    color: var(--foam-soft);
     text-decoration: none;
-    border-bottom: 1px solid #5a5a7d;
+    border-bottom: 1px solid var(--foam-faint);
     transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .signature__by:hover {
-    color: #c9c9db;
-    border-bottom-color: #8f8aa6;
+    color: var(--foam);
+    border-bottom-color: var(--foam-soft);
 }
 
 .signature__dot {
-    color: #5a5a7d;
+    color: var(--foam-faint);
 }
 
 /* Warmer than the byline on purpose: it is an offer, and an offer nobody
    notices is the same as no offer. */
 .signature__give {
-    color: #ffad69;
+    color: var(--accent-light);
     text-decoration: none;
-    border-bottom: 1px solid rgba(255, 173, 105, 0.4);
+    border-bottom: 1px solid rgba(255, 154, 138, 0.45);
     transition: border-color 0.15s ease;
 }
 
 .signature__give:hover {
-    border-bottom-color: #ffad69;
+    border-bottom-color: var(--accent-light);
 }
