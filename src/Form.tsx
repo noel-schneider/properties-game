@@ -61,19 +61,49 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
     const isSubmitEnabled = enough && inputValue.trim().length > 0;
 
     /*
-     * Below three, the box goes grey and says what it is waiting for.
+     * The third pick brings the box, with the cursor already in it.
      *
-     * Read only rather than disabled: a disabled input cannot take the focus,
-     * and the enter shortcut — press it anywhere to start typing — would land
-     * nowhere at all for a player who has picked one bubble. This way the box
-     * can still be reached and still refuses what cannot be answered.
+     * That is the moment the player starts thinking of a name, and a click on
+     * the box was a step between the thought and the typing. Only as the
+     * third arrives — not on mount, so a board restored with three already
+     * picked does not grab the cursor, and not on every render after, so a
+     * player who has clicked away is not pulled back. Never past an open
+     * modal, which owns the keyboard while it is up.
+     */
+    const wasEnough = React.useRef(enough);
+    React.useEffect(() => {
+        const arrived = enough && !wasEnough.current;
+        wasEnough.current = enough;
+        if (!arrived) return;
+        if (document.querySelector('[role="dialog"][aria-modal="true"]')) return;
+
+        input.current?.focus({ preventScroll: true });
+    }, [enough]);
+
+    /*
+     * Below three there is no box at all, only a line saying what to do.
      *
-     * The reminder lives in the placeholder rather than on the answer line
-     * below. The line is where the game replies to a guess; a state of the
-     * board is not a reply, and putting it there made every grey box look
-     * like a wrong answer.
+     * A box shown before it can be used was read as the first thing to do:
+     * players clicked into it and typed before picking anything. Until three
+     * are picked the row says how many are still wanted instead, at the same
+     * height, so the board does not shift when the box arrives.
+     *
+     * The reminder lives in that row rather than on the answer line below.
+     * The line is where the game replies to a guess; a state of the board is
+     * not a reply.
      */
     const says = stale ? '' : message[feedback];
+
+    /*
+     * What is still to pick, counted down.
+     *
+     * One sentence for every count rather than "pick three" throughout: with
+     * one bubble picked, "pick three concepts" reads as if the click did not
+     * take, and a tester read it as being about the box rather than the board.
+     */
+    const reminder = [t('form.needThree'), t('form.needTwo'), t('form.needOne')][
+        Math.min(selected.length, MIN_SELECTED_CONCEPTS - 1)
+    ];
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -150,30 +180,51 @@ function Form({ selected, feedback, onSubmit }: FormProps) {
     return (
         <form className="input-container" onSubmit={handleSubmit}>
             <div className="input-and-submit-container">
-                <input
-                    ref={input}
-                    id="category-input"
+                {enough ? (
+                    <div className="answer-row">
+                        <input
+                            ref={input}
+                            id="category-input"
+                            /*
+                             * A refusal rocks the box. Which of the two names
+                             * it takes alternates with the count of answers
+                             * sent: a running animation ignores a request to
+                             * start again, so two wrong answers in a row need
+                             * two different classes or the second one is
+                             * silent.
+                             */
+                            className={
+                                !stale && (feedback === 'wrong' || feedback === 'spent')
+                                    ? `input input--refused-${attempts % 2 === 0 ? 'a' : 'b'}`
+                                    : 'input'
+                            }
+                            type="text"
+                            value={inputValue}
+                            onChange={handleChange}
+                            placeholder={t('form.placeholder')}/>
+                        <button className="submit" type="submit" disabled={!isSubmitEnabled}>
+                            {t('form.submit')}
+                        </button>
+                    </div>
+                ) : (
                     /*
-                     * A refusal rocks the box. Which of the two names it
-                     * takes alternates with the count of answers sent: a
-                     * running animation ignores a request to start again, so
-                     * two wrong answers in a row need two different classes
-                     * or the second one is silent.
+                     * The same count as three pips, lit as bubbles are picked
+                     * — readable at a glance, in the gold the picked bubbles
+                     * wear. The words carry it for a screen reader; the pips
+                     * are decoration.
                      */
-                    className={
-                        !stale && (feedback === 'wrong' || feedback === 'spent')
-                            ? `input input--refused-${attempts % 2 === 0 ? 'a' : 'b'}`
-                            : 'input'
-                    }
-                    type="text"
-                    value={inputValue}
-                       onChange={handleChange}
-                       readOnly={!enough}
-                       aria-disabled={!enough}
-                       placeholder={enough ? t('form.placeholder') : t('form.needThree')}/>
-                <button className="submit" type="submit" disabled={!isSubmitEnabled}>
-                    {t('form.submit')}
-                </button>
+                    <p className="pick-prompt" aria-live="polite">
+                        <span className="pick-prompt__text">{reminder}</span>
+                        <span className="pick-count" aria-hidden="true">
+                            {Array.from({ length: MIN_SELECTED_CONCEPTS }, (_, i) => (
+                                <span
+                                    key={i}
+                                    className={`pick-count__pip${i < selected.length ? ' pick-count__pip--lit' : ''}`}
+                                />
+                            ))}
+                        </span>
+                    </p>
+                )}
             </div>
             <p className={`feedback feedback--${feedback}`} role="status">
                 {says}

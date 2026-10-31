@@ -50,8 +50,8 @@ test('clicking three bubbles selects them and enables submit', async () => {
   // that there is enough on it to make a guess with.
   expect(bubbles.length).toBeGreaterThanOrEqual(3);
 
-  const submit = screen.getByRole('button', { name: /submit/i });
-  expect(submit).toBeDisabled();
+  // No box and no button until there are three to name.
+  expect(screen.queryByRole('button', { name: /submit/i })).not.toBeInTheDocument();
 
   for (const bubble of bubbles.slice(0, 3)) {
     await user.click(bubble);
@@ -60,7 +60,8 @@ test('clicking three bubbles selects them and enables submit', async () => {
   for (const bubble of bubbles.slice(0, 3)) {
     expect(bubble).toHaveAttribute('aria-checked', 'true');
   }
-  // Three picked opens the box; a category typed into it is the other half.
+  // Three picked brings the box; a category typed into it is the other half.
+  const submit = screen.getByRole('button', { name: /submit/i });
   expect(submit).toBeDisabled();
   await user.type(screen.getByRole('textbox'), 'biome');
   expect(submit).toBeEnabled();
@@ -157,10 +158,13 @@ test('a correct answer clears the selection and the input', async () => {
   await user.click(screen.getByRole('button', { name: /submit/i }));
 
   expect(await screen.findByRole('status')).toHaveTextContent(/correct/i);
-  expect(input).toHaveValue('');
   for (const bubble of screen.getAllByRole('checkbox')) {
     expect(bubble).toHaveAttribute('aria-checked', 'false');
   }
+  // The box goes with the selection, and comes back empty with the next three.
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  for (const bubble of screen.getAllByRole('checkbox').slice(0, 3)) await user.click(bubble);
+  expect(screen.getByRole('textbox')).toHaveValue('');
 });
 
 test('a wrong answer keeps what you typed so it can be reworded', async () => {
@@ -472,6 +476,10 @@ test('the new-concept mark only ever lands on a concept that just arrived', { ti
   for (let turn = 0; turn < 12; turn++) {
     const before = new Set(
         [...document.querySelectorAll('.bubble')].map((b) => b.getAttribute('aria-label')!));
+    // A refused answer leaves its three picked; start each turn from none.
+    // Unpicked by hand rather than with escape, which the rules card open
+    // over this whole test would take instead.
+    for (const picked of screen.queryAllByRole('checkbox', { checked: true })) await user.click(picked);
     const { concepts, property } = findSolvableTriple();
     await select(user, concepts);
     await user.type(screen.getByRole('textbox'), property);

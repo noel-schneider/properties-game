@@ -24,12 +24,11 @@ test('selecting three concepts in the browser enables submit', async ({ page }) 
   await page.goto('/')
   await boardSettled(page)
 
+  // Nothing can be typed until three are picked: there is no box yet, only a
+  // line saying what to pick.
   const submit = page.getByRole('button', { name: 'Submit' })
-  await expect(submit).toBeDisabled()
-
-  // Nothing can be typed until three are picked: the box is read only, and
-  // says as much where the typing would go.
-  await expect(page.locator('.input')).toHaveAttribute('readonly', '')
+  await expect(page.locator('.input')).toHaveCount(0)
+  await expect(page.locator('.pick-prompt')).toBeVisible()
 
   // The board is dealt to a number of moves available, not a number of
   // concepts, so how many bubbles that takes is not fixed.
@@ -41,7 +40,8 @@ test('selecting three concepts in the browser enables submit', async ({ page }) 
     await expect(bubbles.nth(i)).toHaveAttribute('aria-checked', 'true')
   }
 
-  await expect(page.locator('.input')).not.toHaveAttribute('readonly', '')
+  // The third brings the box, with the cursor already in it.
+  await expect(page.locator('.input')).toBeFocused()
   await expect(submit).toBeDisabled()
 
   await page.locator('.input').fill('biome')
@@ -200,10 +200,15 @@ test('enter puts the cursor in the box, without disturbing the board', async ({ 
   await boardSettled(page)
 
   // A real mouse click leaves the focus on the bubble it hit, so this is also
-  // the guard against Enter quietly deselecting the bubble just clicked.
-  const bubble = page.getByRole('checkbox').first()
+  // the guard against Enter quietly deselecting the bubble just clicked. Four
+  // of them: the third brings the box and the cursor with it, and the fourth
+  // takes the focus back onto the board while the box stays.
+  const bubbles = page.getByRole('checkbox')
+  for (let i = 0; i < 3; i++) await bubbles.nth(i).click()
+  const bubble = bubbles.nth(3)
   await bubble.click()
   await expect(bubble).toHaveAttribute('aria-checked', 'true')
+  await expect(page.locator('.input')).not.toBeFocused()
 
   await page.keyboard.press('Enter')
 
@@ -230,7 +235,7 @@ test('a bubble reached with the keyboard keeps the enter key for itself', async 
   await page.keyboard.press('Enter')
 
   await expect(page.locator(`.bubble[aria-label="${name}"]`)).toHaveAttribute('aria-checked', 'true')
-  await expect(page.locator('.input')).not.toBeFocused()
+  expect(await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))).toBe(name)
 })
 
 test('pointing at a concept shows what it shares, once something is found', async ({ page }) => {

@@ -435,7 +435,9 @@
     "ui": {
         "graph.label": "Concepts",
         "form.placeholder": "Type a category here!",
-        "form.needThree": "Pick three concepts",
+        "form.needThree": "First, pick 3 concepts",
+        "form.needTwo": "Pick 2 more concepts",
+        "form.needOne": "Pick 1 more concept",
         "form.spent": "One of the three has already used that category.",
         "form.submit": "Submit",
         "form.correct": "Correct!",
