@@ -71,7 +71,7 @@
        rather than being painted on it. Nearly straight down now, and bluer:
        the light used to be a sunrise off to one side and is now the surface,
        a long way overhead. */
-    filter: drop-shadow(2px 11px 10px rgba(0, 30, 35, 0.5));
+    filter: drop-shadow(0 0 9px var(--shell-glow));
     /*
      * A concept that has given everything goes to a third of its size, and
      * it used to get there between one frame and the next. Eased, it sinks:
@@ -97,10 +97,10 @@
     fill: var(--accent);
 }
 
-/* Brown on coral turns to mud; the name goes white once the shell does not. */
+/* The name takes the accent's own ink once the shell is lit with it. */
 .bubble--selected text:not(.bubble__name--aside),
 .bubble--found text:not(.bubble__name--aside) {
-    fill: #fff;
+    fill: var(--on-accent);
 }
 
 /* Hover is a more specific selector than the selected class, so without this a

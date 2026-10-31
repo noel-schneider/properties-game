@@ -89,7 +89,7 @@
 
 .submit {
   background-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border: none;
   outline: none;
   padding: 15px;

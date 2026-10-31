@@ -557,9 +557,9 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                     the player found is the one thing on screen giving off
                     light of its own. */}
                 <linearGradient id="found-loop" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#ffb3a0" />
-                    <stop offset="55%" stopColor="#ff6b5b" />
-                    <stop offset="100%" stopColor="#e85a8a" />
+                    <stop offset="0%" stopColor="#ffe08f" />
+                    <stop offset="55%" stopColor="#ffcf5c" />
+                    <stop offset="100%" stopColor="#ff6fb5" />
                 </linearGradient>
                 {/*
                   * What a bubble of air is made of.

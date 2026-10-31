@@ -1,5 +1,5 @@
 /*
- * The palette, in one place: sand and coral over turquoise water.
+ * The palette, in one place: living light in the deep.
  *
  * Every colour the interface uses is named here and nowhere else, so trying
  * another palette is a matter of rewriting this block.
@@ -8,54 +8,58 @@
   /* The water, for anything that has to match the background behind it. */
   --water-deep: #010507;
 
-  /* Sand: panels, buttons, the input. */
-  --panel: #f3e6cf;
-  --panel-hover: #faf0dd;
-  --panel-muted: #e6d6ba;
-  --line: #d9c39d;
-  --line-strong: #c4a878;
+  /* Panels, buttons, the input: near-black glass over the water. */
+  --panel: rgba(3, 16, 20, 0.88);
+  --panel-hover: rgba(8, 34, 40, 0.92);
+  --panel-muted: rgba(3, 16, 20, 0.6);
+  --line: #24484a;
+  --line-strong: #3d6a6a;
 
-  /* Brown ink, for anything written on sand or on a shell. */
-  --ink-strong: #3f2e20;
-  --ink: #5b4430;
-  --ink-soft: #8a7258;
-  --ink-faint: #a8916f;
+  /* Near-white ink with a breath of green, the colour of the lure's light. */
+  --ink-strong: #f2fff8;
+  --ink: #d4efe8;
+  --ink-soft: #86aaa4;
+  --ink-faint: #557873;
 
-  /* The bubbles: shells, a shade lighter than the sand. */
-  --shell: #fbf3e4;
-  --shell-hover: #fffaf0;
-  --shell-line: #c9ad80;
+  /* The bubbles: dark bodies ringed in white neon, the same cold light the
+     anglerfish carries. */
+  --shell: #08191c;
+  --shell-hover: #0e262a;
+  --shell-line: #effff9;
+  --shell-glow: rgba(190, 255, 236, 0.45);
 
-  /* The accent. Coral sits straight across the wheel from the water. */
-  --accent: #ff6b5b;
-  --accent-deep: #c4503f;
-  --accent-light: #ff9a8a;
-  --accent-pale: #ffd3c8;
+  /* The accent: gold, the one warm light down here. */
+  --accent: #ffcf5c;
+  --accent-deep: #d9a530;
+  --accent-light: #ffe08f;
+  --accent-pale: #fff0c4;
+  /* What is written on the accent. */
+  --on-accent: #1d1400;
 
   /* Text written straight on the water. */
-  --foam: #f6ecd9;
-  --foam-soft: rgba(246, 236, 217, 0.72);
-  --foam-faint: rgba(246, 236, 217, 0.4);
+  --foam: #f2fff8;
+  --foam-soft: rgba(225, 250, 242, 0.68);
+  --foam-faint: rgba(225, 250, 242, 0.35);
 
-  /* The nudge: cool where every reward is warm. */
-  --cool: #8fe0d4;
-  --cool-light: #effffb;
+  /* The nudge: violet, so it is told apart from both the white and the gold. */
+  --cool: #c78bff;
+  --cool-light: #f1e4ff;
 
-  /* A concept with nothing left: dark and quiet against the water. */
-  --spent: #1d3f43;
-  --spent-line: #2c5c62;
+  /* A concept with nothing left: its light gone out. */
+  --spent: #06161a;
+  --spent-line: #0f3a40;
 
   /* The outline that keeps a label readable wherever it lands. */
-  --outline: #0a2a2e;
+  --outline: #01080a;
 
-  --good: #b6f0a8;
-  --bad: #ffb4a8;
-  --warn: #ffe0a8;
-  --danger: #b03a2e;
-  --danger-hover: #c64b3e;
+  --good: #8dff9e;
+  --bad: #ff8f8a;
+  --warn: #ffe08f;
+  --danger: #e05a4f;
+  --danger-hover: #ec7065;
 
-  --scrim: rgba(2, 18, 22, 0.6);
-  --shadow: rgba(0, 30, 35, 0.4);
+  --scrim: rgba(0, 6, 8, 0.66);
+  --shadow: rgba(0, 0, 0, 0.5);
 }
 
 * {
