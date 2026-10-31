@@ -39,3 +39,16 @@
 @media (prefers-reduced-motion: reduce) {
     .scoreboard__value { animation: none; }
 }
+
+/*
+ * On a phone the corner's controls take the whole top edge, so the score sits
+ * under them rather than behind them, and tighter, so its three counts still
+ * fit on one line.
+ */
+@media (max-width: 700px) {
+    .scoreboard {
+        gap: 1rem;
+        padding-top: 4rem;
+        font-size: 0.75rem;
+    }
+}

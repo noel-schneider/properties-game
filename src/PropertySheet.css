@@ -104,7 +104,7 @@ body.dev-panel-open .sheet {
  */
 @media (max-width: 700px) {
     .sheet {
-        top: 4.5rem;
+        top: 6.75rem;
         left: 0.75rem;
         width: 7.5rem;
         max-height: 30vh;

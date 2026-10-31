@@ -23,6 +23,13 @@
   font-family: 'Poppins', system-ui, sans-serif;
 }
 
+/* Under the corner's controls on a phone, where they take the whole top edge. */
+@media (max-width: 700px) {
+  .tutorial {
+    top: 3.75rem;
+  }
+}
+
 .tutorial__step {
   margin: 0;
   font-size: 0.72rem;
