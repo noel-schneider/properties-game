@@ -1,0 +1,78 @@
+{
+    "categories": {
+        "animal": "easy",
+        "insect": "easy",
+        "reptile": "easy",
+        "trees": "easy",
+        "food": "easy",
+        "sweet": "easy",
+        "water": "easy",
+        "cold": "easy",
+        "heat": "easy",
+        "sand": "easy",
+        "light": "easy",
+        "night": "easy",
+        "weather": "easy",
+        "wind": "easy",
+        "metal": "easy",
+        "music": "easy",
+        "sound": "easy",
+        "sport": "easy",
+        "game": "easy",
+        "vehicle": "easy",
+        "building": "easy",
+        "small": "easy",
+        "big": "easy",
+        "red": "easy",
+        "green": "easy",
+        "white": "easy",
+        "time": "easy",
+
+        "liquid": "medium",
+        "oven": "medium",
+        "money": "medium",
+        "city": "medium",
+        "shelter": "medium",
+        "machine": "medium",
+        "technology": "medium",
+        "art": "medium",
+        "reading": "medium",
+        "communication": "medium",
+        "danger": "medium",
+        "outdoors": "medium",
+        "underground": "medium",
+        "airborne": "medium",
+        "astronomy": "medium",
+        "space": "medium",
+        "biome": "medium",
+
+        "object": "hard",
+        "location": "hard",
+        "exploration": "hard",
+        "entertainment": "hard",
+        "colors": "hard",
+        "accessory": "hard"
+    },
+
+    "pairs": {
+        "rainbow|colors": "easy",
+        "butterfly|colors": "medium",
+
+        "compass|exploration": "medium",
+        "atlas|exploration": "medium",
+
+        "circus|entertainment": "medium",
+        "casino|entertainment": "medium",
+
+        "hat|accessory": "medium",
+        "necklace|accessory": "medium",
+
+        "coin|money": "easy",
+        "necklace|money": "hard",
+
+        "cave|shelter": "hard",
+        "cave|biome": "hard",
+
+        "bread|oven": "easy"
+    }
+}
