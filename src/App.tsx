@@ -3,6 +3,8 @@ import "./App.css";
 import "./controls.css";
 import Answers from "./Answers";
 import Form, { MIN_SELECTED_CONCEPTS } from "./Form";
+import Tutorial from "./Tutorial";
+import { markTutorialDone, needsTutorial } from "./tour";
 import Graph from "./Graph";
 import Help from "./Help";
 import Hint from "./Hint";
@@ -85,6 +87,16 @@ function App({
     const { wordings } = useTranslator();
     const [lifetimeAtStart] = useState(loadLifetime);
     const [found, setFound] = useState<Solution[]>(loadFound);
+
+    // A first visit is walked through the two gestures before the game. The
+    // rules card is not shown on that visit as well: two lessons back to back,
+    // the second a list of what the first just showed, is one too many.
+    const [touring, setTouring] = useState(() => needsTutorial(found.length));
+    const [touredThisVisit] = useState(touring);
+    const endTour = () => {
+        markTutorialDone();
+        setTouring(false);
+    };
 
     // The board is rebuilt from what was found: which concepts are on screen is
     // presentation, what has been found is the game.
@@ -568,27 +580,42 @@ function App({
           )}
           </DevPanel>
           )}
-          <SoundNote muted={muted} />
-          <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} />
-          <PropertySheet rows={namedSoFar} />
+          {/* After the tutorial: it would sit under the tutorial's card. */}
+          {!touring && <SoundNote muted={muted} />}
+          {!touring && (
+              <>
+                  <Scoreboard finds={countFinds(found)} finished={finishedCount} total={pool.length} remaining={left} />
+                  <PropertySheet rows={namedSoFar} />
+              </>
+          )}
           <div className="corner corner--top-right">
-              <Hint available={left > 0} urging={stuck} onAsk={askForHint} />
-              <Help />
+              {/* Neither has anything to act on during the tutorial: its board
+                  has one answer, and it is not the game to start over. */}
+              {!touring && <Hint available={left > 0} urging={stuck} onAsk={askForHint} />}
+              <Help greet={!touredThisVisit} />
               <LanguageToggle />
-              <Reset onReset={playAgain} />
+              {!touring && <Reset onReset={playAgain} />}
               <SoundToggle muted={muted} onToggle={toggleMute} />
               <MusicToggle playing={music} onToggle={toggleMusic} />
               <MusicVolume level={musicVolume} playing={music} onChange={changeMusicVolume} />
           </div>
-          <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} reveal={reveal} onToggle={toggleConcept} onDropInto={dropInto} onClear={clearSelection} />
-          <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
+          {touring ? (
+              <Tutorial pool={pool} muted={muted} playFound={playFound} playReady={playReady} onDone={endTour} />
+          ) : (
+              <>
+                  <Graph concepts={concepts} pool={pool} selected={selected} found={found} arriving={arriving} hinted={hinted} reveal={reveal} onToggle={toggleConcept} onDropInto={dropInto} onClear={clearSelection} />
+                  <Form selected={selected} feedback={feedback} onSubmit={submitGuess} />
+              </>
+          )}
           <div className="corner corner--bottom-left">
               <Signature />
           </div>
+          {!touring && (
           <div className="corner corner--bottom-right">
               <Panel unlocked={unlocked} onForget={forgetAchievements} />
           </div>
-          {worthAsking({ finds: countFinds(found), asked: askedForSupport }) && (
+          )}
+          {!touring && worthAsking({ finds: countFinds(found), asked: askedForSupport }) && (
               <SupportInvite onDismiss={() => { saveAsked(); setAskedForSupport(true); }} />
           )}
           <Toast unlocked={announcing} onDismiss={dismissAnnouncement} />

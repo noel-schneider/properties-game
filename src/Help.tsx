@@ -106,12 +106,20 @@ export const LESSONS: { id: string; wording: UiKey; draw: () => React.ReactNode 
  * reach of a finger, which is the hole the board's own reveal had until it was
  * measured and fixed.
  */
-function Help() {
+interface HelpProps {
+    /**
+     * Whether to greet the player with the rules on arrival. Not on the visit
+     * the tutorial ran: they have just done what the card would list.
+     */
+    greet?: boolean;
+}
+
+function Help({ greet = true }: HelpProps) {
     const { t } = useTranslator();
     // Shown on arrival, every visit: five gestures the board cannot announce on
     // its own. Nothing is remembered between visits — somebody coming back
     // after a week has forgotten them too, and the way past is one click.
-    const [greeting, setGreeting] = useState(() => !skipIntro());
+    const [greeting, setGreeting] = useState(() => greet && !skipIntro());
     const [open, setOpen] = useState(false);
 
     const done = () => {
