@@ -74,5 +74,57 @@ test('on a phone nothing lies over anything else', async ({ page }) => {
 
   // And no keyboard shortcut offered to a screen with no keyboard.
   await expect(page.locator('.press-enter-wrapper')).toBeHidden()
-  if (process.env.PHONE_SHOT) await page.screenshot({ path: process.env.PHONE_SHOT })
+  if (process.env.PHONE_SHOT) {
+    await expect(page.locator('.toast')).toHaveCount(0, { timeout: 20_000 })
+    await page.screenshot({ path: process.env.PHONE_SHOT })
+  }
+})
+
+/**
+ * The tutorial's second lesson is a drag, and on a phone a drag is a finger:
+ * touch events, not a mouse. Dropping a concept into a group is the only way
+ * to do it, so a board that answered the mouse alone would leave a phone
+ * player stuck on step two.
+ */
+test.describe('a first visit on a phone', () => {
+  test.use({ storageState: { cookies: [], origins: [] } })
+
+  test('is walked through both gestures with a finger', async ({ page }) => {
+    await page.goto('/')
+    await page.evaluate(() => localStorage.setItem('properties-game:dev-panel', 'false'))
+    await page.reload()
+    await boardSettled(page)
+
+    for (const name of ['bee', 'ant', 'ladybug']) await page.locator(`.bubble[aria-label="${name}"]`).tap()
+    await page.locator('.input').fill('insect')
+    await page.getByRole('button', { name: 'Submit' }).tap()
+    await expect(page.locator('.bubble[aria-label="butterfly"]')).toBeVisible()
+    await boardSettled(page)
+
+    const middle = async (names: string[]) => {
+      const all = await Promise.all(names.map((name) => page.locator(`.bubble[aria-label="${name}"]`).boundingBox()))
+      return {
+        x: all.reduce((sum, b) => sum + b!.x + b!.width / 2, 0) / all.length,
+        y: all.reduce((sum, b) => sum + b!.y + b!.height / 2, 0) / all.length,
+      }
+    }
+    const touch = await page.context().newCDPSession(page)
+    const send = (type: string, at?: { x: number; y: number }) =>
+      touch.send('Input.dispatchTouchEvent', { type, touchPoints: at ? [at] : [] })
+
+    // Eased towards the group, re-aimed every step: it drifts under a drag.
+    let at = await middle(['butterfly'])
+    await send('touchStart', at)
+    for (let step = 0; step < 25; step++) {
+      const target = await middle(['bee', 'ant', 'ladybug'])
+      at = { x: at.x + (target.x - at.x) * 0.3, y: at.y + (target.y - at.y) * 0.3 }
+      await send('touchMove', at)
+      // A frame for the board to answer each move, as a finger gives it.
+      await page.waitForTimeout(30)
+    }
+    if (process.env.PHONE_SHOT) await page.screenshot({ path: process.env.PHONE_SHOT })
+    await send('touchEnd')
+
+    await expect(page.getByRole('region', { name: 'Tutorial' })).toContainText('all you need to know')
+  })
 })

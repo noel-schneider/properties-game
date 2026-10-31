@@ -17,6 +17,39 @@ export interface Point {
 export const VIEW_WIDTH = 1560;
 export const VIEW_HEIGHT = 800;
 
+export interface Frame {
+    width: number;
+    height: number;
+}
+
+export const LANDSCAPE: Frame = { width: VIEW_WIDTH, height: VIEW_HEIGHT };
+
+/**
+ * The frame on a phone held upright.
+ *
+ * The landscape frame on a screen that tall and narrow shrinks to fit its
+ * width, which drew every bubble a quarter of its size: thirty pixels across,
+ * under a finger twice that. Turned on its side and a little smaller, the same
+ * board fills the screen and the bubbles come out at twice that.
+ */
+export const PORTRAIT: Frame = { width: 700, height: 1020 };
+
+const UPRIGHT_PHONE = '(max-width: 700px) and (orientation: portrait)';
+
+/** Which frame the screen wants, and the other one if the phone is turned. */
+export function useFrame(portrait: Frame = PORTRAIT): Frame {
+    const query = () => window.matchMedia?.(UPRIGHT_PHONE);
+    const [upright, setUpright] = useState(() => query()?.matches ?? false);
+    useEffect(() => {
+        const list = query();
+        if (!list) return;
+        const changed = () => setUpright(list.matches);
+        list.addEventListener?.('change', changed);
+        return () => list.removeEventListener?.('change', changed);
+    }, []);
+    return upright ? portrait : LANDSCAPE;
+}
+
 /**
  * The hard minimum between two bubbles. Deliberately small: when collision is
  * what sets the spacing, every bubble ends up at exactly this distance from its
@@ -83,11 +116,11 @@ function huddle(): LayoutNode {
 }
 
 /** Holds every bubble inside the frame, edges included. */
-function hold(nodes: LayoutNode[], radii: number[]): void {
+function hold(nodes: LayoutNode[], radii: number[], frame: Frame): void {
     nodes.forEach((node, i) => {
         const radius = radii[i] ?? 0;
-        node.x = clamp(node.x, VIEW_WIDTH / 2 - radius);
-        node.y = clamp(node.y, VIEW_HEIGHT / 2 - radius);
+        node.x = clamp(node.x, frame.width / 2 - radius);
+        node.y = clamp(node.y, frame.height / 2 - radius);
     });
 }
 
@@ -113,6 +146,7 @@ export function useBubbleLayout(
     concepts: Concept[],
     radii: number[],
     ties: Tie[] = [],
+    shape: Frame = LANDSCAPE,
 ): Layout {
     // Everything the simulation is keyed on is compared by value, never by
     // array identity. App rebuilds its concepts array on every render, so
@@ -150,7 +184,7 @@ export function useBubbleLayout(
         setSettled(false);
         const step = () => {
             sim.tick();
-            hold(nodes, radii);
+            hold(nodes, radii, shape);
             setPoints(nodes.map((node) => ({ x: node.x, y: node.y })));
 
             if (sim.alpha() > sim.alphaMin()) {
@@ -161,9 +195,12 @@ export function useBubbleLayout(
             }
         };
         frame.current = requestAnimationFrame(step);
-    }, [nodes]);
+    }, [nodes, shape]);
 
     useEffect(() => {
+        // The pull is weaker along the frame's long side, so the cluster comes
+        // out the shape of the frame it has to fit in.
+        const upright = shape.height > shape.width;
         const links: SimulationLinkDatum<LayoutNode>[] = ties.map((tie) => ({
             source: tie.from,
             target: tie.to,
@@ -179,10 +216,8 @@ export function useBubbleLayout(
                     return (radii[nodes.indexOf(from)] ?? 0) + (radii[nodes.indexOf(to)] ?? 0) + GROUP_GAP;
                 })
                 .strength(0.6))
-            // Pulled harder vertically than horizontally, so the cluster comes
-            // out landscape like the frame it has to fit in.
-            .force('towardsCentreX', forceX(CENTRE.x).strength(0.06))
-            .force('towardsCentreY', forceY(CENTRE.y).strength(0.16))
+            .force('towardsCentreX', forceX(CENTRE.x).strength(upright ? 0.09 : 0.06))
+            .force('towardsCentreY', forceY(CENTRE.y).strength(upright ? 0.05 : 0.16))
             // Strong enough that the distance between bubbles is settled by
             // repulsion against this pull, rather than by collision. That is
             // what gives the uneven spacing a graph has and a packed tray of
@@ -212,7 +247,7 @@ export function useBubbleLayout(
 
         if (prefersReducedMotion()) {
             sim.tick(400);
-            hold(nodes, radii);
+            hold(nodes, radii, shape);
             setPoints(nodes.map((node) => ({ x: node.x, y: node.y })));
             setSettled(true);
             return;
@@ -225,7 +260,7 @@ export function useBubbleLayout(
             running.current = false;
             simulation.current = null;
         };
-    }, [nodes, radiiKey, tiesKey, wake]);
+    }, [nodes, radiiKey, tiesKey, wake, shape]);
 
     // Taking hold pins the bubble but does not stir the board. A plain click is
     // a grab and a release with nothing in between, and it should leave a

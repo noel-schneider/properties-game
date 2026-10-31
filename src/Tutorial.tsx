@@ -8,6 +8,14 @@ import {
     answer, clearSelection, drop, startTour, stepOf, toggle,
 } from "./tour";
 import type { Concept } from "./types";
+import type { Frame } from "./useBubbleLayout";
+
+/**
+ * Seven concepts and a newcomer have no use for the game's whole upright
+ * frame, and on a phone the card above takes a good part of the screen: a
+ * tighter frame draws them at a size a finger can hit.
+ */
+const UPRIGHT: Frame = { width: 520, height: 620 };
 
 interface TutorialProps {
     /** Every concept the game knows; the tutorial takes its handful from it. */
@@ -102,6 +110,7 @@ function Tutorial({ pool, muted, playFound, playReady, onDone }: TutorialProps) 
                 onToggle={pick}
                 onDropInto={dropInto}
                 onClear={() => setTour(clearSelection)}
+                upright={UPRIGHT}
             />
             {/* Gone once the group is named: the second lesson is a drag, and a
                 box asking to be typed in would be pointing the wrong way. */}

@@ -33,6 +33,26 @@
     cursor: var(--spark);
 }
 
+/*
+ * On a phone held upright: the room between the score and the answer box, and
+ * no more, so the board's upright frame fills it and nothing of it sits under
+ * the box.
+ */
+@media (max-width: 700px) and (orientation: portrait) {
+    .graph {
+        height: calc(100dvh - 18.5rem);
+        position: relative;
+        z-index: 1;
+        /* The whole board, not the bubbles alone: Chrome does not honour
+           touch-action on the shapes inside an SVG, only on the SVG itself,
+           so wherever the page is tall enough to scroll, a drag started on a
+           bubble was taken for a scroll and cancelled after its first move.
+           The board is the screen here; there is nothing under it to scroll
+           to. */
+        touch-action: none;
+    }
+}
+
 .bubble {
     cursor: var(--spark);
     /* The browser's own focus ring lands as a blue rectangle around the whole
