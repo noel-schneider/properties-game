@@ -1,8 +1,17 @@
 import { expect, test } from '@playwright/test'
 
-// Every other spec plays as a returning player, seeded in the config. This one
-// arrives for the first time.
-test.use({ storageState: { cookies: [], origins: [] } })
+import { BASE_URL } from './server'
+
+// Every other spec skips the arrival cards, seeded in the config. This one
+// arrives as a player who has been before: past the first-visit tutorial,
+// which takes the card's place on that one visit (tutorial.spec.ts), and
+// greeted by the card on every visit after.
+test.use({
+  storageState: {
+    cookies: [],
+    origins: [{ origin: BASE_URL, localStorage: [{ name: 'properties-game:tutorial-done', value: 'true' }] }],
+  },
+})
 
 test('every arrival is shown how to play', async ({ page }) => {
   await page.goto('/')

@@ -1,0 +1,70 @@
+/*
+ * The tutorial's instructions: one card at the top of the screen, where the
+ * score sits in the game, so the eye goes from what to do to the board below.
+ */
+.tutorial {
+  position: absolute;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: min(32rem, calc(100vw - 2rem));
+  box-sizing: border-box;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: 0 0 24px var(--shell-glow);
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+.tutorial__step {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.tutorial__says {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  color: var(--ink-strong);
+}
+
+/* Small and plain: the way out is always there, never the thing to press. */
+.tutorial__skip {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.tutorial__skip:hover {
+  color: var(--ink);
+}
+
+.tutorial__start {
+  padding: 0.55rem 1.4rem;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.tutorial__start:hover:not(:disabled) {
+  background: var(--accent-light);
+  border-color: var(--accent-light);
+}
