@@ -46,9 +46,8 @@ test('the board shows French names when playing in French', () => {
 test('the interface speaks French too', () => {
   renderIn('fr', <App playChime={() => {}} />);
 
-  // Nothing is picked, so the box is showing what it is waiting for — in French.
-  expect(screen.getByRole('textbox')).toHaveAttribute('placeholder', words.fr.ui['form.needThree']);
-  expect(screen.getByRole('button', { name: words.fr.ui['form.submit'] })).toBeInTheDocument();
+  // Nothing is picked, so the row says what it is waiting for — in French.
+  expect(screen.getByText(words.fr.ui['form.needThree'])).toBeInTheDocument();
   expect(screen.getByText(words.fr.ui['score.found'], { exact: false })).toBeInTheDocument();
 });
 
@@ -124,8 +123,8 @@ test('switching language mid-run keeps what has been found', async () => {
   expect(screen.getByTestId('found')).toHaveTextContent(scoreBefore!);
   expect(screen.getByRole('button', { name: new RegExp(words.fr.ui['panel.open']) }))
     .toHaveTextContent(earnedBefore!.replace('Achievements', words.fr.ui['panel.open']));
-  // The answer cleared the selection, so the box is back to asking for three.
-  expect(screen.getByRole('textbox')).toHaveAttribute('placeholder', words.fr.ui['form.needThree']);
+  // The answer cleared the selection, so the row is back to asking for three.
+  expect(screen.getByText(words.fr.ui['form.needThree'])).toBeInTheDocument();
 });
 
 test('the chosen language is remembered', async () => {

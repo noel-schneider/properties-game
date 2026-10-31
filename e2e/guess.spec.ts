@@ -91,7 +91,8 @@ test('a found group stays on the board, tied, and its concepts carry on', async 
   await expect(page.locator('.found__label')).toHaveCount(0)
   await page.getByRole('checkbox', { name: names[0], exact: true }).hover()
   await expect(page.locator('.found__label')).toHaveText(property)
-  await expect(page.locator('.input')).toHaveValue('')
+  // The box went with the selection, word and all.
+  await expect(page.locator('.input')).toHaveCount(0)
 })
 
 test('a concept can be dropped onto a category already found', async ({ page }) => {

@@ -22,21 +22,31 @@ test('nothing moves while the box is being answered', async ({ page }) => {
     // layout is to blame for.
     await page.evaluate(() => document.fonts.ready)
 
-    const where = async () => ({
-      input: Math.round((await page.locator('.input').boundingBox())!.y),
-      hint: Math.round((await page.locator('.press-enter-wrapper').boundingBox())!.y),
-    })
+    // The row rather than the box: below three there is no box, only the line
+    // that stands in its place, and the row is what must not move.
+    const where = async () => {
+      const row = (await page.locator('.input-and-submit-container').boundingBox())!
+      return {
+        row: Math.round(row.y),
+        height: Math.round(row.height),
+        hint: Math.round((await page.locator('.press-enter-wrapper').boundingBox())!.y),
+      }
+    }
 
     const idle = await where()
 
-    // One concept picked: the box goes grey and swaps its placeholder for the
-    // reminder, which is the moment the layout used to shift.
+    // One concept picked: the reminder counts down, which is the moment the
+    // layout used to shift.
     await page.locator('.bubble').first().click()
-    await expect(page.locator('.input')).toHaveAttribute('readonly', '')
+    await expect(page.locator('.pick-count__pip--lit')).toHaveCount(1)
     const short = await where()
 
+    // The third brings the box in place of the reminder.
     const dealt = await page.getByRole('checkbox').evaluateAll((n) => n.map((e) => e.getAttribute('aria-label')!))
     for (const name of dealt.slice(1, 3)) await page.getByRole('checkbox', { name, exact: true }).click()
+    await expect(page.locator('.input')).toBeFocused()
+    const ready = await where()
+
     await page.locator('.input').fill('zzzzzzzz')
     await page.getByRole('button', { name: 'Submit' }).click()
     const wrong = await where()
@@ -44,6 +54,7 @@ test('nothing moves while the box is being answered', async ({ page }) => {
 
     expect(text).toMatch(/not a category/i)
     expect(short).toEqual(idle)
+    expect(ready).toEqual(idle)
     expect(wrong).toEqual(idle)
   }
 })

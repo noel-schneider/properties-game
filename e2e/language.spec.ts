@@ -9,8 +9,8 @@ test('the game opens in French for a French browser', async ({ browser }) => {
   await page.goto('/')
   await boardSettled(page)
 
-  await expect(page.locator('.input'))
-    .toHaveAttribute('placeholder', fr.ui['form.needThree'])
+  await expect(page.locator('.pick-prompt__text'))
+    .toHaveText(fr.ui['form.needThree'])
   await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
   await context.close()
 })
@@ -19,8 +19,8 @@ test('the game opens in English otherwise', async ({ page }) => {
   await page.goto('/')
   await boardSettled(page)
 
-  await expect(page.locator('.input'))
-    .toHaveAttribute('placeholder', en.ui['form.needThree'])
+  await expect(page.locator('.pick-prompt__text'))
+    .toHaveText(en.ui['form.needThree'])
   await expect(page.locator('html')).toHaveAttribute('lang', 'en')
 })
 
@@ -31,17 +31,16 @@ test('the flags switch the whole game over, and the choice sticks', async ({ pag
   await page.reload()
   await boardSettled(page)
 
-  await expect(page.locator('.input'))
-    .toHaveAttribute('placeholder', en.ui['form.needThree'])
+  await expect(page.locator('.pick-prompt__text'))
+    .toHaveText(en.ui['form.needThree'])
 
   // The flags live behind the one flying now, and a hover is what opens them.
   await page.getByRole('button', { name: en.ui['language.group'] }).hover()
   await page.getByRole('button', { name: fr.ui['language.fr'] }).click()
 
-  // Nothing is picked, so the box is saying what it waits for — in French.
-  await expect(page.locator('.input'))
-    .toHaveAttribute('placeholder', fr.ui['form.needThree'])
-  await expect(page.getByRole('button', { name: fr.ui['form.submit'] })).toBeVisible()
+  // Nothing is picked, so the row is saying what it waits for — in French.
+  await expect(page.locator('.pick-prompt__text'))
+    .toHaveText(fr.ui['form.needThree'])
   await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
 
   // The bubbles are renamed too, not just the chrome.
@@ -53,8 +52,8 @@ test('the flags switch the whole game over, and the choice sticks', async ({ pag
 
   await page.reload()
   await boardSettled(page)
-  await expect(page.locator('.input'))
-    .toHaveAttribute('placeholder', fr.ui['form.needThree'])
+  await expect(page.locator('.pick-prompt__text'))
+    .toHaveText(fr.ui['form.needThree'])
 })
 
 test('a flag can be reached from the button that opens it', async ({ page }) => {
