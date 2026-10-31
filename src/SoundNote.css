@@ -13,12 +13,12 @@
     gap: 0.55rem;
     padding: 0.5rem 0.6rem 0.5rem 0.8rem;
     border-radius: 0.6rem;
-    border: 1px solid #40405c;
-    background: rgba(28, 30, 48, 0.94);
-    box-shadow: 0 10px 26px rgba(8, 8, 16, 0.4);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    box-shadow: 0 10px 26px var(--shadow);
     font-family: 'Poppins', system-ui, sans-serif;
     font-size: 0.78rem;
-    color: #c9c9db;
+    color: var(--ink);
     animation: sound-note-in 0.3s ease-out both;
 }
 
@@ -40,12 +40,12 @@
     padding: 0 0.3rem;
     border: none;
     background: none;
-    color: #8f8aa6;
+    color: var(--ink-soft);
     font-size: 1rem;
     line-height: 1;
     cursor: pointer;
 }
 
 .sound-note__close:hover {
-    color: #c9c9db;
+    color: var(--ink);
 }

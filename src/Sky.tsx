@@ -18,22 +18,30 @@ export const SHAFTS = 3;
 /**
  * How many bodies of light hang in the deep.
  *
- * Four very large, very soft gradients drifting over one another, in hues
+ * Three very large, very soft gradients drifting over one another, in hues
  * close enough to be one colour and far enough apart to keep the water from
  * reading as a flat wash. This is what replaced a tiled fractal-noise
  * texture: noise is what a generated image looks like, however it is tinted,
  * and no amount of it is ever mistaken for water.
  */
-export const BLOOMS = 4;
+export const BLOOMS = 3;
 
 /**
- * How many motes drift up through the water.
+ * How many flakes of marine snow sink through the water.
  *
- * Twenty is the number at which the eye stops counting them and starts
- * reading the water as full of something. Each is one element the compositor
- * holds and moves on its own; none of them touches a render.
+ * Enough that the eye stops counting them and starts reading the water as
+ * full of something. Each is one element the compositor holds and moves on
+ * its own; none of them touches a render.
  */
-export const MOTES = 20;
+export const MOTES = 24;
+
+/**
+ * How many specks of plankton flare in the dark.
+ *
+ * Each is lit for a fifth of its cycle at most, so at any moment only two or
+ * three are glowing — enough to say something down here is alive.
+ */
+export const PLANKTON = 14;
 
 /**
  * The background: deep water, with the surface somewhere far above the board.
@@ -105,23 +113,42 @@ function Sky({ risen = 0 }: SkyProps) {
     }), []);
 
     /**
-     * Where each mote starts, how long it takes to climb and how far it
+     * Where each flake starts, how long it takes to fall and how far it
      * wanders on the way.
      *
      * Settled once rather than drawn fresh: a new set on every render would
      * have the whole water jump every time a chord lands. Spread by index
-     * rather than at random, so no two of them ever climb in formation —
-     * which is the one thing drifting plankton never does.
+     * rather than at random, so no two of them ever fall in formation —
+     * which is the one thing drifting debris never does.
      */
     const motes = useMemo(
         () =>
             Array.from({ length: MOTES }, (_, i) => ({
                 left: ((i * 37) % 100) + (i % 3),
-                delay: -((i * 41) % 38),
-                rise: 18 + ((i * 7) % 23),
-                drift: (i % 2 === 0 ? 1 : -1) * (3 + (i % 5) * 2),
-                size: 3.4 + (i % 4) * 1.4,
-                dim: 0.3 + (i % 4) * 0.12,
+                delay: -((i * 41) % 58),
+                rise: 30 + ((i * 7) % 31),
+                drift: (i % 2 === 0 ? 1 : -1) * (2 + (i % 5) * 1.5),
+                size: 1.6 + (i % 4) * 0.9,
+                dim: 0.22 + (i % 4) * 0.1,
+            })),
+        [],
+    );
+
+    /**
+     * Where each speck of plankton hangs, and when it flares.
+     *
+     * Kept out of the floor and away from the very top, and spread by index
+     * for the same reason as the snow.
+     */
+    const sparks = useMemo(
+        () =>
+            Array.from({ length: PLANKTON }, (_, i) => ({
+                left: (i * 53) % 97 + 1.5,
+                top: 14 + ((i * 29) % 66),
+                cycle: 9 + ((i * 5) % 13),
+                delay: -((i * 3.7) % 17) - i * 0.31,
+                size: 7 + (i % 3) * 3,
+                dim: 0.45 + (i % 4) * 0.13,
             })),
         [],
     );
@@ -144,13 +171,16 @@ function Sky({ risen = 0 }: SkyProps) {
             </div>
 
             {/*
-              * Something large, a long way off, every few minutes.
+              * Something small with a light of its own, every few minutes.
               *
               * Never explained and never acknowledged by the game. It costs
               * one element and one very slow animation, and it is the detail
               * people tell each other about.
               */}
             <div className="sky__passer" />
+
+            {/* Where the light comes in, glowing through the surface. */}
+            <div className="sky__sun" />
 
             {/*
               * The swell alternates between two identical animations rather
@@ -168,6 +198,26 @@ function Sky({ risen = 0 }: SkyProps) {
             >
                 {Array.from({ length: SHAFTS }, (_, i) => (
                     <span key={i} className={`sky__shaft sky__shaft--${i + 1}`} />
+                ))}
+            </div>
+
+            {/* The sea floor, only just made out. */}
+            <div className="sky__floor" />
+
+            <div className="sky__glow">
+                {sparks.map((spark, i) => (
+                    <span
+                        key={i}
+                        className="sky__spark"
+                        style={{
+                            '--spark-left': `${spark.left}%`,
+                            '--spark-top': `${spark.top}%`,
+                            '--spark-cycle': `${spark.cycle}s`,
+                            '--spark-delay': `${spark.delay.toFixed(2)}s`,
+                            '--spark-size': `${spark.size}px`,
+                            '--spark-dim': String(spark.dim),
+                        } as React.CSSProperties}
+                    />
                 ))}
             </div>
 

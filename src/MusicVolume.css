@@ -22,13 +22,13 @@
 .volume::-webkit-slider-runnable-track {
     height: 3px;
     border-radius: 2px;
-    background: #40405c;
+    background: var(--line);
 }
 
 .volume::-moz-range-track {
     height: 3px;
     border-radius: 2px;
-    background: #40405c;
+    background: var(--line);
 }
 
 .volume::-webkit-slider-thumb {
@@ -40,7 +40,7 @@
     margin-top: -0.3rem;
     border: none;
     border-radius: 50%;
-    background: #c9c9db;
+    background: var(--ink);
 }
 
 .volume::-moz-range-thumb {
@@ -48,19 +48,19 @@
     height: 0.7rem;
     border: none;
     border-radius: 50%;
-    background: #c9c9db;
+    background: var(--ink);
 }
 
 .volume:hover:not(:disabled)::-webkit-slider-thumb {
-    background: #ffad69;
+    background: var(--accent);
 }
 
 .volume:hover:not(:disabled)::-moz-range-thumb {
-    background: #ffad69;
+    background: var(--accent);
 }
 
 .volume:focus-visible {
-    outline: 2px solid #ffad69;
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-radius: 0.3rem;
 }

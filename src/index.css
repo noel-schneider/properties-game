@@ -1,3 +1,67 @@
+/*
+ * The palette, in one place: living light in the deep.
+ *
+ * Every colour the interface uses is named here and nowhere else, so trying
+ * another palette is a matter of rewriting this block.
+ */
+:root {
+  /* The water, for anything that has to match the background behind it. */
+  --water-deep: #010507;
+
+  /* Panels, buttons, the input: near-black glass over the water. */
+  --panel: rgba(3, 16, 20, 0.88);
+  --panel-hover: rgba(8, 34, 40, 0.92);
+  --panel-muted: rgba(3, 16, 20, 0.6);
+  --line: #24484a;
+  --line-strong: #3d6a6a;
+
+  /* Near-white ink with a breath of green, the colour of the lure's light. */
+  --ink-strong: #f2fff8;
+  --ink: #d4efe8;
+  --ink-soft: #86aaa4;
+  --ink-faint: #557873;
+
+  /* The bubbles: dark bodies ringed in white neon, the same cold light the
+     anglerfish carries. */
+  --shell: #08191c;
+  --shell-hover: #0e262a;
+  --shell-line: #effff9;
+  --shell-glow: rgba(190, 255, 236, 0.45);
+
+  /* The accent: gold, the one warm light down here. */
+  --accent: #ffcf5c;
+  --accent-deep: #d9a530;
+  --accent-light: #ffe08f;
+  --accent-pale: #fff0c4;
+  /* What is written on the accent. */
+  --on-accent: #1d1400;
+
+  /* Text written straight on the water. */
+  --foam: #f2fff8;
+  --foam-soft: rgba(225, 250, 242, 0.68);
+  --foam-faint: rgba(225, 250, 242, 0.35);
+
+  /* The nudge: violet, so it is told apart from both the white and the gold. */
+  --cool: #c78bff;
+  --cool-light: #f1e4ff;
+
+  /* A concept with nothing left: its light gone out. */
+  --spent: #06161a;
+  --spent-line: #0f3a40;
+
+  /* The outline that keeps a label readable wherever it lands. */
+  --outline: #01080a;
+
+  --good: #8dff9e;
+  --bad: #ff8f8a;
+  --warn: #ffe08f;
+  --danger: #e05a4f;
+  --danger-hover: #ec7065;
+
+  --scrim: rgba(0, 6, 8, 0.66);
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
 * {
   font-family: 'Poppins', sans-serif;
 }
@@ -5,7 +69,7 @@
 /* The sky sits behind the page on its own layer, so the page itself must not
    paint over it. The colour stays on the root as the fallback underneath. */
 html {
-  background-color: #05070e;
+  background-color: var(--water-deep);
 }
 
 body {

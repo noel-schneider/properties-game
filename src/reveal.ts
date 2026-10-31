@@ -45,15 +45,15 @@ export function marksOf(reveal: Reveal): 'arcs' | 'rings' | null {
  *
  * Five, because five is the most properties one concept can carry and no two
  * of its categories may share a colour. Each one has to be read on the almost
- * black sky *and* on an almost white bubble, which rules out anything very
+ * black water *and* on a dark shell ringed in white, which rules out anything very
  * pale or very dark — these sit in the middle on purpose.
  */
 export const HUES = [
-    '#ffad69', // the game's own orange
-    '#6fcfd0', // teal
-    '#b48cff', // violet
-    '#ff7fa5', // pink
-    '#9fd356', // green
+    '#ffcf5c', // the game's own gold
+    '#ff8a5c', // ember
+    '#c78bff', // violet
+    '#ff6fb5', // pink
+    '#8dff9e', // green
 ] as const;
 
 /**

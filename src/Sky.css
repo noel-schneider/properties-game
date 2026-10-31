@@ -25,15 +25,15 @@
      */
     background:
         linear-gradient(to bottom,
-            #273c62 0%,
-            #223355 11%,
-            #1c2b47 23%,
-            #17223a 36%,
-            #121a2d 50%,
-            #0e1422 64%,
-            #0a0e18 79%,
-            #05070e 100%),
-        #05070e;
+            #0f3a40 0%,
+            #0c3137 11%,
+            #0a282e 23%,
+            #082025 36%,
+            #06181c 50%,
+            #041115 64%,
+            #030b0e 79%,
+            #010507 100%),
+        #010507;
 }
 
 /*
@@ -50,14 +50,14 @@
     inset: 0;
     opacity: var(--risen);
     background: linear-gradient(to bottom,
-        #3f6aa6 0%,
-        #375d94 11%,
-        #2f5082 23%,
-        #28436f 36%,
-        #21375c 50%,
-        #1a2b49 64%,
-        #142037 79%,
-        #0d1525 100%);
+        #23707a 0%,
+        #1e636d 11%,
+        #19555f 23%,
+        #144650 36%,
+        #103840 50%,
+        #0c2a31 64%,
+        #081d22 79%,
+        #041014 100%);
 }
 
 /*
@@ -76,11 +76,11 @@
 }
 
 /* ---------------------------------------------------------------------------
- * The deep: four bodies of light, drifting over one another.
+ * The deep: three bodies of light, drifting over one another.
  *
  * This replaced a tiled fractal-noise texture, which is what a generated
  * image looks like however it is tinted — mottled, repeating, and never once
- * mistaken for water. What is here instead has no texture at all: four very
+ * mistaken for water. What is here instead has no texture at all: three very
  * large radial gradients in hues close enough to read as one colour, each
  * drifting and swelling on its own long cycle, added to the water rather than
  * laid over it.
@@ -93,7 +93,9 @@
     inset: -25%;
     /* Furthest off of everything, so it barely leans at all. */
     translate: calc(var(--lean-x) * 7px) calc(var(--lean-y) * 5px);
-    mix-blend-mode: screen;
+    /* Plain alpha rather than a screen blend: over water this dark the two
+       come out the same, and a blend mode is another full-screen pass on
+       every frame. */
     /* Gone by the floor: light this far down is the memory of light. */
     -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.75) 42%, rgba(0, 0, 0, 0.25) 72%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.75) 42%, rgba(0, 0, 0, 0.25) 72%, transparent 100%);
@@ -109,11 +111,8 @@
 /*
  * The broad one, high and off to the left: the nearest thing to a source.
  *
- * All four sit in the violet-blue the interface is already built out of —
- * #1f2135 and #40405c on the panels, #6f6a85 on the gauges. The water was a
- * clear teal before, which is a different family of colours altogether, and
- * the board looked pasted onto it. Indigo also leaves the orange where it
- * does the most: straight across the wheel from it.
+ * All three sit in the turquoise of the water itself, a shade or two apart,
+ * so they read as light moving through it rather than as colours on it.
  */
 .sky__bloom--1 {
     --bloom-time: 37s;
@@ -121,7 +120,7 @@
     left: -12%;
     width: 78%;
     height: 68%;
-    background: radial-gradient(closest-side, rgba(62, 108, 176, 0.5), rgba(62, 108, 176, 0.28) 46%, rgba(62, 108, 176, 0) 100%);
+    background: radial-gradient(closest-side, rgba(70, 168, 170, 0.26), rgba(70, 168, 170, 0.14) 46%, rgba(70, 168, 170, 0) 100%);
 }
 
 /* Its answer on the other side, colder and further down. */
@@ -132,10 +131,10 @@
     right: -18%;
     width: 86%;
     height: 82%;
-    background: radial-gradient(closest-side, rgba(46, 72, 142, 0.46), rgba(46, 72, 142, 0.25) 48%, rgba(46, 72, 142, 0) 100%);
+    background: radial-gradient(closest-side, rgba(34, 110, 128, 0.26), rgba(34, 110, 128, 0.13) 48%, rgba(34, 110, 128, 0) 100%);
 }
 
-/* A wash of indigo across the middle, which is what stops the whole thing
+/* A greener wash across the middle, which is what stops the whole thing
    being one colour thinned out. */
 .sky__bloom--3 {
     --bloom-time: 71s;
@@ -144,20 +143,7 @@
     left: 14%;
     width: 96%;
     height: 72%;
-    background: radial-gradient(closest-side, rgba(96, 80, 152, 0.34), rgba(96, 80, 152, 0.16) 52%, rgba(96, 80, 152, 0) 100%);
-}
-
-/* And one small flush of the game's own pink, low down and nearly out: the
-   only thing suggesting anything is alive at that depth, and the same colour
-   the loops of a found group are drawn in. */
-.sky__bloom--4 {
-    --bloom-time: 43s;
-    --bloom-delay: -17s;
-    top: 46%;
-    left: 36%;
-    width: 46%;
-    height: 44%;
-    background: radial-gradient(closest-side, rgba(156, 86, 124, 0.3), rgba(156, 86, 124, 0.13) 50%, rgba(156, 86, 124, 0) 100%);
+    background: radial-gradient(closest-side, rgba(40, 132, 120, 0.18), rgba(40, 132, 120, 0.08) 52%, rgba(40, 132, 120, 0) 100%);
 }
 
 /*
@@ -171,149 +157,210 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Something large going past, a long way off.
+ * Something small going past in the dark, carrying its own light.
  *
- * Barely darker than the water it crosses, because that is what distance
- * does to a thing in water, and slow enough that you are never quite sure
- * you saw it. Once every four minutes or so: a wonder that turns up on
- * schedule stops being one.
+ * An anglerfish, drawn from the real thing: a body that is nearly all head,
+ * an underslung jaw gaping open on a red maw and needle teeth too long to
+ * close over, an eye barely there, and the lure hung out in front of the
+ * mouth on its rod. Lit only from the front, by that lure, flickering the way
+ * living light does. Once every four minutes or so: a wonder that
+ * turns up on schedule stops being one.
  *
- * One element and one animation. It is off screen for nine tenths of its
- * cycle, which costs nothing to be.
+ * One element, its halo and two animations. It is off screen for nine tenths
+ * of its cycle, which costs nothing to be.
  * ------------------------------------------------------------------------ */
 .sky__passer {
     position: absolute;
     /*
-     * High, and above the board rather than across it. Two earlier places
-     * were wrong for two different reasons: down in the deep the silhouette
-     * and the water are the same colour and it crossed unseen, and at a
-     * quarter down it passed behind the bubbles, where the only part of it
-     * anybody saw was the tail.
+     * Low, in the darkest of the water, where the lure has the most to light
+     * up: under the board rather than across it, so it is not lost behind the
+     * bubbles.
      */
-    top: 8%;
+    top: 70%;
     left: 0;
-    width: 215px;
-    height: 79px;
+    /* The fish is 144 by 90; the margin round it is room for the glow, which
+       the mask would otherwise cut off square at the edge of the box. */
+    width: 224px;
+    height: 170px;
+    margin: -40px 0 0 -40px;
     opacity: 0;
     pointer-events: none;
     will-change: transform;
     background-repeat: no-repeat;
-    background-size: contain;
-    /* A whale, more or less: a long body, a notch for the tail, no detail at
-       all. Anything more precise would be a picture of a fish rather than
-       the shape of one too far away to make out. */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 70'%3E%3Cpath fill='%2305070e' d='M8 36 C34 10 96 6 128 22 C140 28 150 33 160 33 L186 18 L178 36 L186 54 L160 39 C150 39 140 44 128 50 C96 66 34 62 8 36 Z'/%3E%3C/svg%3E");
+    background-size: 144px 90px;
+    background-position: 40px 40px;
+    /*
+     * Seen only where the lure reaches. The light dies within a few
+     * centimetres, so the face is just made out — teeth, the edge of a jaw —
+     * and the rest of the body goes back into the dark it came out of.
+     */
+    -webkit-mask-image: radial-gradient(circle 90px at 178px 57px,
+        #000 0, rgba(0, 0, 0, 0.7) 18px, rgba(0, 0, 0, 0.3) 40px, rgba(0, 0, 0, 0.07) 62px, transparent 84px);
+    mask-image: radial-gradient(circle 90px at 178px 57px,
+        #000 0, rgba(0, 0, 0, 0.7) 18px, rgba(0, 0, 0, 0.3) 40px, rgba(0, 0, 0, 0.07) 62px, transparent 84px);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 100'%3E %3Cdefs%3E %3CradialGradient id='s' cx='0.92' cy='0.18' r='0.95'%3E%3Cstop offset='0' stop-color='%233b6a64'/%3E%3Cstop offset='0.3' stop-color='%2315302f'/%3E%3Cstop offset='0.7' stop-color='%23071312'/%3E%3Cstop offset='1' stop-color='%23020606'/%3E%3C/radialGradient%3E %3ClinearGradient id='m' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%232a0b0c'/%3E%3Cstop offset='1' stop-color='%23050101'/%3E%3C/linearGradient%3E %3CradialGradient id='e' cx='0.5' cy='0.5' r='0.5'%3E%3Cstop offset='0' stop-color='%23fbfff9'/%3E%3Cstop offset='0.6' stop-color='%23c8fff0'/%3E%3Cstop offset='1' stop-color='%237fe8d6'/%3E%3C/radialGradient%3E %3C/defs%3E %3Cpath fill='url(%23m)' d='M136 50 C126 51 114 56 106 63 C126 72 150 52 154 31 Z'/%3E %3Cpath fill='url(%23s)' d='M31 58 C44 36 78 17 108 19 C117 20 122 24 125 30 C128 37 133 42 136 50 C126 51 114 56 106 63 C126 72 150 52 154 31 C156 42 151 54 145 61 C136 74 120 83 100 85 C72 89 46 79 32 64 Z'/%3E %3Cpath fill='none' stroke='%235e948a' stroke-opacity='0.35' stroke-width='0.8' d='M108 19 C117 20 122 24 125 30 C128 37 133 42 136 50'/%3E %3Cpath fill='none' stroke='%235e948a' stroke-opacity='0.3' stroke-width='0.8' d='M154 31 C156 42 151 54 145 61'/%3E %3Cg fill='%23e4efe6' fill-opacity='0.9'%3E%3Cpath d='M134.3 50.7L131.7 48.0L132.9 51.3Z M130.6 52.3L127.0 48.0L129.2 52.9Z M127.0 53.9L123.2 49.3L125.4 54.6Z M123.4 55.5L120.3 52.2L121.7 56.2Z M119.7 57.1L116.7 53.9L118.0 57.8Z M115.9 58.7L113.1 55.7L114.5 59.3Z M112.5 60.2L109.1 56.7L110.5 61.1Z M108.5 61.9L106.3 59.8L107.1 62.5Z'/%3E%3Cpath d='M108.9 61.1L112.6 68.2L110.8 59.8Z M113.7 57.9L117.6 66.2L115.2 56.9Z M118.4 54.7L123.6 67.1L119.6 53.9Z M122.9 51.7L128.2 64.2L124.3 50.8Z M127.6 48.6L131.0 56.1L128.8 47.8Z M131.9 45.8L136.0 54.3L133.7 44.5Z M136.5 42.6L140.1 49.9L138.2 41.5Z M141.2 39.5L145.6 49.3L142.7 38.5Z M145.9 36.4L149.5 44.4L147.1 35.6Z M150.5 33.4L152.8 37.5L151.8 32.5Z'/%3E%3C/g%3E %3Ccircle cx='119' cy='33' r='1.9' fill='%239fbdb5' fill-opacity='0.7'/%3E%3Ccircle cx='119.4' cy='33.2' r='1' fill='%23000'/%3E %3Cpath fill='none' stroke='%23142a28' stroke-width='1.5' stroke-linecap='round' d='M114 21 C116 6 136 -1 148 6 C153 9 154 13 153 17'/%3E %3Cpath fill='none' stroke='%239ff3e2' stroke-opacity='0.6' stroke-width='0.5' d='M153 21 l-2 4 M153.5 21 l1.5 4.5 M152.6 21.5 l-0.5 3.5'/%3E %3Ccircle cx='153' cy='19' r='3.2' fill='url(%23e)'/%3E %3C/svg%3E");
     animation: passing 247s linear infinite;
+}
+
+/* The lure's glow, centred on the lure at the tip of the rod. */
+.sky__passer::before {
+    content: '';
+    position: absolute;
+    /* The lure: 153, 19 on the fish's 160 by 100 drawing, plus the margin. */
+    left: 178px;
+    top: 57px;
+    width: 64px;
+    height: 64px;
+    margin: -32px 0 0 -32px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+        rgba(236, 255, 246, 0.9) 0%,
+        rgba(160, 255, 228, 0.45) 14%,
+        rgba(110, 230, 210, 0.16) 40%,
+        rgba(90, 210, 200, 0) 70%);
+    animation: lure 3.7s ease-in-out infinite;
+}
+
+/* Uneven on purpose: living light gutters, it does not blink. */
+@keyframes lure {
+    0%, 100% { opacity: 0.85; transform: scale(1); }
+    18%      { opacity: 1;    transform: scale(1.12); }
+    34%      { opacity: 0.55; transform: scale(0.9); }
+    52%      { opacity: 0.95; transform: scale(1.05); }
+    70%      { opacity: 0.7;  transform: scale(0.96); }
 }
 
 /*
  * Across in about half a minute, then four minutes of nothing. The fade is
  * inside the crossing, so it is never seen to arrive at an edge or stop at
- * one.
+ * one. Facing right, so it swims the way it is going.
  */
 @keyframes passing {
-    0%    { transform: translate3d(-18vw, 0, 0) scaleX(1); opacity: 0; }
-    2%    { opacity: 0.55; }
-    10%   { opacity: 0.55; }
-    12%   { transform: translate3d(118vw, 0, 0) scaleX(1); opacity: 0; }
-    100%  { transform: translate3d(118vw, 0, 0) scaleX(1); opacity: 0; }
+    0%    { transform: translate3d(-18vw, 0, 0); opacity: 0; }
+    2%    { opacity: 1; }
+    10%   { opacity: 1; }
+    12%   { transform: translate3d(118vw, 0, 0); opacity: 0; }
+    100%  { transform: translate3d(118vw, 0, 0); opacity: 0; }
 }
 
 .sky[data-still="true"] .sky__passer {
-    /* Not stilled — gone. A silhouette parked in the middle of the board is
-       not a still version of something swimming past, it is a smudge nobody
-       can explain. */
+    /* Not stilled — gone. A fish parked in the middle of the board is not a
+       still version of something swimming past, it is a smudge nobody can
+       explain. */
     display: none;
 }
 
 /* ---------------------------------------------------------------------------
- * The shafts: light coming down from a surface a long way up.
+ * The rays: sunlight broken up by the surface and fanned down through water.
  *
- * Each one leans its own way and sways on its own cycle. The cycles do not
- * divide into each other, so the background never visibly returns to a frame
- * you have seen — small enough that you notice it only by looking.
+ * Each shaft is a whole layer of thin, nearly vertical rays rather than one
+ * wide beam. Three layers with spacings that do not divide into each other
+ * overlap into an irregular set of rays, and as each drifts on its own cycle
+ * the rays slide together and apart, which is the shimmer real light under a
+ * moving surface has.
+ *
+ * Still only a transform on each layer: the gradient is painted once.
  * ------------------------------------------------------------------------ */
-.sky__shaft {
-    position: absolute;
-    top: -34%;
-    height: 132%;
-    will-change: transform;
-    /*
-     * Pivoted on a point well above the frame, so the three of them open out
-     * from one source rather than hanging parallel. Parallel bars were the
-     * other half of what made this look drawn rather than lit.
-     */
-    transform-origin: 50% -46%;
-    /* Stronger as the surface comes down: light that has less water to cross
-       arrives with more of itself left. Through a variable, so a shaft can
-       still be dimmer than its neighbours without losing the rise. */
-    --dim: 1;
-    opacity: calc(var(--dim) * (0.75 + var(--risen) * 0.45));
-    /*
-     * The blur sits on this element and the shape on the one inside it.
-     * `clip-path` is applied after `filter`, so a shape cut here comes out
-     * with two hard diagonal edges that the blur has already passed over —
-     * which is exactly what the first attempt looked like.
-     */
-    filter: blur(26px);
+.sky {
+    /* Where the sun sits above the surface, a little right of centre. */
+    --source-x: 54%;
 }
 
-.sky__shaft::before {
-    content: '';
+.sky__sun {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom,
-        rgba(186, 206, 250, 0.2) 0%,
-        rgba(170, 190, 240, 0.145) 18%,
-        rgba(150, 168, 222, 0.094) 36%,
-        rgba(130, 146, 200, 0.054) 54%,
-        rgba(112, 126, 178, 0.024) 72%,
-        rgba(96, 108, 158, 0) 100%);
-    /* Narrow where it enters and spread by the time it arrives, which is what
-       light does on its way down through anything. */
-    clip-path: polygon(41% 0%, 59% 0%, 100% 100%, 0% 100%);
-    /* Soft at both edges even so, or a shaft of light has a side you can
-       trace with a finger, which no shaft of light has. */
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 26%, #000 74%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, #000 26%, #000 74%, transparent 100%);
-    /* Further off than the light behind it, so it leans less: that
-       difference is the whole of the depth. */
-    translate: calc(var(--lean-x) * 12px) 0;
+    left: calc(var(--source-x) - 45vmax);
+    top: calc(-45vmax + 4vh);
+    width: 90vmax;
+    height: 90vmax;
+    border-radius: 50%;
+    /* Warm at the very heart and cooling to the water's own blue: the only
+       warm light in the scene, so it reads as the sun and not a lamp. */
+    background: radial-gradient(closest-side,
+        rgba(255, 236, 196, 0.13) 0%,
+        rgba(232, 214, 196, 0.08) 12%,
+        rgba(150, 214, 210, 0.06) 34%,
+        rgba(100, 180, 180, 0.05) 60%,
+        rgba(80, 160, 165, 0) 100%);
+    opacity: calc(0.55 + var(--risen) * 0.6);
+    will-change: transform;
+    animation: sun-breathe 13s ease-in-out infinite alternate;
+}
+
+@keyframes sun-breathe {
+    from { transform: scale(1); }
+    to   { transform: scale(1.06); }
+}
+
+.sky__shaft {
+    position: absolute;
+    /* Wider than the frame, so drifting never shows an edge. */
+    left: -20%;
+    width: 140%;
+    top: -10%;
+    height: 120%;
+    transform-origin: 50% 0;
+    will-change: transform;
+    --dim: 1;
+    opacity: calc(var(--dim) * (0.5 + var(--risen) * 0.6));
+    /* No blur: each ray already ramps up and down across its width, and a
+       blur on a layer this size that turns every frame was the most
+       expensive thing on the page. */
+    /* Strongest near the surface and gone by the floor; thinner towards the
+       sides, so the light reads as falling around the middle of the board. */
+    -webkit-mask-image:
+        linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 40%, rgba(0, 0, 0, 0.15) 75%, transparent 100%),
+        linear-gradient(to right, transparent 8%, #000 35%, #000 65%, transparent 92%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+        linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 40%, rgba(0, 0, 0, 0.15) 75%, transparent 100%),
+        linear-gradient(to right, transparent 8%, #000 35%, #000 65%, transparent 92%);
+    mask-composite: intersect;
+    /* Near-vertical bands rather than a fan: the sun is far enough away that
+       its rays arrive all but parallel. */
+    background: repeating-linear-gradient(to right,
+        rgba(200, 244, 236, 0) 0,
+        var(--ray) calc(var(--gap) * var(--width) * 0.5),
+        rgba(200, 244, 236, 0) calc(var(--gap) * var(--width)),
+        rgba(200, 244, 236, 0) var(--gap));
     animation: sway var(--sway) ease-in-out infinite alternate;
 }
 
 .sky__shaft--1 {
     --sway: 19s;
-    left: -2%;
-    width: 42%;
-    transform: rotate(5deg);
+    --gap: 137px;
+    --width: 0.34;
+    --tilt: 4deg;
+    --ray: rgba(214, 250, 240, 0.1);
 }
 
 .sky__shaft--2 {
     --sway: 23s;
+    --gap: 223px;
+    --width: 0.5;
+    --tilt: 7deg;
+    --ray: rgba(196, 244, 236, 0.08);
     --dim: 0.9;
-    left: 32%;
-    width: 52%;
-    transform: rotate(-3deg);
 }
 
 .sky__shaft--3 {
     --sway: 31s;
-    --dim: 0.72;
-    left: 68%;
-    width: 38%;
-    transform: rotate(7deg);
+    --gap: 311px;
+    --width: 0.18;
+    --tilt: 2deg;
+    --ray: rgba(236, 252, 244, 0.13);
+    --dim: 0.8;
 }
 
-/* Barely a lean either way. Water moves the light; it does not wave it about,
-   and the pivot is far enough above the frame that a degree is plenty. */
+/* A slight lean, drifting sideways: rays from different layers slide over
+   one another, cross and part. */
 @keyframes sway {
-    from { transform: rotate(-1.3deg) scaleX(1); }
-    to   { transform: rotate(1.3deg) scaleX(1.07); }
+    from { transform: rotate(calc(var(--tilt) - 1deg)) translateX(-2%); }
+    to   { transform: rotate(calc(var(--tilt) + 1deg)) translateX(2%); }
 }
 
 /* Asked for less motion: the same water, holding still. */
 .sky[data-still="true"] .sky__shaft,
+.sky[data-still="true"] .sky__sun,
 .sky[data-still="true"] .sky__bloom {
     animation: none;
 }
@@ -345,13 +392,13 @@
 
 @keyframes sky-swell-a {
     0%   { opacity: 1; transform: scale(1); }
-    14%  { opacity: calc(1 + var(--swell) * 0.03); transform: scale(calc(1 + var(--swell) * 0.0022)); }
+    14%  { opacity: calc(1 + var(--swell) * 0.03); transform: scale(calc(1 + var(--swell) * 0.0)); }
     100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes sky-swell-b {
     0%   { opacity: 1; transform: scale(1); }
-    14%  { opacity: calc(1 + var(--swell) * 0.03); transform: scale(calc(1 + var(--swell) * 0.0022)); }
+    14%  { opacity: calc(1 + var(--swell) * 0.03); transform: scale(calc(1 + var(--swell) * 0.0)); }
     100% { opacity: 1; transform: scale(1); }
 }
 
@@ -360,57 +407,114 @@
 }
 
 /* ---------------------------------------------------------------------------
- * The motes: whatever it is that hangs in deep water, on its way up.
+ * The floor: the bottom of the sea, only just made out.
  *
- * The layer that does most of the work of saying the page is not a
- * photograph. Each one carries its own start, climb and wander as custom
- * properties, so twenty elements share one keyframe and the compositor moves
- * them without anything being recomputed.
+ * Two ridges of rock, a pair of hydrothermal chimneys smoking faintly, tube
+ * worms with their red plumes and a few glowing spots — all one SVG, tiled
+ * along the bottom and lit only along its edges, so it reads as a shape in
+ * the dark rather than as a picture of one. Nearest of the far things, so it
+ * leans a little more than the light behind it.
+ * ------------------------------------------------------------------------ */
+.sky__floor {
+    position: absolute;
+    left: -3%;
+    right: -3%;
+    bottom: 0;
+    height: max(18vh, 120px);
+    /*
+     * Barely there. A long way off through dark water a shape loses its
+     * edges and nearly all its contrast, so it is thinned until it is
+     * something you are not sure you saw.
+     */
+    opacity: 0.45;
+    /* Its own layer, so leaning with the pointer moves it rather than
+       repainting it. */
+    will-change: transform;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 220' preserveAspectRatio='xMidYMax slice'%3E %3Cdefs%3E %3ClinearGradient id='rock' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%230b2226'/%3E%3Cstop offset='1' stop-color='%23020809'/%3E%3C/linearGradient%3E %3ClinearGradient id='far' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%230a2327' stop-opacity='0.85'/%3E%3Cstop offset='1' stop-color='%2303100f'/%3E%3C/linearGradient%3E %3CradialGradient id='plume'%3E%3Cstop offset='0' stop-color='%239fb8b4' stop-opacity='0.12'/%3E%3Cstop offset='1' stop-color='%239fb8b4' stop-opacity='0'/%3E%3C/radialGradient%3E %3CradialGradient id='spot'%3E%3Cstop offset='0' stop-color='%238ff7e6' stop-opacity='0.5'/%3E%3Cstop offset='1' stop-color='%238ff7e6' stop-opacity='0'/%3E%3C/radialGradient%3E %3C/defs%3E %3Cpath d='M0 220 L0 139.3 L8 136.4 L16 131.0 L24 127.6 L32 128.1 L40 123.6 L48 122.1 L56 124.6 L64 122.9 L72 125.5 L80 125.7 L88 128.2 L96 128.1 L104 131.5 L112 133.5 L120 132.5 L128 133.1 L136 132.0 L144 128.4 L152 129.9 L160 128.0 L168 126.0 L176 124.6 L184 128.2 L192 127.4 L200 129.5 L208 131.5 L216 132.2 L224 133.9 L232 132.0 L240 133.0 L248 130.1 L256 129.6 L264 126.0 L272 119.1 L280 115.1 L288 111.3 L296 110.5 L304 105.1 L312 103.4 L320 100.5 L328 100.4 L336 99.7 L344 99.7 L352 100.9 L360 101.1 L368 102.3 L376 101.0 L384 101.1 L392 99.5 L400 98.6 L408 96.0 L416 92.9 L424 95.3 L432 96.1 L440 97.1 L448 98.0 L456 101.6 L464 103.2 L472 109.7 L480 112.7 L488 115.3 L496 117.6 L504 123.2 L512 125.3 L520 122.4 L528 125.3 L536 123.3 L544 121.6 L552 121.5 L560 123.0 L568 123.5 L576 120.8 L584 124.1 L592 123.4 L600 127.8 L608 127.9 L616 131.5 L624 132.7 L632 131.0 L640 132.5 L648 128.5 L656 125.9 L664 126.1 L672 121.9 L680 121.0 L688 120.8 L696 121.5 L704 120.5 L712 121.7 L720 127.5 L728 128.4 L736 134.3 L744 137.5 L752 138.5 L760 141.4 L768 143.6 L776 145.3 L784 145.6 L792 145.6 L800 145.6 L808 146.6 L816 144.9 L824 144.9 L832 146.9 L840 146.2 L848 148.2 L856 152.7 L864 152.6 L872 154.0 L880 152.5 L888 154.0 L896 153.4 L904 149.0 L912 148.4 L920 144.7 L928 138.2 L936 136.3 L944 131.6 L952 128.9 L960 124.8 L968 124.1 L976 122.9 L984 119.4 L992 119.3 L1000 121.7 L1008 122.7 L1016 119.5 L1024 119.5 L1032 118.7 L1040 115.8 L1048 113.9 L1056 111.6 L1064 109.9 L1072 109.4 L1080 107.4 L1088 107.7 L1096 110.2 L1104 108.9 L1112 113.4 L1120 116.7 L1128 117.8 L1136 119.9 L1144 124.1 L1152 123.1 L1160 123.2 L1168 123.6 L1176 123.4 L1184 119.1 L1192 117.9 L1200 115.8 L1208 116.0 L1216 113.0 L1224 113.9 L1232 111.0 L1240 112.0 L1248 114.0 L1256 115.8 L1264 114.7 L1272 114.2 L1280 113.6 L1288 114.5 L1296 111.8 L1304 112.5 L1312 110.7 L1320 106.2 L1328 105.0 L1336 106.2 L1344 105.6 L1352 107.2 L1360 107.3 L1368 109.4 L1376 113.6 L1384 119.7 L1392 121.7 L1400 126.0 L1408 129.8 L1416 132.8 L1424 135.0 L1432 138.6 L1440 136.6 L1448 136.7 L1456 141.0 L1464 141.6 L1472 143.1 L1480 142.5 L1488 146.6 L1496 149.0 L1504 148.9 L1512 153.7 L1520 156.4 L1528 157.5 L1536 158.0 L1544 157.1 L1552 156.5 L1560 154.2 L1568 151.0 L1576 150.1 L1584 145.8 L1592 144.9 L1600 139.3 L1600 220 Z' fill='url(%23far)'/%3E %3Cpath d='M0 139.3 L8 136.4 L16 131.0 L24 127.6 L32 128.1 L40 123.6 L48 122.1 L56 124.6 L64 122.9 L72 125.5 L80 125.7 L88 128.2 L96 128.1 L104 131.5 L112 133.5 L120 132.5 L128 133.1 L136 132.0 L144 128.4 L152 129.9 L160 128.0 L168 126.0 L176 124.6 L184 128.2 L192 127.4 L200 129.5 L208 131.5 L216 132.2 L224 133.9 L232 132.0 L240 133.0 L248 130.1 L256 129.6 L264 126.0 L272 119.1 L280 115.1 L288 111.3 L296 110.5 L304 105.1 L312 103.4 L320 100.5 L328 100.4 L336 99.7 L344 99.7 L352 100.9 L360 101.1 L368 102.3 L376 101.0 L384 101.1 L392 99.5 L400 98.6 L408 96.0 L416 92.9 L424 95.3 L432 96.1 L440 97.1 L448 98.0 L456 101.6 L464 103.2 L472 109.7 L480 112.7 L488 115.3 L496 117.6 L504 123.2 L512 125.3 L520 122.4 L528 125.3 L536 123.3 L544 121.6 L552 121.5 L560 123.0 L568 123.5 L576 120.8 L584 124.1 L592 123.4 L600 127.8 L608 127.9 L616 131.5 L624 132.7 L632 131.0 L640 132.5 L648 128.5 L656 125.9 L664 126.1 L672 121.9 L680 121.0 L688 120.8 L696 121.5 L704 120.5 L712 121.7 L720 127.5 L728 128.4 L736 134.3 L744 137.5 L752 138.5 L760 141.4 L768 143.6 L776 145.3 L784 145.6 L792 145.6 L800 145.6 L808 146.6 L816 144.9 L824 144.9 L832 146.9 L840 146.2 L848 148.2 L856 152.7 L864 152.6 L872 154.0 L880 152.5 L888 154.0 L896 153.4 L904 149.0 L912 148.4 L920 144.7 L928 138.2 L936 136.3 L944 131.6 L952 128.9 L960 124.8 L968 124.1 L976 122.9 L984 119.4 L992 119.3 L1000 121.7 L1008 122.7 L1016 119.5 L1024 119.5 L1032 118.7 L1040 115.8 L1048 113.9 L1056 111.6 L1064 109.9 L1072 109.4 L1080 107.4 L1088 107.7 L1096 110.2 L1104 108.9 L1112 113.4 L1120 116.7 L1128 117.8 L1136 119.9 L1144 124.1 L1152 123.1 L1160 123.2 L1168 123.6 L1176 123.4 L1184 119.1 L1192 117.9 L1200 115.8 L1208 116.0 L1216 113.0 L1224 113.9 L1232 111.0 L1240 112.0 L1248 114.0 L1256 115.8 L1264 114.7 L1272 114.2 L1280 113.6 L1288 114.5 L1296 111.8 L1304 112.5 L1312 110.7 L1320 106.2 L1328 105.0 L1336 106.2 L1344 105.6 L1352 107.2 L1360 107.3 L1368 109.4 L1376 113.6 L1384 119.7 L1392 121.7 L1400 126.0 L1408 129.8 L1416 132.8 L1424 135.0 L1432 138.6 L1440 136.6 L1448 136.7 L1456 141.0 L1464 141.6 L1472 143.1 L1480 142.5 L1488 146.6 L1496 149.0 L1504 148.9 L1512 153.7 L1520 156.4 L1528 157.5 L1536 158.0 L1544 157.1 L1552 156.5 L1560 154.2 L1568 151.0 L1576 150.1 L1584 145.8 L1592 144.9 L1600 139.3' fill='none' stroke='%233f7c7a' stroke-opacity='0.12' stroke-width='1.2'/%3E %3Cpath d='M294 171.5 C297.2 124.0 301.2 88.5 304.4 80.5 L302.0 76.5 L318.0 76.5 L315.6 81.5 C318.0 90.5 322.0 128.7 326 171.5 Z M295.6 147.7 q14.4 -6 28.8 0 q-14.4 5 -28.8 0Z M298.0 126.8 q12.0 -6 24.0 0 q-12.0 5 -24.0 0Z M300.4 105.9 q9.6 -6 19.2 0 q-9.6 5 -19.2 0Z' fill='url(%23rock)'/%3E%3Cellipse cx='310' cy='48.5' rx='14' ry='34' fill='url(%23plume)'/%3E%3Cpath d='M327 161.4 C329.2 130.4 331.95 111.4 334.15 103.4 L332.5 99.4 L343.5 99.4 L341.85 104.4 C343.5 113.4 346.25 133.5 349 161.4 Z M328.1 145.9 q9.9 -6 19.8 0 q-9.9 5 -19.8 0Z M329.75 132.3 q8.25 -6 16.5 0 q-8.25 5 -16.5 0Z M331.4 118.6 q6.6 -6 13.2 0 q-6.6 5 -13.2 0Z' fill='url(%23rock)'/%3E%3Cellipse cx='338' cy='71.4' rx='14' ry='34' fill='url(%23plume)'/%3E%3Cpath d='M1162 171.8 C1165.6 111.8 1170.1 63.8 1173.7 55.8 L1171.0 51.8 L1189.0 51.8 L1186.3 56.8 C1189.0 65.8 1193.5 117.8 1198 171.8 Z M1163.8 141.8 q16.2 -6 32.4 0 q-16.2 5 -32.4 0Z M1166.5 115.4 q13.5 -6 27.0 0 q-13.5 5 -27.0 0Z M1169.2 89.0 q10.8 -6 21.6 0 q-10.8 5 -21.6 0Z' fill='url(%23rock)'/%3E%3Cellipse cx='1180' cy='23.8' rx='14' ry='34' fill='url(%23plume)'/%3E%3Cpath d='M1200 181.3 C1202.4 146.3 1205.4 123.3 1207.8 115.3 L1206.0 111.3 L1218.0 111.3 L1216.2 116.3 C1218.0 125.3 1221.0 149.8 1224 181.3 Z M1201.2 163.8 q10.8 -6 21.6 0 q-10.8 5 -21.6 0Z M1203.0 148.4 q9.0 -6 18.0 0 q-9.0 5 -18.0 0Z M1204.8 133.0 q7.2 -6 14.4 0 q-7.2 5 -14.4 0Z' fill='url(%23rock)'/%3E%3Cellipse cx='1212' cy='83.3' rx='14' ry='34' fill='url(%23plume)'/%3E %3Cpath d='M554.5 149.6 q-3.7 -7.5 -1.8 -15.1 M556.3 149.6 q-3.1 -8.8 -1.5 -17.6 M550.7 149.6 q-1.2 -11.7 -0.6 -23.3 M562.2 149.6 q-2.6 -12.9 -1.3 -25.8 M568.1 149.6 q-0.9 -7.0 -0.5 -14.0 M585.6 153.6 q-3.8 -11.1 -1.9 -22.2 M596.6 153.6 q-4.6 -10.7 -2.3 -21.5 M592.3 153.6 q0.5 -7.9 0.2 -15.9 M586.8 153.6 q4.6 -12.8 2.3 -25.6 M596.4 153.6 q3.1 -11.2 1.6 -22.4 M614.8 156.0 q-3.6 -10.7 -1.8 -21.4 M613.9 156.0 q4.6 -12.6 2.3 -25.3 M621.4 156.0 q-1.5 -13.1 -0.7 -26.2 M619.9 156.0 q-3.9 -7.0 -2.0 -14.0 M613.3 156.0 q-3.6 -13.2 -1.8 -26.3 M982.6 174.2 q-1.2 -15.9 -0.6 -31.8 M978.6 174.2 q-2.1 -9.3 -1.0 -18.5 M989.4 174.2 q4.6 -10.8 2.3 -21.6 M988.3 174.2 q-2.4 -13.0 -1.2 -25.9 M989.6 174.2 q-0.8 -12.0 -0.4 -23.9 M999.4 175.2 q-0.1 -16.8 -0.0 -33.7 M998.7 175.2 q-3.8 -11.8 -1.9 -23.5 M1005.4 175.2 q-2.1 -11.4 -1.0 -22.9 M1008.6 175.2 q-4.9 -15.3 -2.4 -30.5 M1003.7 175.2 q4.4 -9.7 2.2 -19.5 M1455.6 170.8 q-2.3 -9.5 -1.2 -18.9 M1443.1 170.8 q-2.1 -16.9 -1.0 -33.8 M1452.2 170.8 q1.4 -11.7 0.7 -23.5 M1452.1 170.8 q-3.8 -14.4 -1.9 -28.9 M1455.2 170.8 q0.3 -10.0 0.2 -20.0' fill='none' stroke='%230d2a2c' stroke-width='3' stroke-linecap='round'/%3E %3Ccircle cx='552.7' cy='134.5' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='554.8' cy='132.0' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='550.1' cy='126.3' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='560.9' cy='123.8' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='567.6' cy='135.6' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='583.6' cy='131.4' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='594.3' cy='132.1' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='592.5' cy='137.7' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='589.1' cy='128.0' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='597.9' cy='131.2' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='613.1' cy='134.6' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='616.2' cy='130.7' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='620.6' cy='129.8' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='617.9' cy='142.0' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='611.5' cy='129.7' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='982.0' cy='142.3' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='977.6' cy='155.6' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='991.8' cy='152.6' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='987.1' cy='148.3' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='989.2' cy='150.2' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='999.3' cy='141.5' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='996.8' cy='151.7' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='1004.4' cy='152.4' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='1006.2' cy='144.7' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='1005.8' cy='155.7' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='1454.5' cy='151.8' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='1442.1' cy='137.0' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='1452.9' cy='147.3' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='1450.2' cy='141.9' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E%3Ccircle cx='1455.4' cy='150.7' r='2.2' fill='%23ff6b5b' fill-opacity='0.55'/%3E %3Cpath d='M130 151.5 q3 -18.3 -2 -36.7 M760 180.9 q3 -17.9 -2 -35.9 M1340 188.3 q3 -20.2 -2 -40.5 M1530 154.8 q3 -19.6 -2 -39.2' fill='none' stroke='%230d2a2c' stroke-width='2' stroke-linecap='round'/%3E %3Cpath d='M0 220 L0 136.0 L8 139.1 L16 137.8 L24 140.9 L32 143.1 L40 141.5 L48 142.3 L56 140.0 L64 143.8 L72 146.2 L80 150.8 L88 153.3 L96 151.7 L104 151.4 L112 149.7 L120 150.4 L128 149.0 L136 147.1 L144 151.2 L152 150.1 L160 152.7 L168 150.2 L176 148.1 L184 149.9 L192 146.6 L200 147.6 L208 153.4 L216 156.7 L224 158.1 L232 163.4 L240 162.9 L248 163.5 L256 161.4 L264 164.7 L272 165.1 L280 168.6 L288 170.7 L296 169.8 L304 169.8 L312 166.8 L320 163.3 L328 159.3 L336 157.5 L344 157.3 L352 154.6 L360 157.4 L368 155.6 L376 153.8 L384 153.1 L392 148.8 L400 145.9 L408 145.9 L416 147.9 L424 147.8 L432 154.1 L440 152.2 L448 155.5 L456 155.1 L464 150.5 L472 152.7 L480 151.3 L488 153.6 L496 153.2 L504 154.7 L512 155.3 L520 156.7 L528 150.8 L536 150.0 L544 148.5 L552 148.0 L560 146.6 L568 148.5 L576 150.9 L584 152.7 L592 149.9 L600 151.9 L608 152.1 L616 153.8 L624 153.8 L632 162.1 L640 163.8 L648 169.2 L656 173.3 L664 175.9 L672 174.1 L680 177.1 L688 177.0 L696 178.6 L704 181.7 L712 183.9 L720 184.9 L728 184.8 L736 185.1 L744 184.0 L752 178.8 L760 178.0 L768 182.8 L776 183.1 L784 184.6 L792 185.0 L800 186.4 L808 186.4 L816 184.0 L824 184.0 L832 184.2 L840 190.6 L848 190.5 L856 195.1 L864 197.6 L872 194.1 L880 194.6 L888 193.2 L896 190.3 L904 190.3 L912 187.8 L920 189.2 L928 187.1 L936 187.4 L944 181.3 L952 177.3 L960 175.5 L968 172.3 L976 171.9 L984 170.4 L992 171.5 L1000 172.8 L1008 171.2 L1016 168.9 L1024 167.8 L1032 166.1 L1040 167.9 L1048 172.8 L1056 175.8 L1064 177.3 L1072 178.3 L1080 177.5 L1088 175.0 L1096 173.7 L1104 174.4 L1112 174.5 L1120 173.4 L1128 176.4 L1136 177.0 L1144 176.1 L1152 174.0 L1160 171.7 L1168 167.8 L1176 168.2 L1184 167.4 L1192 170.7 L1200 174.9 L1208 177.3 L1216 177.3 L1224 180.4 L1232 179.3 L1240 179.4 L1248 178.8 L1256 183.9 L1264 186.4 L1272 191.4 L1280 192.6 L1288 194.1 L1296 191.9 L1304 190.0 L1312 185.9 L1320 185.7 L1328 185.8 L1336 186.4 L1344 184.3 L1352 184.8 L1360 182.1 L1368 177.5 L1376 174.8 L1384 172.0 L1392 169.2 L1400 169.9 L1408 169.8 L1416 173.7 L1424 174.1 L1432 171.1 L1440 169.9 L1448 168.0 L1456 167.0 L1464 165.1 L1472 168.7 L1480 169.1 L1488 169.5 L1496 166.8 L1504 164.3 L1512 160.5 L1520 155.8 L1528 153.0 L1536 148.5 L1544 148.3 L1552 148.9 L1560 148.4 L1568 144.2 L1576 142.7 L1584 139.2 L1592 134.6 L1600 136.0 L1600 220 Z' fill='url(%23rock)'/%3E %3Cpath d='M0 136.0 L8 139.1 L16 137.8 L24 140.9 L32 143.1 L40 141.5 L48 142.3 L56 140.0 L64 143.8 L72 146.2 L80 150.8 L88 153.3 L96 151.7 L104 151.4 L112 149.7 L120 150.4 L128 149.0 L136 147.1 L144 151.2 L152 150.1 L160 152.7 L168 150.2 L176 148.1 L184 149.9 L192 146.6 L200 147.6 L208 153.4 L216 156.7 L224 158.1 L232 163.4 L240 162.9 L248 163.5 L256 161.4 L264 164.7 L272 165.1 L280 168.6 L288 170.7 L296 169.8 L304 169.8 L312 166.8 L320 163.3 L328 159.3 L336 157.5 L344 157.3 L352 154.6 L360 157.4 L368 155.6 L376 153.8 L384 153.1 L392 148.8 L400 145.9 L408 145.9 L416 147.9 L424 147.8 L432 154.1 L440 152.2 L448 155.5 L456 155.1 L464 150.5 L472 152.7 L480 151.3 L488 153.6 L496 153.2 L504 154.7 L512 155.3 L520 156.7 L528 150.8 L536 150.0 L544 148.5 L552 148.0 L560 146.6 L568 148.5 L576 150.9 L584 152.7 L592 149.9 L600 151.9 L608 152.1 L616 153.8 L624 153.8 L632 162.1 L640 163.8 L648 169.2 L656 173.3 L664 175.9 L672 174.1 L680 177.1 L688 177.0 L696 178.6 L704 181.7 L712 183.9 L720 184.9 L728 184.8 L736 185.1 L744 184.0 L752 178.8 L760 178.0 L768 182.8 L776 183.1 L784 184.6 L792 185.0 L800 186.4 L808 186.4 L816 184.0 L824 184.0 L832 184.2 L840 190.6 L848 190.5 L856 195.1 L864 197.6 L872 194.1 L880 194.6 L888 193.2 L896 190.3 L904 190.3 L912 187.8 L920 189.2 L928 187.1 L936 187.4 L944 181.3 L952 177.3 L960 175.5 L968 172.3 L976 171.9 L984 170.4 L992 171.5 L1000 172.8 L1008 171.2 L1016 168.9 L1024 167.8 L1032 166.1 L1040 167.9 L1048 172.8 L1056 175.8 L1064 177.3 L1072 178.3 L1080 177.5 L1088 175.0 L1096 173.7 L1104 174.4 L1112 174.5 L1120 173.4 L1128 176.4 L1136 177.0 L1144 176.1 L1152 174.0 L1160 171.7 L1168 167.8 L1176 168.2 L1184 167.4 L1192 170.7 L1200 174.9 L1208 177.3 L1216 177.3 L1224 180.4 L1232 179.3 L1240 179.4 L1248 178.8 L1256 183.9 L1264 186.4 L1272 191.4 L1280 192.6 L1288 194.1 L1296 191.9 L1304 190.0 L1312 185.9 L1320 185.7 L1328 185.8 L1336 186.4 L1344 184.3 L1352 184.8 L1360 182.1 L1368 177.5 L1376 174.8 L1384 172.0 L1392 169.2 L1400 169.9 L1408 169.8 L1416 173.7 L1424 174.1 L1432 171.1 L1440 169.9 L1448 168.0 L1456 167.0 L1464 165.1 L1472 168.7 L1480 169.1 L1488 169.5 L1496 166.8 L1504 164.3 L1512 160.5 L1520 155.8 L1528 153.0 L1536 148.5 L1544 148.3 L1552 148.9 L1560 148.4 L1568 144.2 L1576 142.7 L1584 139.2 L1592 134.6 L1600 136.0' fill='none' stroke='%235fa3a0' stroke-opacity='0.18' stroke-width='1.4'/%3E %3Ccircle cx='205' cy='149.2' r='9' fill='url(%23spot)'/%3E%3Ccircle cx='205' cy='149.2' r='1.6' fill='%23bafff2'/%3E%3Ccircle cx='705' cy='180.0' r='9' fill='url(%23spot)'/%3E%3Ccircle cx='705' cy='180.0' r='1.6' fill='%23bafff2'/%3E%3Ccircle cx='1050' cy='171.5' r='9' fill='url(%23spot)'/%3E%3Ccircle cx='1050' cy='171.5' r='1.6' fill='%23bafff2'/%3E%3Ccircle cx='1395' cy='167.5' r='9' fill='url(%23spot)'/%3E%3Ccircle cx='1395' cy='167.5' r='1.6' fill='%23bafff2'/%3E %3C/svg%3E") repeat-x bottom / auto 100%;
+    translate: calc(var(--lean-x) * 18px) calc(var(--lean-y) * 6px);
+}
+
+/* ---------------------------------------------------------------------------
+ * Living light: plankton flaring and fading in the dark.
  *
- * Negative delays, so the water is already full of them on the first frame
- * rather than filling from the floor up while somebody watches.
+ * Each speck spends most of its cycle unlit and flares for a moment, on a
+ * cycle and a delay of its own, so the water is never lit the same way twice
+ * and never blinks in step.
+ * ------------------------------------------------------------------------ */
+.sky__glow {
+    position: absolute;
+    inset: 0;
+    translate: calc(var(--lean-x) * 26px) calc(var(--lean-y) * 16px);
+}
+
+.sky__spark {
+    position: absolute;
+    left: var(--spark-left);
+    top: var(--spark-top);
+    width: var(--spark-size);
+    height: var(--spark-size);
+    border-radius: 50%;
+    background: radial-gradient(circle, #e6fffa 0%, rgba(120, 240, 225, 0.75) 30%, rgba(80, 220, 210, 0) 70%);
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: flare var(--spark-cycle) ease-in-out var(--spark-delay) infinite;
+}
+
+@keyframes flare {
+    0%   { opacity: 0; transform: scale(0.6); }
+    6%   { opacity: var(--spark-dim); transform: scale(1); }
+    14%  { opacity: calc(var(--spark-dim) * 0.4); transform: scale(0.9); }
+    22%  { opacity: 0; transform: scale(0.7); }
+    100% { opacity: 0; transform: scale(0.6); }
+}
+
+.sky[data-still="true"] .sky__spark {
+    animation: none;
+    opacity: calc(var(--spark-dim) * 0.35);
+}
+
+/* ---------------------------------------------------------------------------
+ * Marine snow: what hangs in deep water, sinking towards the floor.
+ *
+ * Debris from the light far above, falling slowly and leaning with the
+ * current. Each flake carries its own start, fall and wander as custom
+ * properties, so they all share one keyframe and the compositor moves them
+ * without anything being recomputed.
+ *
+ * Negative delays, so the water is already full of it on the first frame
+ * rather than filling from the top down while somebody watches.
  * ------------------------------------------------------------------------ */
 .sky__drift {
     position: absolute;
     inset: 0;
     overflow: hidden;
-    /* Hanging nearest of all, between the board and the shafts. */
+    /* Hanging nearest of all, between the board and everything else. */
     translate: calc(var(--lean-x) * 34px) calc(var(--lean-y) * 22px);
 }
 
 .sky__mote {
     position: absolute;
-    bottom: -4%;
+    top: -4%;
     left: var(--mote-left);
     width: var(--mote-size);
-    height: var(--mote-size);
-    border-radius: 50%;
-    /*
-     * A soft light. It was a shell for a while — a rim, a highlight, a
-     * see-through middle — and drawn that carefully it read as a photograph
-     * of a bubble over a board made of flat colour and plain shapes.
-     */
-    background: radial-gradient(circle, rgba(232, 238, 255, 0.72) 0%, rgba(212, 221, 251, 0.34) 52%, rgba(198, 210, 246, 0) 100%);
+    height: calc(var(--mote-size) * 0.8);
+    border-radius: 45% 55% 50% 40%;
+    background: radial-gradient(circle, rgba(226, 238, 230, 0.75) 0%, rgba(200, 220, 212, 0.3) 55%, rgba(190, 210, 204, 0) 100%);
     opacity: 0;
     will-change: transform, opacity;
-    animation: rise var(--rise-time) linear var(--rise-delay) infinite;
+    animation: sink var(--rise-time) linear var(--rise-delay) infinite;
 }
 
 /*
- * Up, with a lean. It fades in off the floor and out before the top, so
- * nothing is ever seen to appear or to stop — the two things that would give
- * away that these are twenty elements on a loop.
+ * Down, leaning one way the whole time and turning slowly as it goes. It
+ * fades in below the top and out above the floor, so nothing is ever seen to
+ * appear or to stop.
  */
-/*
- * Up, leaning one way the whole time. It used to wander back and forth and
- * squash as it went, which is what a bubble does and also what an animation
- * being performed at you looks like.
- */
-@keyframes rise {
-    0%   { transform: translate3d(0, 0, 0); opacity: 0; }
-    12%  { opacity: var(--mote-dim); }
-    80%  { opacity: var(--mote-dim); }
-    100% { transform: translate3d(var(--mote-drift), -104vh, 0); opacity: 0; }
+@keyframes sink {
+    0%   { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+    10%  { opacity: var(--mote-dim); }
+    82%  { opacity: var(--mote-dim); }
+    100% { transform: translate3d(var(--mote-drift), 104vh, 0) rotate(160deg); opacity: 0; }
 }
 
 .sky[data-still="true"] .sky__mote {
@@ -421,7 +525,9 @@
 @media (prefers-reduced-motion: reduce) {
     .sky__pulse,
     .sky__shaft,
+    .sky__sun,
     .sky__bloom,
+    .sky__spark,
     .sky__mote {
         animation: none !important;
     }

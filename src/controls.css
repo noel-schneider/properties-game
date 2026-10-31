@@ -10,9 +10,9 @@
     height: 2.1rem;
     padding: 0 0.75rem;
     border-radius: 0.55rem;
-    border: 1px solid #40405c;
-    background: #272a40;
-    color: #c9c9db;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
     font-family: 'Poppins', system-ui, sans-serif;
     font-size: 0.82rem;
     line-height: 1;
@@ -21,8 +21,8 @@
 }
 
 .control:hover:not(:disabled) {
-    background: #31344e;
-    border-color: #5a5a7d;
+    background: var(--panel-hover);
+    border-color: var(--line-strong);
 }
 
 .control:disabled {
@@ -38,11 +38,11 @@
 }
 
 .control--on {
-    border-color: #ffad69;
+    border-color: var(--accent);
 }
 
 .control__count {
-    color: #ffad69;
+    color: var(--accent);
     font-weight: 600;
 }
 
@@ -79,7 +79,7 @@
  */
 .control--off {
     position: relative;
-    color: #6f6a85;
+    color: var(--ink-faint);
 }
 
 .control--off > span,
@@ -95,7 +95,7 @@
     top: 50%;
     height: 1.5px;
     border-radius: 1px;
-    background: #c9c9db;
+    background: var(--ink);
     transform: rotate(-32deg);
 }
 
@@ -129,12 +129,12 @@
 
 @keyframes urging {
     0%, 100% { border-color: currentColor; box-shadow: none; }
-    50%      { border-color: #ffc38c; box-shadow: 0 0 10px rgba(255, 195, 140, 0.35); }
+    50%      { border-color: var(--accent-light); box-shadow: 0 0 10px rgba(255, 154, 138, 0.4); }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .control--urging {
         animation: none;
-        border-color: #ffc38c;
+        border-color: var(--accent-light);
     }
 }

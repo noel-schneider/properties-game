@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fireEvent, render } from '@testing-library/react'
-import Sky, { BLOOMS, MOTES, SHAFTS } from './Sky'
+import Sky, { BLOOMS, MOTES, PLANKTON, SHAFTS } from './Sky'
 
 const css = readFileSync(join(__dirname, 'Sky.css'), 'utf8');
 
@@ -48,10 +48,13 @@ test('no two shafts sway on the same cycle', () => {
   expect(new Set(periods).size).toBe(SHAFTS);
 });
 
-test('something drifts up through it', () => {
+test('marine snow falls through it', () => {
+  // This far down nothing rises: what hangs in the water is debris from the
+  // light far above, sinking towards the floor.
   render(<Sky />);
 
   expect(document.querySelectorAll('.sky__mote')).toHaveLength(MOTES);
+  expect(css).toMatch(/@keyframes sink\s*\{[\s\S]*?100%\s*\{[^}]*translate3d\([^,]+,\s*1\d\dvh/);
 });
 
 test('and no two motes rise together', () => {
@@ -130,4 +133,31 @@ test('and it stays away entirely from a player who asked for less motion', () =>
   // A silhouette parked in the middle of the board is not a still version of
   // something swimming past; it is a smudge nobody can explain.
   expect(css).toMatch(/\.sky\[data-still="true"\][^{]*\.sky__passer\s*\{[^}]*display:\s*none/);
+});
+
+test('specks of living light flare and fade in the dark', () => {
+  render(<Sky />);
+
+  expect(document.querySelectorAll('.sky__spark')).toHaveLength(PLANKTON);
+});
+
+test('and no two of them flare on the same beat', () => {
+  // A dozen lights blinking together is a sign, not plankton.
+  render(<Sky />);
+
+  const cycles = [...document.querySelectorAll('.sky__spark')].map(
+    (spark) => (spark as HTMLElement).style.getPropertyValue('--spark-delay'),
+  );
+
+  expect(new Set(cycles).size).toBe(PLANKTON);
+});
+
+test('they hold still for a player who asked for less motion', () => {
+  expect(css).toMatch(/\.sky\[data-still="true"\][^{]*\.sky__spark\s*\{[^}]*animation:\s*none/);
+});
+
+test('there is a floor down there, only just made out', () => {
+  render(<Sky />);
+
+  expect(document.querySelectorAll('.sky__floor')).toHaveLength(1);
 });

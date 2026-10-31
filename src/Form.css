@@ -43,25 +43,25 @@
 }
 
 .small-text {
-  color: white;
+  color: var(--foam);
 }
 
 .input {
-  background-color: #333;
-  color: #fff;
+  background-color: var(--panel);
+  color: var(--ink-strong);
   flex: 1 1 auto;
   /* It takes every category name in the game, so it is sized for typing in
      rather than for fitting under the board. */
   min-width: 0;
   padding: 14px 16px;
   outline: 0;
-  border: 1px solid rgba(105, 105, 105, 0.397);
+  border: 1px solid var(--line);
   border-radius: 10px;
   font-size: 1.05rem;
 }
 
 .input:focus {
-  border-color: #00bfff;
+  border-color: var(--accent);
 }
 
 /*
@@ -72,24 +72,24 @@
  * is where the reminder now lives, is still read.
  */
 .input:read-only {
-  background-color: #2b2b2b;
-  color: #8a8a8a;
-  border-color: rgba(105, 105, 105, 0.2);
+  background-color: var(--panel-muted);
+  color: var(--ink-faint);
+  border-color: var(--line);
   cursor: not-allowed;
 }
 
 .input:read-only::placeholder {
-  color: #ffad69;
-  opacity: 0.75;
+  color: var(--accent-deep);
+  opacity: 0.85;
 }
 
 .input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--ink-faint);
 }
 
 .submit {
-  background-color: #ff841f;
-  color: #fff;
+  background-color: var(--accent);
+  color: var(--on-accent);
   border: none;
   outline: none;
   padding: 15px;
@@ -100,8 +100,8 @@
 }
 
 .submit:disabled {
-  background-color: #cdcdcd;
-  color: #fff;
+  background-color: var(--panel-muted);
+  color: var(--ink-faint);
   border: none;
   outline: none;
   padding: 15px;
@@ -112,7 +112,7 @@
 }
 
 .submit:hover {
-  background-color: #0077cc;
+  background-color: var(--accent-deep);
 }
 
 /*
@@ -143,16 +143,16 @@
 }
 
 .feedback--correct {
-  color: #7ddf9a;
+  color: var(--good);
 }
 
 .feedback--wrong {
-  color: #ff8f8f;
+  color: var(--bad);
 }
 
 /* Nor is this one: the word is right, and one of the three has spent it. */
 .feedback--spent {
-  color: #ffc9a0;
+  color: var(--warn);
 }
 
 /*
