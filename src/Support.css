@@ -92,3 +92,10 @@
 .support__no:hover {
     background: var(--panel-hover);
 }
+
+/* Under the score on a phone, which sits lower there. */
+@media (max-width: 700px) {
+    .support {
+        top: 6.75rem;
+    }
+}

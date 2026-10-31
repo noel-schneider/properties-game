@@ -104,10 +104,13 @@ body.dev-panel-open .sheet {
  */
 @media (max-width: 700px) {
     .sheet {
-        top: 4.5rem;
+        top: 6.75rem;
         left: 0.75rem;
         width: 7.5rem;
         max-height: 30vh;
+        /* Under the board rather than over it: the board fills the screen
+           here, and a list lying over a bubble leaves it out of reach. */
+        z-index: 0;
     }
 
     .sheet__row {

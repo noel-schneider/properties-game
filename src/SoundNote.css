@@ -49,3 +49,22 @@
 .sound-note__close:hover {
     color: var(--ink);
 }
+
+/*
+ * On a phone the score sits lower, under the corner's controls, and the list
+ * of categories takes the left: this goes under the score, on the right.
+ */
+@media (max-width: 700px) {
+    .sound-note {
+        top: 6.75rem;
+        left: auto;
+        right: 0.75rem;
+        transform: none;
+        animation-name: sound-note-in-phone;
+    }
+
+    @keyframes sound-note-in-phone {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+}

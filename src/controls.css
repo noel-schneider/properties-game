@@ -138,3 +138,24 @@
         border-color: var(--accent-light);
     }
 }
+
+/*
+ * On a phone the two bottom corners meet in the middle, so the achievements
+ * step up over the footer line instead of sitting on top of it.
+ */
+@media (max-width: 700px) {
+    .corner--top-right {
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+
+    .corner--bottom-right {
+        bottom: 2.75rem;
+        right: 0.75rem;
+    }
+
+    .corner--bottom-left {
+        bottom: 0.9rem;
+        left: 0.75rem;
+    }
+}

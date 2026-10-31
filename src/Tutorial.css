@@ -23,6 +23,33 @@
   font-family: 'Poppins', system-ui, sans-serif;
 }
 
+/*
+ * On a phone: under the corner's controls, which take the whole top edge, and
+ * in the page's flow rather than over it. The upright board fills the screen
+ * from the top, and a card lying over it hid the very concepts it was asking
+ * to be picked. The board then takes what the card leaves.
+ */
+@media (max-width: 700px) {
+  .tutorial {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    margin: 3.75rem auto 0;
+    padding: 0.8rem 1rem;
+  }
+
+  .tutorial__says {
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .tutorial + .graph {
+    height: calc(100dvh - 27rem);
+  }
+}
+
 .tutorial__step {
   margin: 0;
   font-size: 0.72rem;

@@ -237,3 +237,24 @@
         animation: none;
     }
 }
+
+/*
+ * On a phone: as wide as the screen allows, so a category name fits in the
+ * box, and anchored above the achievements rather than at a share of the
+ * height, which put it on top of them.
+ */
+@media (max-width: 700px) {
+  .input-container {
+    width: calc(100% - 1.5rem);
+    top: auto;
+    bottom: 5.25rem;
+    transform: translateX(50%);
+  }
+}
+
+/* A key nobody has: a touchscreen sends the answer with the button. */
+@media (hover: none) and (pointer: coarse) {
+  .press-enter-wrapper {
+    display: none;
+  }
+}

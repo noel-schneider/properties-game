@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './Graph.css'
-import { useBubbleLayout, VIEW_HEIGHT, VIEW_WIDTH } from './useBubbleLayout'
+import { useBubbleLayout, useFrame, VIEW_WIDTH } from './useBubbleLayout'
+import type { Frame } from './useBubbleLayout'
 import type { Point, Tie } from './useBubbleLayout'
 import { useTranslator } from './i18n'
 import { donePropertiesOf, isSpent, liveProperties, progressOf } from './game'
@@ -48,8 +49,12 @@ const ASIDE_WIDTH = 96;
  * ones still live. Put beside rather than inside because the dot is a third
  * of the size and nothing legible fits in it.
  */
-export function asideLabel(x: number, radius: number): { dx: number; anchor: 'start' | 'end' } {
-    const wall = VIEW_WIDTH / 2 - LABEL_MARGIN;
+export function asideLabel(
+    x: number,
+    radius: number,
+    frameWidth: number = VIEW_WIDTH,
+): { dx: number; anchor: 'start' | 'end' } {
+    const wall = frameWidth / 2 - LABEL_MARGIN;
     const fitsRight = x + radius + ASIDE_GAP + ASIDE_WIDTH <= wall;
 
     return fitsRight
@@ -112,6 +117,11 @@ interface GraphProps {
      */
     onClear?: () => void;
     /**
+     * The frame to use on a phone held upright, for a board that knows it
+     * holds only a handful of concepts and can draw them larger.
+     */
+    upright?: Frame;
+    /**
      * Dropping a concept onto a category already found. The index is into
      * `found`; whether it is a right answer is settled by the game, not here.
      */
@@ -168,7 +178,7 @@ interface Gesture {
     moved: boolean;
 }
 
-function Graph({ concepts, pool = concepts, selected, found, arriving = [], hinted = [], reveal = 'arcs', onToggle, onDropInto, onClear }: GraphProps) {
+function Graph({ concepts, pool = concepts, selected, found, arriving = [], hinted = [], reveal = 'arcs', onToggle, onDropInto, onClear, upright }: GraphProps) {
     const { concept: conceptName, property: propertyName, t } = useTranslator();
     const svg = useRef<SVGSVGElement>(null);
     const gesture = useRef<Gesture | null>(null);
@@ -217,7 +227,8 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
         [concepts, found, pool],
     );
 
-    const { points, settled, grab, dragTo, release } = useBubbleLayout(concepts, radii, ties);
+    const frame = useFrame(upright);
+    const { points, settled, grab, dragTo, release } = useBubbleLayout(concepts, radii, ties, frame);
 
     /**
      * The members of the group found last, so the board can answer back when
@@ -540,7 +551,7 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
             ref={svg}
             className="graph"
             data-settled={settled}
-            viewBox={`${-VIEW_WIDTH / 2} ${-VIEW_HEIGHT / 2} ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+            viewBox={`${-frame.width / 2} ${-frame.height / 2} ${frame.width} ${frame.height}`}
             role="group"
             aria-label={t('graph.label')}
             data-idle={String(idle)}
@@ -945,7 +956,7 @@ function Graph({ concepts, pool = concepts, selected, found, arriving = [], hint
                 if (!done.has(concept.name)) return null;
 
                 const { x, y } = points[i] ?? { x: 0, y: 0 };
-                const aside = asideLabel(x, radii[i]);
+                const aside = asideLabel(x, radii[i], frame.width);
 
                 // Drawn outside the bubble groups, so these miss the reveal's
                 // dimming unless it is applied to them by hand — and then they
